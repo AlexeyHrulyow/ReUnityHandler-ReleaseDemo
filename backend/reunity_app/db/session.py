@@ -1,14 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-from app.core.config import settings
+
+# ИЗМЕНИТЕ ЭТУ СТРОКУ:
+# Было: from app.core.config import settings
+# Стало:
+from reunity_app.core.config import settings
 
 # Создаем асинхронный движок
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
     future=True,
-    poolclass=NullPool  # Упрощаем для начала
+    poolclass=NullPool
 )
 
 # Асинхронная сессия

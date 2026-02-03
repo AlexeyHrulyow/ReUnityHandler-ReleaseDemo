@@ -1,3 +1,4 @@
+# backend/requirements.txt - оптимизирован для Python 3.12
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 sqlalchemy==2.0.23
@@ -5,9 +6,8 @@ asyncpg==0.29.0
 alembic==1.12.1
 python-dotenv==1.0.0
 python-multipart==0.0.6
-# Устанавливаем совместимые версии без Rust
-pydantic==2.4.2
-pydantic-core==2.10.1
+# pydantic 2.5.0 будет работать с бинарным wheel в Python 3.12
+pydantic==2.5.0
 pydantic-settings==2.1.0
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
