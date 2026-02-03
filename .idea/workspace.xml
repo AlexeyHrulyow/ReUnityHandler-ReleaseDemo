@@ -1,15 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/core/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/db/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/db/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/db/session.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ReUnityHandler.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ReUnityHandler.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/check_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/api/endpoints/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/create_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/services/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/db/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/db/base.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/db/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/db/session.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/document_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/services/document_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/webmis_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/services/webmis_integration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test_connection.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;AlexeyHrulyow&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:AlexeyHrulyow/ReUnityHandler.git&quot;,
+    &quot;accountId&quot;: &quot;0b9ce910-2dd5-4905-ad8f-eeac75ee6a1e&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="38y6QW2I5OQKKRyoEFpbPMVN0G0" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -17,9 +69,129 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.check_tables.executor": "Run",
+    "Python.create_tables.executor": "Run",
+    "Python.pyparser.executor": "Run",
+    "Python.run.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/reab/PycharmProjects/ReUnityHandler/backend/app/services",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\services" />
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\schemas" />
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\db" />
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\core" />
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\api" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.run">
+    <configuration name="check_tables" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/check_tables.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="create_tables" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/create_tables.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pyparser" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pyparser.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/run.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.run" />
+        <item itemvalue="Python.check_tables" />
+        <item itemvalue="Python.create_tables" />
+        <item itemvalue="Python.pyparser" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
