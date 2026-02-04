@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование документа - ReUnityHandler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .patient-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .sections-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .section-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background: white;
+        }
+        .section-card.completed {
+            border-left: 4px solid #27ae60;
+        }
+        .section-card.pending {
+            border-left: 4px solid #f39c12;
+        }
+        .section-card.unassigned {
+            border-left: 4px solid #95a5a6;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .section-form {
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Редактирование документа</h1>
+            <button class="btn btn-secondary" onclick="window.location.href='/cases'">
+                ← Назад к списку случаев
+            </button>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                ← Панель управления
+            </button>
+        </div>
+
+        <div id="documentInfo" class="patient-info">
+            Загрузка информации о документе...
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="addNewSection()">
+                + Добавить новый раздел
+            </button>
+            <button class="btn btn-success" onclick="signDocument()" id="signDocumentBtn" style="display: none;">
+                ✓ Подписать документ
+            </button>
+            <button class="btn btn-danger" onclick="exportToWebmis()" id="exportBtn" style="display: none;">
+                📤 Отправить в ВебМИС
+            </button>
+        </div>
+
+        <div class="section-form" id="sectionForm">
+            <h3 id="sectionFormTitle">Новый раздел</h3>
+            <div class="form-group">
+                <label for="sectionName">Название раздела:</label>
+                <input type="text" id="sectionName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="sectionDoctor">Врач:</label>
+                <select id="sectionDoctor" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+                <label for="sectionContent">Содержание (JSON):</label>
+                <textarea id="sectionContent" placeholder='{"ключ": "значение", "ключ2": "значение2"}'></textarea>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="saveSection()">Сохранить</button>
+                <button class="btn btn-secondary" onclick="cancelEdit()">Отмена</button>
+            </div>
+        </div>
+
+        <h2>Разделы документа</h2>
+        <div id="sectionsList" class="sections-container">
+            Загрузка разделов...
+        </div>
+    </div>
+
+    <script>
+        let currentDocumentId = null;
+        let currentUser = null;
+        let doctorsList = [];
+        let currentEditingSectionId = null;
+
+        // Получаем ID документа из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        currentDocumentId = urlParams.get('id');
+
+        if (!currentDocumentId) {
+            alert('ID документа не указан');
+            window.location.href = '/cases';
+        }
+
+        // Проверяем аутентификацию
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                } else {
+                    throw new Error('Ошибка загрузки пользователя');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                window.location.href = '/';
+            }
+        }
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/v1/doctors?active_only=true', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    doctorsList = await response.json();
+                    updateDoctorsSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки врачей:', error);
+            }
+        }
+
+        function updateDoctorsSelect() {
+            const select = document.getElementById('sectionDoctor');
+            select.innerHTML = '';
+            doctorsList.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = `${doctor.full_name} (${doctor.role})`;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadDocument() {
+            try {
+                const response = await fetch(`/api/v1/documents/${currentDocumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const document = await response.json();
+                    displayDocumentInfo(document);
+
+                    // Показываем кнопки в зависимости от роли
+                    if (currentUser.role === 'admin' || currentUser.role === 'head') {
+                        document.getElementById('signDocumentBtn').style.display = 'inline-block';
+                        if (document.signed_at) {
+                            document.getElementById('exportBtn').style.display = 'inline-block';
+                        }
+                    }
+                } else {
+                    showAlert('Ошибка загрузки документа', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        function displayDocumentInfo(document) {
+            const container = document.getElementById('documentInfo');
+            let html = `
+                <h3>Информация о документе</h3>
+                <p><strong>ID документа:</strong> ${document.id}</p>
+                <p><strong>Случай:</strong> ${document.case_info?.name || 'Не указано'}</p>
+                <p><strong>Номер полиса:</strong> ${document.case_info?.insurance_number || 'Не указан'}</p>
+                <p><strong>Статус:</strong> ${document.signed_at ? 'Подписан' : 'Черновик'}</p>
+            `;
+
+            if (document.signed_at) {
+                html += `<p><strong>Подписан:</strong> ${document.signer_name || 'Неизвестно'}</p>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function loadSections() {
+            try {
+                const response = await fetch(`/api/v1/documents/${currentDocumentId}/sections`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const sections = await response.json();
+                    displaySections(sections);
+                } else {
+                    document.getElementById('sectionsList').textContent = 'Ошибка загрузки разделов';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('sectionsList').textContent = 'Ошибка подключения к серверу';
+            }
+        }
+
+        function displaySections(sections) {
+            const container = document.getElementById('sectionsList');
+
+            if (sections.length === 0) {
+                container.innerHTML = '<p class="alert alert-info">Разделы не добавлены</p>';
+                return;
+            }
+
+            let html = '';
+            sections.forEach(section => {
+                const statusClass = section.is_signed ? 'completed' : 'pending';
+                const statusText = section.is_signed ? 'Подписан' : 'На заполнении';
+
+                html += `
+                    <div class="section-card ${statusClass}">
+                        <h4>${section.section_name}</h4>
+                        <p><strong>Врач:</strong> ${section.doctor_name}</p>
+                        <p><strong>Статус:</strong>
+                            <span class="status-badge ${section.is_signed ? 'status-completed' : 'status-pending'}">
+                                ${statusText}
+                            </span>
+                        </p>
+                        <p><strong>Обновлено:</strong> ${new Date(section.updated_at).toLocaleString()}</p>
+
+                        <div class="section-actions">
+                            ${section.doctor_id === currentUser.id || currentUser.role === 'admin' || currentUser.role === 'head' ?
+                                `<button class="btn btn-primary" onclick="editSection(${section.id})">Редактировать</button>` :
+                                ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function addNewSection() {
+            if (currentUser.role !== 'admin' && currentUser.role !== 'head') {
+                showAlert('Только администратор или заведующий может добавлять разделы', 'warning');
+                return;
+            }
+
+            currentEditingSectionId = null;
+            document.getElementById('sectionFormTitle').textContent = 'Новый раздел';
+            document.getElementById('sectionName').value = '';
+            document.getElementById('sectionContent').value = '';
+            document.getElementById('sectionForm').style.display = 'block';
+            window.scrollTo(0, document.getElementById('sectionForm').offsetTop);
+        }
+
+        async function editSection(sectionId) {
+            try {
+                const response = await fetch(`/api/v1/documents/sections/${sectionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const section = await response.json();
+                    currentEditingSectionId = section.id;
+
+                    document.getElementById('sectionFormTitle').textContent = 'Редактирование раздела';
+                    document.getElementById('sectionName').value = section.section_name;
+                    document.getElementById('sectionName').readOnly = true;
+                    document.getElementById('sectionDoctor').value = section.doctor_id;
+                    document.getElementById('sectionDoctor').disabled = true;
+                    document.getElementById('sectionContent').value = JSON.stringify(section.content, null, 2);
+
+                    document.getElementById('sectionForm').style.display = 'block';
+                    window.scrollTo(0, document.getElementById('sectionForm').offsetTop);
+                } else {
+                    showAlert('Ошибка загрузки раздела', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        async function saveSection() {
+            const sectionName = document.getElementById('sectionName').value.trim();
+            const doctorId = document.getElementById('sectionDoctor').value;
+            const contentText = document.getElementById('sectionContent').value.trim();
+
+            if (!sectionName || !doctorId) {
+                showAlert('Заполните обязательные поля', 'warning');
+                return;
+            }
+
+            let content = {};
+            if (contentText) {
+                try {
+                    content = JSON.parse(contentText);
+                } catch (e) {
+                    showAlert('Ошибка в формате JSON', 'error');
+                    return;
+                }
+            }
+
+            const url = currentEditingSectionId ?
+                `/api/v1/documents/sections/${currentEditingSectionId}` :
+                `/api/v1/documents/${currentDocumentId}/sections`;
+
+            const method = currentEditingSectionId ? 'PUT' : 'POST';
+
+            const data = currentEditingSectionId ? {
+                content: content
+            } : {
+                section_name: sectionName,
+                doctor_id: parseInt(doctorId),
+                content: content
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showAlert(currentEditingSectionId ? 'Раздел обновлен' : 'Раздел создан', 'success');
+                    cancelEdit();
+                    await loadSections();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка сохранения', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('sectionForm').style.display = 'none';
+            document.getElementById('sectionName').readOnly = false;
+            document.getElementById('sectionDoctor').disabled = false;
+            currentEditingSectionId = null;
+        }
+
+        async function signDocument() {
+            if (!confirm('Вы уверены, что хотите подписать документ? После подписания редактирование будет невозможно.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/documents/${currentDocumentId}/sign`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert('Документ успешно подписан', 'success');
+                    await loadDocument();
+                    await loadSections();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка подписания', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        function exportToWebmis() {
+            showAlert('Функция экспорта в ВебМИС будет реализована в следующей версии', 'info');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertClass = type === 'error' ? 'alert alert-danger' :
+                             type === 'success' ? 'alert alert-success' :
+                             type === 'warning' ? 'alert alert-warning' :
+                             'alert alert-info';
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = alertClass;
+            alertDiv.innerHTML = `
+                ${message}
+                <button style="float: right; background: none; border: none; font-size: 20px; cursor: pointer;"
+                        onclick="this.parentElement.remove()">×</button>
+            `;
+
+            container.appendChild(alertDiv);
+
+            // Автоматическое удаление через 5 секунд
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadDoctors();
+            await loadDocument();
+            await loadSections();
+        });
+    </script>
+</body>
+</html>

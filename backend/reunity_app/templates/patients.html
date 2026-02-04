@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пациенты - ReUnityHandler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .filters {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Управление пациентами</h1>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                ← Назад в панель управления
+            </button>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Поиск пациентов...">
+            <button class="btn btn-primary" onclick="searchPatients()">Поиск</button>
+        </div>
+
+        <div id="errorContainer" style="display: none;"></div>
+
+        <div id="loading" class="loading">Загрузка пациентов...</div>
+        <div id="patientsTable" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Фамилия</th>
+                        <th>Имя</th>
+                        <th>Отчество</th>
+                        <th>Дата рождения</th>
+                        <th>Номер полиса</th>
+                        <th>Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTableBody">
+                    <!-- Данные будут загружены через JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('auth_token');
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPatients);
+
+       async function loadPatients() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('patientsTable').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'none';
+
+                const response = await fetch('/api/v1/patients/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const patients = await response.json();
+                    displayPatients(patients);
+                } else if (response.status === 401) {
+                    // Если не авторизован, перенаправляем на страницу входа
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/';
+                } else {
+                    const errorText = await response.text();
+                    showError('Ошибка загрузки пациентов. Код ошибки: ' + response.status + ' - ' + errorText);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Ошибка подключения к серверу: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayPatients(patients) {
+            const tableBody = document.getElementById('patientsTableBody');
+            const patientsTable = document.getElementById('patientsTable');
+
+            if (patients.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7">Пациенты не найдены</td></tr>';
+                patientsTable.style.display = 'table';
+                return;
+            }
+
+            let html = '';
+            patients.forEach(patient => {
+                const birthDate = patient.birth_date ? new Date(patient.birth_date).toLocaleDateString('ru-RU') : 'Не указана';
+                const createdDate = new Date(patient.created_at).toLocaleDateString('ru-RU');
+
+                html += `
+                    <tr>
+                        <td>${patient.id}</td>
+                        <td>${patient.last_name}</td>
+                        <td>${patient.first_name}</td>
+                        <td>${patient.middle_name || ''}</td>
+                        <td>${birthDate}</td>
+                        <td>${patient.insurance_number || 'Не указан'}</td>
+                        <td>${createdDate}</td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+            patientsTable.style.display = 'table';
+        }
+
+        async function searchPatients() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('patientsTable').style.display = 'none';
+
+                const url = searchTerm ?
+                    `/api/v1/patients/search?q=${encodeURIComponent(searchTerm)}` :
+                    '/api/v1/patients';
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const patients = await response.json();
+                    displayPatients(patients);
+                } else if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/';
+                } else {
+                    showError('Ошибка поиска пациентов. Код ошибки: ' + response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Ошибка подключения к серверу');
+            }
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `
+                <div class="error">
+                    <strong>Ошибка:</strong> ${message}
+                    <button onclick="location.reload()" style="float: right; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                        Повторить
+                    </button>
+                </div>
+            `;
+            errorContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
