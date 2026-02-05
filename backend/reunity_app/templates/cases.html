@@ -162,6 +162,12 @@
             margin-top: 2px;
             text-align: center;
         }
+        .no-cases {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -199,12 +205,8 @@
                 </select>
             </div>
             <div class="filter-group">
-                <label for="dateFromFilter">Дата с:</label>
-                <input type="date" id="dateFromFilter">
-            </div>
-            <div class="filter-group">
-                <label for="dateToFilter">Дата по:</label>
-                <input type="date" id="dateToFilter">
+                <label for="dateFilter">Дата создания:</label>
+                <input type="date" id="dateFilter">
             </div>
             <div class="filter-group">
                 <label>&nbsp;</label>
@@ -258,8 +260,7 @@
         let currentFilters = {
             search: '',
             status: '',
-            date_from: '',
-            date_to: ''
+            date: ''
         };
 
         // Проверяем аутентификацию при загрузке
@@ -333,12 +334,9 @@
                     url += `&status=${currentFilters.status}`;
                 }
 
-                if (currentFilters.date_from) {
-                    url += `&date_from=${currentFilters.date_from}`;
-                }
-
-                if (currentFilters.date_to) {
-                    url += `&date_to=${currentFilters.date_to}`;
+                if (currentFilters.date) {
+                    // Для совместимости с API используем date_from и date_to с одинаковой датой
+                    url += `&date_from=${currentFilters.date}&date_to=${currentFilters.date}`;
                 }
 
                 const response = await fetch(url, {
@@ -386,10 +384,12 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="8" style="text-align: center;">
-                            <p>Случаи не найдены</p>
-                            ${currentUser.role === 'admin' || currentUser.role === 'head' || currentUser.role === 'therapist' ?
-                                '<button class="btn btn-primary" onclick="createNewCase()">Создать первый случай</button>' :
-                                ''}
+                            <div class="no-cases">
+                                <p>Случаи не найдены</p>
+                                ${currentUser.role === 'admin' || currentUser.role === 'head' || currentUser.role === 'therapist' ?
+                                    '<button class="btn btn-primary" onclick="createNewCase()">Создать первый случай</button>' :
+                                    ''}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -496,8 +496,7 @@
         function applyFilters() {
             currentFilters.search = document.getElementById('searchInput').value.trim();
             currentFilters.status = document.getElementById('statusFilter').value;
-            currentFilters.date_from = document.getElementById('dateFromFilter').value;
-            currentFilters.date_to = document.getElementById('dateToFilter').value;
+            currentFilters.date = document.getElementById('dateFilter').value;
             currentPage = 0;
             loadCases();
         }
@@ -505,9 +504,8 @@
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
-            document.getElementById('dateFromFilter').value = '';
-            document.getElementById('dateToFilter').value = '';
-            currentFilters = { search: '', status: '', date_from: '', date_to: '' };
+            document.getElementById('dateFilter').value = '';
+            currentFilters = { search: '', status: '', date: '' };
             currentPage = 0;
             loadCases();
         }

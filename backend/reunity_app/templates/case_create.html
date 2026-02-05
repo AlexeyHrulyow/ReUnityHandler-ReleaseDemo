@@ -128,6 +128,13 @@
         .patient-info.hidden {
             display: none;
         }
+        .new-patient-form {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff8e1;
+            border-radius: 5px;
+            border: 1px solid #ffeaa7;
+        }
         .new-patient-form.hidden {
             display: none;
         }
@@ -152,12 +159,29 @@
             font-size: 14px;
             margin-top: 5px;
         }
-        .switch-buttons {
+        .info-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .action-buttons .btn {
+            flex: 1;
+        }
+        .mode-switcher {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
         }
-        .switch-btn {
+        .mode-btn {
             padding: 10px 20px;
             border: 2px solid #3498db;
             background: white;
@@ -165,10 +189,20 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s;
         }
-        .switch-btn.active {
+        .mode-btn:hover {
+            background: #f0f7ff;
+        }
+        .mode-btn.active {
             background: #3498db;
             color: white;
+        }
+        .mode-content {
+            display: none;
+        }
+        .mode-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -186,67 +220,83 @@
         <div id="messageContainer"></div>
 
         <div class="form-container">
-            <div class="switch-buttons">
-                <button id="existingPatientBtn" class="switch-btn active" onclick="showExistingPatientForm()">
-                    Выбрать существующего пациента
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Как создать случай?</h3>
+                <p>1. Выберите способ добавления пациента: поиск в базе или создание нового</p>
+                <p>2. Заполните данные пациента</p>
+                <p>3. Заполните данные случая</p>
+                <p>4. Нажмите "Создать случай"</p>
+            </div>
+
+            <div class="mode-switcher">
+                <button type="button" class="mode-btn active" id="existingPatientModeBtn" onclick="switchMode('existing')">
+                    🔍 Выбрать существующего пациента
                 </button>
-                <button id="newPatientBtn" class="switch-btn" onclick="showNewPatientForm()">
-                    Создать нового пациента
+                <button type="button" class="mode-btn" id="newPatientModeBtn" onclick="switchMode('new')">
+                    ＋ Добавить нового пациента
                 </button>
             </div>
 
             <form id="caseForm">
-                <!-- Существующий пациент -->
-                <div id="existingPatientSection" class="form-section">
-                    <h3>Поиск пациента</h3>
-                    <div class="form-group patient-search-container">
-                        <label for="patientSearch" class="required">Поиск по ФИО или номеру полиса:</label>
-                        <input type="text" id="patientSearch"
-                               placeholder="Начните вводить фамилию, имя или номер полиса..."
-                               autocomplete="off">
-                        <div id="searchResults" class="search-results"></div>
-                        <p class="info-text">Введите минимум 2 символа для поиска</p>
-                    </div>
-
-                    <div id="selectedPatientInfo" class="patient-info hidden">
-                        <h4>Выбран пациент:</h4>
-                        <div id="patientDetails">
-                            <p><strong>ФИО:</strong> <span id="patientFullName"></span></p>
-                            <p><strong>Дата рождения:</strong> <span id="patientBirthDate"></span></p>
-                            <p><strong>Номер полиса:</strong> <span id="patientInsurance"></span></p>
+                <!-- Режим поиска существующего пациента -->
+                <div id="existingPatientMode" class="mode-content active">
+                    <div class="form-section">
+                        <h3>Поиск пациента в базе</h3>
+                        <div class="form-group patient-search-container">
+                            <label for="patientSearch" class="required">Поиск по ФИО или номеру полиса:</label>
+                            <input type="text" id="patientSearch"
+                                   placeholder="Начните вводить фамилию, имя или номер полиса..."
+                                   autocomplete="off">
+                            <div id="searchResults" class="search-results"></div>
+                            <p class="info-text">Введите минимум 2 символа для поиска</p>
                         </div>
-                        <input type="hidden" id="patientId" name="patient_id">
+
+                        <div id="selectedPatientInfo" class="patient-info hidden">
+                            <h4>Выбран пациент:</h4>
+                            <div id="patientDetails">
+                                <p><strong>ФИО:</strong> <span id="patientFullName"></span></p>
+                                <p><strong>Дата рождения:</strong> <span id="patientBirthDate"></span></p>
+                                <p><strong>Номер полиса:</strong> <span id="patientInsurance"></span></p>
+                            </div>
+                            <input type="hidden" id="patientId" name="patient_id">
+                            <button type="button" class="btn btn-secondary" onclick="clearPatientSelection()" style="margin-top: 10px;">
+                                Выбрать другого пациента
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Новый пациент -->
-                <div id="newPatientSection" class="form-section hidden">
-                    <h3>Данные нового пациента</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="lastName" class="required">Фамилия:</label>
-                            <input type="text" id="lastName" name="last_name" placeholder="Иванов">
-                        </div>
-                        <div class="form-group">
-                            <label for="firstName" class="required">Имя:</label>
-                            <input type="text" id="firstName" name="first_name" placeholder="Иван">
-                        </div>
-                        <div class="form-group">
-                            <label for="middleName">Отчество:</label>
-                            <input type="text" id="middleName" name="middle_name" placeholder="Иванович">
-                        </div>
-                    </div>
+                <!-- Режим добавления нового пациента -->
+                <div id="newPatientMode" class="mode-content">
+                    <div class="form-section">
+                        <h3>Добавление нового пациента</h3>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="birthDate" class="required">Дата рождения:</label>
-                            <input type="date" id="birthDate" name="birth_date">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lastName" class="required">Фамилия:</label>
+                                <input type="text" id="lastName" name="last_name" placeholder="Иванов">
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName" class="required">Имя:</label>
+                                <input type="text" id="firstName" name="first_name" placeholder="Иван">
+                            </div>
+                            <div class="form-group">
+                                <label for="middleName">Отчество:</label>
+                                <input type="text" id="middleName" name="middle_name" placeholder="Иванович">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="insuranceNumber" class="required">Последние 4 цифры полиса:</label>
-                            <input type="text" id="insuranceNumber" name="insurance_number"
-                                   placeholder="1234" maxlength="4" pattern="\d{4}">
-                            <p class="info-text">Только последние 4 цифры полиса ОМС</p>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="birthDate" class="required">Дата рождения:</label>
+                                <input type="date" id="birthDate" name="birth_date">
+                            </div>
+                            <div class="form-group">
+                                <label for="insuranceNumber" class="required">Последние 4 цифры полиса:</label>
+                                <input type="text" id="insuranceNumber" name="insurance_number"
+                                       placeholder="1234" maxlength="4" pattern="\d{4}">
+                                <p class="info-text">Только последние 4 цифры полиса ОМС</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -275,8 +325,8 @@
                     </div>
                 </div>
 
-                <div style="text-align: center; margin-top: 30px;">
-                    <button type="submit" class="btn btn-success" style="min-width: 200px;">
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success">
                         Создать случай
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="window.location.href='/cases'">
@@ -291,7 +341,7 @@
         let token = localStorage.getItem('auth_token');
         let searchTimeout = null;
         let currentUser = null;
-        let isNewPatient = false;
+        let currentMode = 'existing'; // 'existing' или 'new'
 
         // Проверяем аутентификацию
         if (!token) {
@@ -352,21 +402,25 @@
             });
         }
 
-        function showExistingPatientForm() {
-            isNewPatient = false;
-            document.getElementById('existingPatientBtn').classList.add('active');
-            document.getElementById('newPatientBtn').classList.remove('active');
-            document.getElementById('existingPatientSection').classList.remove('hidden');
-            document.getElementById('newPatientSection').classList.add('hidden');
-        }
+        function switchMode(mode) {
+            currentMode = mode;
 
-        function showNewPatientForm() {
-            isNewPatient = true;
-            document.getElementById('newPatientBtn').classList.add('active');
-            document.getElementById('existingPatientBtn').classList.remove('active');
-            document.getElementById('newPatientSection').classList.remove('hidden');
-            document.getElementById('existingPatientSection').classList.add('hidden');
-            document.getElementById('selectedPatientInfo').classList.add('hidden');
+            // Обновляем кнопки
+            document.getElementById('existingPatientModeBtn').classList.toggle('active', mode === 'existing');
+            document.getElementById('newPatientModeBtn').classList.toggle('active', mode === 'new');
+
+            // Показываем/скрываем содержимое
+            document.getElementById('existingPatientMode').classList.toggle('active', mode === 'existing');
+            document.getElementById('newPatientMode').classList.toggle('active', mode === 'new');
+
+            // Очищаем выбор пациента при переключении режимов
+            if (mode === 'new') {
+                clearPatientSelection();
+                hideSearchResults();
+                document.getElementById('patientSearch').value = '';
+            }
+
+            showMessage(`Режим: ${mode === 'existing' ? 'Выбор существующего пациента' : 'Добавление нового пациента'}`, 'info');
         }
 
         function handlePatientSearch(e) {
@@ -469,15 +523,23 @@
             document.getElementById('patientSearch').value = '';
             hideSearchResults();
 
-            showMessage('Пациент выбран', 'success');
+            showMessage('Пациент выбран. Теперь заполните данные случая.', 'success');
+        }
+
+        function clearPatientSelection() {
+            document.getElementById('patientId').value = '';
+            document.getElementById('selectedPatientInfo').classList.add('hidden');
+            document.getElementById('patientSearch').value = '';
+            hideSearchResults();
         }
 
         function validateForm() {
-            if (!isNewPatient) {
+            // Проверяем данные в зависимости от режима
+            if (currentMode === 'existing') {
                 // Проверяем, выбран ли существующий пациент
                 const patientId = document.getElementById('patientId').value;
                 if (!patientId) {
-                    showMessage('Выберите пациента из списка', 'error');
+                    showMessage('Выберите пациента из списка или переключитесь на добавление нового пациента', 'error');
                     return false;
                 }
             } else {
@@ -523,7 +585,7 @@
             let patientId;
 
             try {
-                if (isNewPatient) {
+                if (currentMode === 'new') {
                     // Создаем нового пациента
                     const patientData = {
                         last_name: document.getElementById('lastName').value.trim(),
@@ -597,7 +659,8 @@
             const container = document.getElementById('messageContainer');
 
             const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error' : 'success';
+            messageDiv.className = type === 'error' ? 'error' :
+                                 type === 'success' ? 'success' : 'info';
             messageDiv.innerHTML = `
                 ${message}
                 <button onclick="this.parentElement.remove()"
