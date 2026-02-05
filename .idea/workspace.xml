@@ -4,37 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.0.2&#10;- версия python изменена на более стабильную: 3.14 -&gt; 3.12&#10;- настроены библиотеки&#10;- таблицы добавляются корректно">
-      <change afterPath="$PROJECT_DIR$/backend/check_password.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/create_initial_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/doctors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/patients.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/document.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/patient.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_auth_fix.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_create_case.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_db.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_login.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/update_password.py" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс">
+      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/security.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,8 +18,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -72,33 +46,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.check_password.executor": "Run",
-    "Python.check_tables.executor": "Run",
-    "Python.clean_database.executor": "Run",
-    "Python.create_initial_data.executor": "Run",
-    "Python.create_tables.executor": "Run",
-    "Python.lab2.executor": "Run",
-    "Python.pyparser.executor": "Run",
-    "Python.run.executor": "Run",
-    "Python.test_auth.executor": "Run",
-    "Python.test_auth_fix.executor": "Run",
-    "Python.test_create_case.executor": "Run",
-    "Python.test_db.executor": "Run",
-    "Python.test_login.executor": "Run",
-    "Python.test_pythin312.executor": "Run",
-    "Python.update_password.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/reab/PycharmProjects/ReUnityHandler",
-    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.check_password.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_tables.executor&quot;: &quot;Run&quot;,
+    &quot;Python.clean_database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_initial_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_tables.executor&quot;: &quot;Run&quot;,
+    &quot;Python.lab2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.pyparser.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_auth.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_auth_fix.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_create_case.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_login.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_pythin312.executor&quot;: &quot;Run&quot;,
+    &quot;Python.update_password.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/reab/PycharmProjects/ReUnityHandler&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler" />
@@ -273,7 +247,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770107875123</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс">
+      <option name="closed" value="true" />
+      <created>1770198762101</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770198762101</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -290,6 +272,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Версия 0.0.1&#10;- созданы базы данных&#10;- не настроены библиотеки" />
     <MESSAGE value="Версия 0.0.2&#10;- версия python изменена на более стабильную: 3.14 -&gt; 3.12&#10;- настроены библиотеки&#10;- таблицы добавляются корректно" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.0.2&#10;- версия python изменена на более стабильную: 3.14 -&gt; 3.12&#10;- настроены библиотеки&#10;- таблицы добавляются корректно" />
+    <MESSAGE value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
   </component>
 </project>

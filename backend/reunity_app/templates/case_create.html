@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание нового случая - ReUnityHandler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .form-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .patient-search {
+            position: relative;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-result-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .search-result-item:hover {
+            background: #f0f0f0;
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Создание нового случая</h1>
+            <button class="btn btn-secondary" onclick="window.location.href='/cases'">
+                ← Назад к списку случаев
+            </button>
+        </div>
+
+        <div id="errorContainer" style="display: none;"></div>
+
+        <div class="form-container">
+            <form id="caseForm">
+                <div class="form-group patient-search">
+                    <label for="patientSearch" class="required">Поиск пациента:</label>
+                    <input type="text" id="patientSearch" placeholder="Начните вводить ФИО пациента..."
+                           autocomplete="off" required>
+                    <div id="searchResults" class="search-results"></div>
+                    <input type="hidden" id="patientId" name="patient_id">
+                    <div id="selectedPatient" style="margin-top: 10px; padding: 10px; background: #e8f4fc; border-radius: 4px; display: none;">
+                        <strong>Выбран пациент:</strong> <span id="patientName"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="admissionDate" class="required">Дата поступления:</label>
+                    <input type="date" id="admissionDate" name="admission_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="caseStatus" class="required">Статус случая:</label>
+                    <select id="caseStatus" name="status" required>
+                        <option value="draft">Черновик</option>
+                        <option value="in_progress" selected>В процессе</option>
+                        <option value="waiting_review">На проверке</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Примечания:</label>
+                    <textarea id="notes" name="notes" rows="4" placeholder="Дополнительная информация..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Создать случай</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/cases'">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('auth_token');
+        let searchTimeout = null;
+        let currentUser = null;
+
+        // Проверяем аутентификацию
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            setupForm();
+        });
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/';
+                }
+
+                currentUser = await response.json();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                localStorage.removeItem('auth_token');
+                window.location.href = '/';
+            }
+        }
+
+        function setupForm() {
+            // Устанавливаем сегодняшнюю дату по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('admissionDate').value = today;
+
+            // Настраиваем поиск пациентов
+            const patientSearch = document.getElementById('patientSearch');
+            patientSearch.addEventListener('input', handlePatientSearch);
+
+            // Обработка отправки формы
+            document.getElementById('caseForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        function handlePatientSearch(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                hideSearchResults();
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                await searchPatients(query);
+            }, 300);
+        }
+
+        async function searchPatients(query) {
+            try {
+                const response = await fetch(`/api/v1/patients/search?q=${encodeURIComponent(query)}&limit=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const patients = await response.json();
+                    displaySearchResults(patients);
+                }
+            } catch (error) {
+                console.error('Ошибка поиска:', error);
+            }
+        }
+
+        function displaySearchResults(patients) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+
+            if (patients.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-result-item">Пациенты не найдены</div>';
+                resultsContainer.style.display = 'block';
+                return;
+            }
+
+            patients.forEach(patient => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''} (Полис: ${patient.insurance_number || 'нет'})`;
+                item.dataset.patientId = patient.id;
+                item.dataset.patientName = `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`;
+
+                item.addEventListener('click', () => {
+                    selectPatient(patient.id, `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`);
+                });
+
+                resultsContainer.appendChild(item);
+            });
+
+            resultsContainer.style.display = 'block';
+        }
+
+        function hideSearchResults() {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        function selectPatient(patientId, patientName) {
+            document.getElementById('patientId').value = patientId;
+            document.getElementById('patientName').textContent = patientName;
+            document.getElementById('selectedPatient').style.display = 'block';
+            document.getElementById('patientSearch').value = '';
+            hideSearchResults();
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const patientId = document.getElementById('patientId').value;
+            if (!patientId) {
+                showError('Выберите пациента');
+                return;
+            }
+
+            const caseData = {
+                patient_id: parseInt(patientId),
+                admission_date: document.getElementById('admissionDate').value + 'T00:00:00',
+                status: document.getElementById('caseStatus').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const response = await fetch('/api/v1/cases/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(caseData)
+                });
+
+                if (response.ok) {
+                    const caseResponse = await response.json();
+                    alert('Случай успешно создан!');
+                    window.location.href = `/cases`;
+                } else {
+                    const errorText = await response.text();
+                    showError(`Ошибка создания случая: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Ошибка подключения к серверу: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `
+                <div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                    <strong>Ошибка:</strong> ${message}
+                </div>
+            `;
+            errorContainer.style.display = 'block';
+        }
+
+        // Закрываем результаты поиска при клике вне области
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.patient-search')) {
+                hideSearchResults();
+            }
+        });
+    </script>
+</body>
+</html>

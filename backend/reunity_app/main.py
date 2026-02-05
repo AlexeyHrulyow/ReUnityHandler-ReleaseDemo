@@ -237,3 +237,8 @@ async def create_test_user():
         await db.refresh(doctor)
 
         return {"message": "Пользователь создан", "username": "admin"}
+
+@app.get("/case_create")
+async def case_create_page(request: Request):
+    """Страница создания нового случая"""
+    return templates.TemplateResponse("case_create.html", {"request": request})
