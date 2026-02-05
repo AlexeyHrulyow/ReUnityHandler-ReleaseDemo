@@ -11,7 +11,7 @@
             line-height: 1.6;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         .header {
@@ -134,6 +134,34 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        .doctor-status {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-done {
+            background: #27ae60;
+            color: white;
+        }
+        .status-pending {
+            background: #e74c3c;
+            color: white;
+        }
+        .status-label {
+            font-size: 10px;
+            margin-top: 2px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -171,6 +199,14 @@
                 </select>
             </div>
             <div class="filter-group">
+                <label for="dateFromFilter">Дата с:</label>
+                <input type="date" id="dateFromFilter">
+            </div>
+            <div class="filter-group">
+                <label for="dateToFilter">Дата по:</label>
+                <input type="date" id="dateToFilter">
+            </div>
+            <div class="filter-group">
                 <label>&nbsp;</label>
                 <button class="btn btn-primary" onclick="applyFilters()" style="width: auto;">
                     🔍 Применить фильтры
@@ -196,6 +232,7 @@
                         <th>Дата поступления</th>
                         <th>Создатель</th>
                         <th>Статус</th>
+                        <th>Статус врачей</th>
                         <th>Создан</th>
                         <th>Действия</th>
                     </tr>
@@ -220,7 +257,9 @@
         let hasMore = true;
         let currentFilters = {
             search: '',
-            status: ''
+            status: '',
+            date_from: '',
+            date_to: ''
         };
 
         // Проверяем аутентификацию при загрузке
@@ -294,6 +333,14 @@
                     url += `&status=${currentFilters.status}`;
                 }
 
+                if (currentFilters.date_from) {
+                    url += `&date_from=${currentFilters.date_from}`;
+                }
+
+                if (currentFilters.date_to) {
+                    url += `&date_to=${currentFilters.date_to}`;
+                }
+
                 const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -338,7 +385,7 @@
             if (cases.length === 0 && currentPage === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center;">
+                        <td colspan="8" style="text-align: center;">
                             <p>Случаи не найдены</p>
                             ${currentUser.role === 'admin' || currentUser.role === 'head' || currentUser.role === 'therapist' ?
                                 '<button class="btn btn-primary" onclick="createNewCase()">Создать первый случай</button>' :
@@ -388,6 +435,30 @@
                         statusText = caseItem.status || 'Неизвестно';
                 }
 
+                // Создаем статус врачей
+                const doctorStatusHTML = `
+                    <div class="doctor-status">
+                        <div>
+                            <div class="status-icon ${caseItem.neurologist_completed ? 'status-done' : 'status-pending'}">
+                                ${caseItem.neurologist_completed ? '✓' : '✗'}
+                            </div>
+                            <div class="status-label">Невролог</div>
+                        </div>
+                        <div>
+                            <div class="status-icon ${caseItem.therapist_completed ? 'status-done' : 'status-pending'}">
+                                ${caseItem.therapist_completed ? '✓' : '✗'}
+                            </div>
+                            <div class="status-label">Терапевт</div>
+                        </div>
+                        <div>
+                            <div class="status-icon ${caseItem.head_completed ? 'status-done' : 'status-pending'}">
+                                ${caseItem.head_completed ? '✓' : '✗'}
+                            </div>
+                            <div class="status-label">Заведующий</div>
+                        </div>
+                    </div>
+                `;
+
                 // Определяем доступные действия
                 let actions = '';
 
@@ -396,9 +467,8 @@
                                 📝 Документ
                             </button>`;
 
-                // Завершение доступно администраторам, заведующим и создателю
-                if (currentUser.role === 'admin' || currentUser.role === 'head' ||
-                    (currentUser.id === caseItem.creator_id && caseItem.status !== 'completed' && caseItem.status !== 'sent')) {
+                // Завершение доступно администраторам, заведующим
+                if (currentUser.role === 'admin' || currentUser.role === 'head') {
                     actions += `<button class="btn btn-success" onclick="completeCase(${caseItem.id})"
                                 ${caseItem.status === 'completed' || caseItem.status === 'sent' ? 'disabled style="opacity:0.5"' : ''}
                                 title="Завершить случай">
@@ -412,6 +482,7 @@
                     <td>${admissionDate}</td>
                     <td>${caseItem.creator_name || 'Неизвестно'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${doctorStatusHTML}</td>
                     <td>${createdDate}</td>
                     <td>${actions}</td>
                 `;
@@ -425,6 +496,8 @@
         function applyFilters() {
             currentFilters.search = document.getElementById('searchInput').value.trim();
             currentFilters.status = document.getElementById('statusFilter').value;
+            currentFilters.date_from = document.getElementById('dateFromFilter').value;
+            currentFilters.date_to = document.getElementById('dateToFilter').value;
             currentPage = 0;
             loadCases();
         }
@@ -432,7 +505,9 @@
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
-            currentFilters = { search: '', status: '' };
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
+            currentFilters = { search: '', status: '', date_from: '', date_to: '' };
             currentPage = 0;
             loadCases();
         }

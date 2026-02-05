@@ -22,7 +22,6 @@ pwd_context = CryptContext(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-# Функции для работы с паролями
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Проверка пароля с использованием SHA256"""
     if not plain_password or not hashed_password:
@@ -85,7 +84,7 @@ async def get_current_active_user(current_user: Doctor = Depends(get_current_use
 # Функция для проверки ролей
 def require_role(*roles):
     def role_checker(current_user: Doctor = Depends(get_current_active_user)):
-        if current_user.role not in roles:
+        if current_user.role.value not in roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Operation not permitted for your role"
@@ -93,9 +92,3 @@ def require_role(*roles):
         return current_user
 
     return role_checker
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
-
-def get_password_hash(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()

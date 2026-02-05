@@ -184,60 +184,6 @@ app.include_router(cases.router, prefix="/api/v1/cases", tags=["Случаи"])
 app.include_router(doctors.router, prefix="/api/v1/doctors", tags=["Врачи"])
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Документы"])
 
-
-# Тестовые endpoint для отладки
-@app.get("/test-auth")
-async def test_auth():
-    """Тестовый endpoint для проверки аутентификации"""
-    return {
-        "message": "Это открытый endpoint, доступен без авторизации",
-        "time": datetime.now().isoformat()
-    }
-
-
-@app.get("/test-protected")
-async def test_protected(current_user: Doctor = Depends(auth.get_current_user)):
-    """Тестовый защищенный endpoint"""
-    return {
-        "message": "Это защищенный endpoint",
-        "user": current_user.username,
-        "role": current_user.role.value if hasattr(current_user.role, 'value') else current_user.role
-    }
-
-
-@app.post("/create-test-user")
-async def create_test_user():
-    """Создание тестового пользователя для отладки"""
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from sqlalchemy import select
-    from reunity_app.db.session import get_db
-    from reunity_app.db.models import Doctor, DoctorRole
-    import hashlib
-
-    async for db in get_db():
-        # Проверяем, есть ли уже админ
-        result = await db.execute(select(Doctor).where(Doctor.username == "admin"))
-        existing = result.scalar_one_or_none()
-
-        if existing:
-            return {"message": "Пользователь уже существует", "username": "admin"}
-
-        # Создаем нового админа
-        hashed_password = hashlib.sha256("admin123".encode()).hexdigest()
-        doctor = Doctor(
-            username="admin",
-            hashed_password=hashed_password,
-            last_name="Администратор",
-            first_name="Системный",
-            role=DoctorRole.ADMIN,
-            is_active=True
-        )
-        db.add(doctor)
-        await db.commit()
-        await db.refresh(doctor)
-
-        return {"message": "Пользователь создан", "username": "admin"}
-
 @app.get("/case_create")
 async def case_create_page(request: Request):
     """Страница создания нового случая"""

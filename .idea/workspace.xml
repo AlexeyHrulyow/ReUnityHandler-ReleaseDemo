@@ -4,11 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс">
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.0.4&#10;- добавление пациентов, начало реализации">
+      <change afterPath="$PROJECT_DIR$/backend/test/diagnose_db.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/test/update_database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/check_password.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/check_password.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/check_tables.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/check_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/clean_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/clean_database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/create_initial_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/create_initial_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/create_tables.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/create_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_auth_fix.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_auth_fix.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_connection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_create_case.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_create_case.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/test_login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/update_password.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/update_password.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,8 +37,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -46,33 +65,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.check_password.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_tables.executor&quot;: &quot;Run&quot;,
-    &quot;Python.clean_database.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_initial_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_tables.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lab2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pyparser.executor&quot;: &quot;Run&quot;,
-    &quot;Python.run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_auth.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_auth_fix.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_create_case.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_login.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_pythin312.executor&quot;: &quot;Run&quot;,
-    &quot;Python.update_password.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/reab/PycharmProjects/ReUnityHandler&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.check_password.executor": "Run",
+    "Python.check_tables.executor": "Run",
+    "Python.clean_database.executor": "Run",
+    "Python.create_initial_data.executor": "Run",
+    "Python.create_tables.executor": "Run",
+    "Python.diagnose_db.executor": "Run",
+    "Python.lab2.executor": "Run",
+    "Python.pyparser.executor": "Run",
+    "Python.run.executor": "Run",
+    "Python.test_auth.executor": "Run",
+    "Python.test_auth_fix.executor": "Run",
+    "Python.test_create_case.executor": "Run",
+    "Python.test_db.executor": "Run",
+    "Python.test_login.executor": "Run",
+    "Python.test_pythin312.executor": "Run",
+    "Python.update_database.executor": "Run",
+    "Python.update_password.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/reab/PycharmProjects/ReUnityHandler",
+    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler" />
@@ -82,12 +103,35 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app\core" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\test" />
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend" />
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler" />
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.run">
+  <component name="RunManager" selected="Python.pyparser">
+    <configuration name="diagnose_db" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\test\diagnose_db.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="pyparser" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -132,28 +176,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_auth" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ReUnityHandler" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/test_auth.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test_auth_fix" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -167,7 +189,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/test_auth_fix.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\test\test_auth_fix.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -176,7 +198,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="update_password" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="update_database" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -189,7 +211,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/update_password.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\test\update_database.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -200,11 +222,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.run" />
-        <item itemvalue="Python.test_auth_fix" />
-        <item itemvalue="Python.update_password" />
-        <item itemvalue="Python.test_auth" />
         <item itemvalue="Python.pyparser" />
+        <item itemvalue="Python.run" />
+        <item itemvalue="Python.diagnose_db" />
+        <item itemvalue="Python.update_database" />
+        <item itemvalue="Python.test_auth_fix" />
       </list>
     </recent_temporary>
   </component>
@@ -255,7 +277,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770198762101</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Версия 0.0.4&#10;- добавление пациентов, начало реализации">
+      <option name="closed" value="true" />
+      <created>1770278462164</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1770278462164</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -273,6 +303,7 @@
     <MESSAGE value="Версия 0.0.1&#10;- созданы базы данных&#10;- не настроены библиотеки" />
     <MESSAGE value="Версия 0.0.2&#10;- версия python изменена на более стабильную: 3.14 -&gt; 3.12&#10;- настроены библиотеки&#10;- таблицы добавляются корректно" />
     <MESSAGE value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
+    <MESSAGE value="Версия 0.0.4&#10;- добавление пациентов, начало реализации" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.0.4&#10;- добавление пациентов, начало реализации" />
   </component>
 </project>

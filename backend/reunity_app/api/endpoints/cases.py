@@ -1,12 +1,12 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_
-from datetime import datetime
+from sqlalchemy import select, or_, func
+from datetime import datetime, date
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
-from reunity_app.db.models import Doctor, Patient, Case as CaseModel, Document, CaseStatus, DoctorRole
+from reunity_app.db.models import Doctor, Patient, Case as CaseModel, Document, CaseStatus
 from reunity_app.schemas.case import CaseCreate, CaseUpdate, Case as CaseSchema, CaseWithPatient
 
 router = APIRouter()
@@ -31,7 +31,8 @@ async def create_case(
         patient_id=case.patient_id,
         creator_id=current_user.id,
         admission_date=case.admission_date,
-        status=case.status
+        status=case.status,
+        notes=case.notes
     )
 
     db.add(db_case)
@@ -46,7 +47,18 @@ async def create_case(
     db.add(db_document)
     await db.commit()
 
-    return db_case
+    return CaseSchema(
+        id=db_case.id,
+        patient_id=db_case.patient_id,
+        creator_id=db_case.creator_id,
+        admission_date=db_case.admission_date,
+        status=db_case.status,
+        notes=db_case.notes,
+        created_at=db_case.created_at,
+        updated_at=db_case.updated_at,
+        completed_at=db_case.completed_at,
+        sent_to_webmis_at=db_case.sent_to_webmis_at
+    )
 
 
 @router.get("/", response_model=List[CaseWithPatient])
@@ -56,6 +68,8 @@ async def list_cases(
         status: Optional[CaseStatus] = Query(None, description="Фильтр по статусу"),
         patient_id: Optional[int] = Query(None, description="Фильтр по пациенту"),
         search: Optional[str] = Query(None, description="Поиск по ФИО пациента"),
+        date_from: Optional[date] = Query(None, description="Фильтр по дате с"),
+        date_to: Optional[date] = Query(None, description="Фильтр по дате по"),
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
@@ -79,9 +93,12 @@ async def list_cases(
             )
         )
 
-    # Врачи видят только свои случаи, админы и заведующие видят все
-    if current_user.role not in [DoctorRole.ADMIN, DoctorRole.HEAD]:
-        query = query.where(CaseModel.creator_id == current_user.id)
+    # Фильтр по дате создания случая
+    if date_from:
+        query = query.where(func.date(CaseModel.created_at) >= date_from)
+
+    if date_to:
+        query = query.where(func.date(CaseModel.created_at) <= date_to)
 
     query = query.offset(skip).limit(limit).order_by(CaseModel.created_at.desc())
 
@@ -99,6 +116,21 @@ async def list_cases(
         creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
         creator = creator_result.scalar_one_or_none()
 
+        # Получаем информацию о документе
+        document_result = await db.execute(
+            select(Document).where(Document.case_id == case.id)
+        )
+        document = document_result.scalar_one_or_none()
+
+        # Получаем информацию о разделах документа
+        neurologist_completed = False
+        therapist_completed = False
+        head_completed = False
+
+        if document:
+            # Здесь позже добавим логику проверки статуса разделов
+            pass
+
         # Создаем объект схемы
         case_data = CaseSchema(
             id=case.id,
@@ -106,6 +138,7 @@ async def list_cases(
             creator_id=case.creator_id,
             admission_date=case.admission_date,
             status=case.status,
+            notes=case.notes,
             created_at=case.created_at,
             updated_at=case.updated_at,
             completed_at=case.completed_at,
@@ -117,7 +150,11 @@ async def list_cases(
             **case_data.dict(),
             patient_name=patient.full_name if patient else "Неизвестно",
             patient_insurance=patient.insurance_number if patient else None,
-            creator_name=creator.full_name if creator else "Неизвестно"
+            patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
+            creator_name=creator.full_name if creator else "Неизвестно",
+            neurologist_completed=neurologist_completed,
+            therapist_completed=therapist_completed,
+            head_completed=head_completed
         )
 
         cases_with_details.append(case_with_patient)
@@ -138,10 +175,6 @@ async def get_case(
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Проверка прав доступа
-    if current_user.role not in [DoctorRole.ADMIN, DoctorRole.HEAD] and case.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Нет доступа к данному случаю")
-
     # Получаем дополнительную информацию
     patient_result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
     patient = patient_result.scalar_one_or_none()
@@ -156,6 +189,7 @@ async def get_case(
         creator_id=case.creator_id,
         admission_date=case.admission_date,
         status=case.status,
+        notes=case.notes,
         created_at=case.created_at,
         updated_at=case.updated_at,
         completed_at=case.completed_at,
@@ -166,7 +200,11 @@ async def get_case(
         **case_data.dict(),
         patient_name=patient.full_name if patient else "Неизвестно",
         patient_insurance=patient.insurance_number if patient else None,
-        creator_name=creator.full_name if creator else "Неизвестно"
+        patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
+        creator_name=creator.full_name if creator else "Неизвестно",
+        neurologist_completed=False,
+        therapist_completed=False,
+        head_completed=False
     )
 
 
@@ -184,10 +222,6 @@ async def update_case(
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Проверка прав доступа
-    if current_user.role not in [DoctorRole.ADMIN, DoctorRole.HEAD] and case.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Нет доступа к данному случаю")
-
     # Обновляем поля
     update_data = case_update.dict(exclude_unset=True)
     for field, value in update_data.items():
@@ -202,6 +236,7 @@ async def update_case(
         creator_id=case.creator_id,
         admission_date=case.admission_date,
         status=case.status,
+        notes=case.notes,
         created_at=case.created_at,
         updated_at=case.updated_at,
         completed_at=case.completed_at,
@@ -240,10 +275,6 @@ async def complete_case(
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
-
-    # Проверка прав доступа
-    if current_user.role not in [DoctorRole.ADMIN, DoctorRole.HEAD] and case.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Нет доступа к данному случаю")
 
     case.status = CaseStatus.COMPLETED
     case.completed_at = datetime.utcnow()

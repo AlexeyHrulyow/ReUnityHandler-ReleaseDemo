@@ -115,28 +115,6 @@
                 <h3>👥 Пациенты</h3>
                 <p>Управление базой данных пациентов</p>
             </a>
-
-            <a href="#" class="nav-card" onclick="alert('В разработке')">
-                <h3>📄 Документы</h3>
-                <p>Работа с медицинскими документами</p>
-            </a>
-
-            <a href="#" class="nav-card" onclick="alert('В разработке')">
-                <h3>⚙️ Настройки</h3>
-                <p>Настройки системы и пользователей</p>
-            </a>
-
-            <div class="nav-card">
-                <h3>📊 Статистика</h3>
-                <p>Просмотр статистики и отчетов</p>
-                <p style="color: #999; font-size: 12px;">(В разработке)</p>
-            </div>
-
-            <div class="nav-card">
-                <h3>🔄 Интеграция</h3>
-                <p>Интеграция с ВебМИС</p>
-                <p style="color: #999; font-size: 12px;">(В разработке)</p>
-            </div>
         </div>
     </div>
 
@@ -187,14 +165,18 @@
                     document.getElementById('navCards').style.display = 'grid';
                     document.getElementById('loading').style.display = 'none';
 
-                    // Показываем дополнительные возможности для администраторов
-                    if (currentUser.role === 'admin' || currentUser.role === 'head') {
-                        const userInfo = document.getElementById('userInfo');
-                        const adminBtn = document.createElement('button');
-                        adminBtn.className = 'btn btn-primary';
-                        adminBtn.textContent = 'Администрирование';
-                        adminBtn.onclick = () => window.location.href = '/api/v1/doctors';
-                        userInfo.appendChild(adminBtn);
+                    // Добавляем карточку администрирования только для админа
+                    if (currentUser.role === 'admin') {
+                        const navCards = document.getElementById('navCards');
+                        const adminCard = document.createElement('a');
+                        adminCard.href = '/api/v1/doctors';
+                        adminCard.target = '_blank';
+                        adminCard.className = 'nav-card';
+                        adminCard.innerHTML = `
+                            <h3>⚙️ Администрирование</h3>
+                            <p>Управление пользователями и настройками</p>
+                        `;
+                        navCards.appendChild(adminCard);
                     }
                 } else {
                     console.error('Ошибка загрузки пользователя:', response.status, response.statusText);

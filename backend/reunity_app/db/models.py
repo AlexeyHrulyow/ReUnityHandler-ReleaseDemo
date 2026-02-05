@@ -112,6 +112,7 @@ class Case(Base):
     creator_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
     status = Column(Enum(CaseStatus), default=CaseStatus.DRAFT, nullable=False)
     admission_date = Column(DateTime, nullable=False)
+    notes = Column(Text, nullable=True)  # Новое поле для примечаний
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     completed_at = Column(DateTime(timezone=True))
