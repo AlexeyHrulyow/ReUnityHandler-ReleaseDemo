@@ -10,6 +10,8 @@ from sqlalchemy import text
 import os
 import logging
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -287,6 +289,30 @@ async def list_routes():
     return {
         "routes": routes,
         "count": len(routes)
+    }
+
+
+@app.get("/api/v1/test-structure/{document_id}")
+async def test_structure(
+        document_id: int,
+        db: AsyncSession = Depends(get_db)
+):
+    """Тестовый эндпоинт для проверки структуры"""
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Document).where(Document.id == document_id)
+    )
+    document = result.scalar_one_or_none()
+
+    if not document:
+        return {"error": "Документ не найден", "document_id": document_id}
+
+    return {
+        "document_id": document.id,
+        "case_id": document.case_id,
+        "content": document.content,
+        "exists": True
     }
 
 

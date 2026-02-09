@@ -539,7 +539,7 @@
                 console.log('Проверяем документ для случая:', caseId);
 
                 // Проверяем, есть ли документ для этого случая
-                const response = await fetch(`/api/v1/documents?case_id=${caseId}`, {
+                const response = await fetch(`/api/v1/documents/?case_id=${caseId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -552,6 +552,7 @@
 
                     if (documents.length > 0) {
                         // Переходим к редактированию существующего документа
+                        console.log('ID документа:', documents[0].id, 'ID случая:', caseId);
                         window.location.href = `/document_table?id=${documents[0].id}`;
                     } else {
                         // Создаем новый документ

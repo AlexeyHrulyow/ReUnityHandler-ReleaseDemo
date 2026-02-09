@@ -576,3 +576,28 @@ async def sign_document_section(
     await db.commit()
 
     return {"message": "Раздел подписан успешно"}
+
+
+@router.get("/{document_id}/structure")
+async def get_document_structure_redirect(
+        document_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: Doctor = Depends(get_current_active_user)
+):
+    """Редирект на document-table эндпоинт"""
+    # Проверяем существование документа
+    result = await db.execute(
+        select(Document).where(Document.id == document_id)
+    )
+    document = result.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Документ не найден")
+
+    # Возвращаем информацию для редиректа
+    return {
+        "message": "Используйте /api/v1/document-table/{document_id}/structure",
+        "redirect_to": f"/api/v1/document-table/{document_id}/structure",
+        "document_id": document_id,
+        "case_id": document.case_id
+    }

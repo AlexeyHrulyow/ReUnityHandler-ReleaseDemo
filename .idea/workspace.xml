@@ -4,22 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы">
-      <change afterPath="$PROJECT_DIR$/backend/check_doctors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/check_documents.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/debug_api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/test_api_direct.py" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.1.1&#10;- не работает создание документа">
+      <change afterPath="$PROJECT_DIR$/backend/check_document_id.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/security.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/test/update_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test/update_database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +96,7 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.check_documents">
+  <component name="RunManager" selected="Python.run">
     <configuration name="check_doctors" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -121,6 +111,28 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/check_doctors.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/check_document_id.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -195,35 +207,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_api_direct" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ReUnityHandler" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/test_api_direct.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.run" />
+        <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
         <item itemvalue="Python.check_doctors" />
-        <item itemvalue="Python.run" />
         <item itemvalue="Python.pyparser" />
-        <item itemvalue="Python.test_api_direct" />
       </list>
     </recent_temporary>
   </component>
@@ -298,7 +288,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770292487326</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Версия 0.1.1&#10;- не работает создание документа">
+      <option name="closed" value="true" />
+      <created>1770617544233</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770617544233</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -319,6 +317,7 @@
     <MESSAGE value="Версия 0.0.4&#10;- добавление пациентов, начало реализации" />
     <MESSAGE value="Версия 0.0.5&#10;- улучшено добавление пациентов&#10;- новые фильтры для поиска" />
     <MESSAGE value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
+    <MESSAGE value="Версия 0.1.1&#10;- не работает создание документа" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.1.1&#10;- не работает создание документа" />
   </component>
 </project>
