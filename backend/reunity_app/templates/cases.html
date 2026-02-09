@@ -552,7 +552,7 @@
 
                     if (documents.length > 0) {
                         // Переходим к редактированию существующего документа
-                        window.location.href = `/document_edit?id=${documents[0].id}`;
+                        window.location.href = `/document_table?id=${documents[0].id}`;
                     } else {
                         // Создаем новый документ
                         if (confirm('Документ для этого случая не найден. Создать новый?')) {

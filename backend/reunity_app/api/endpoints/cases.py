@@ -42,9 +42,14 @@ async def create_case(
     # Создаем связанный документ
     db_document = Document(
         case_id=db_case.id,
-        content={"sections": {}}
+        content={}
     )
     db.add(db_document)
+    await db.commit()
+    await db.refresh(db_document)
+
+    # Инициализируем структуру документа
+    db_document.initialize_content()
     await db.commit()
 
     return CaseSchema(
@@ -128,8 +133,9 @@ async def list_cases(
         head_completed = False
 
         if document:
-            # Здесь позже добавим логику проверки статуса разделов
-            pass
+            neurologist_completed = document.neurologist_completed
+            therapist_completed = document.therapist_completed
+            head_completed = document.head_completed
 
         # Создаем объект схемы
         case_data = CaseSchema(
@@ -175,12 +181,28 @@ async def get_case(
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
+    # Получаем документ для этого случая
+    document_result = await db.execute(
+        select(Document).where(Document.case_id == case.id)
+    )
+    document = document_result.scalar_one_or_none()
+
     # Получаем дополнительную информацию
     patient_result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
     patient = patient_result.scalar_one_or_none()
 
     creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
     creator = creator_result.scalar_one_or_none()
+
+    # Получаем статусы заполнения из документа
+    neurologist_completed = False
+    therapist_completed = False
+    head_completed = False
+
+    if document:
+        neurologist_completed = document.neurologist_completed
+        therapist_completed = document.therapist_completed
+        head_completed = document.head_completed
 
     # Создаем объект схемы
     case_data = CaseSchema(
@@ -202,9 +224,9 @@ async def get_case(
         patient_insurance=patient.insurance_number if patient else None,
         patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
         creator_name=creator.full_name if creator else "Неизвестно",
-        neurologist_completed=False,
-        therapist_completed=False,
-        head_completed=False
+        neurologist_completed=neurologist_completed,
+        therapist_completed=therapist_completed,
+        head_completed=head_completed
     )
 
 

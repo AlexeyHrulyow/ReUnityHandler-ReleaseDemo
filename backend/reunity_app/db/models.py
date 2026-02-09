@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
 import enum
 from datetime import datetime
+from typing import List, Dict, Any  # Важный импорт!
 
 from .base import Base
 
@@ -25,6 +26,45 @@ class CaseStatus(str, enum.Enum):
     ARCHIVED = "archived"
 
 
+class DocumentRow(str, enum.Enum):
+    """Строки документа"""
+    HEADER = "header"
+    PAIN_SYNDROME = "pain_syndrome"
+    STATO_DYNAMIC = "stato_dynamic"
+    MENTAL_FUNCTIONS = "mental_functions"
+    INTERNAL_ORGANS = "internal_organs"
+    SENSORY_FUNCTIONS = "sensory_functions"
+    VITAL_ACTIVITY = "vital_activity"
+    SELF_CARE = "self_care"
+    MOBILITY = "mobility"
+    WORK_ABILITY = "work_ability"
+    COMMUNICATION = "communication"
+    TOTAL_SCORE = "total_score"
+
+
+# Константы для распределения строк по врачам
+NEUROLOGIST_ROWS = [
+    DocumentRow.PAIN_SYNDROME,
+    DocumentRow.STATO_DYNAMIC,
+    DocumentRow.MENTAL_FUNCTIONS,
+    DocumentRow.INTERNAL_ORGANS,
+    DocumentRow.SENSORY_FUNCTIONS
+]
+
+THERAPIST_ROWS = [
+    DocumentRow.VITAL_ACTIVITY,
+    DocumentRow.SELF_CARE,
+    DocumentRow.MOBILITY,
+    DocumentRow.WORK_ABILITY,
+    DocumentRow.COMMUNICATION
+]
+
+HEAD_ROWS = [
+    DocumentRow.HEADER,
+    DocumentRow.TOTAL_SCORE
+]
+
+
 class Patient(Base):
     """Модель пациента"""
     __tablename__ = "patients"
@@ -34,7 +74,7 @@ class Patient(Base):
     first_name = Column(String(100), nullable=False)
     middle_name = Column(String(100))
     birth_date = Column(DateTime)
-    insurance_number = Column(String(20))  # Последние 4 цифры полиса
+    insurance_number = Column(String(20))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Связи
@@ -112,7 +152,7 @@ class Case(Base):
     creator_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
     status = Column(Enum(CaseStatus), default=CaseStatus.DRAFT, nullable=False)
     admission_date = Column(DateTime, nullable=False)
-    notes = Column(Text, nullable=True)  # Новое поле для примечаний
+    notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     completed_at = Column(DateTime(timezone=True))
@@ -136,7 +176,18 @@ class Document(Base):
     template_id = Column(Integer, ForeignKey("document_templates.id"))
     signer_id = Column(Integer, ForeignKey("doctors.id"))
 
-    content = Column(JSON, default=dict, nullable=False)
+    # Структура документа в виде JSON-таблицы
+    content = Column(JSON, default={}, nullable=False)
+
+    # Статусы заполнения врачами
+    neurologist_completed = Column(Boolean, default=False)
+    therapist_completed = Column(Boolean, default=False)
+    head_completed = Column(Boolean, default=False)
+
+    # Даты заполнения
+    neurologist_filled_at = Column(DateTime(timezone=True))
+    therapist_filled_at = Column(DateTime(timezone=True))
+    head_filled_at = Column(DateTime(timezone=True))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -150,6 +201,55 @@ class Document(Base):
 
     def __repr__(self):
         return f"<Document #{self.id}>"
+
+    def initialize_content(self):
+        """Инициализация структуры документа"""
+        self.content = {
+            "header": ["", "До лечения", "После лечения"],
+            "pain_syndrome": ["Болевой синдром", "", ""],
+            "stato_dynamic": ["Нарушение стато-динамических функций", "", ""],
+            "mental_functions": ["Нарушение психических функций: восприятия, памяти, мышления, речи, эмоции, воли", "",
+                                 ""],
+            "internal_organs": [
+                "Нарушение функций: кровообращения, дыхания, пищеварения, выделения, обмена веществ и энергии, внутренней секреции",
+                "", ""],
+            "sensory_functions": ["Нарушение зрительных функций: зрения, слуха, обоняния, осязания", "", ""],
+            "vital_activity": ["Нарушение жизнедеятельности", "", ""],
+            "self_care": ["Нарушение самообслуживания", "", ""],
+            "mobility": ["Нарушение способности к передвижению", "", ""],
+            "work_ability": ["Нарушение способности к трудовой деятельности", "", ""],
+            "communication": ["Нарушение способности к общению с окружающими", "", ""],
+            "total_score": ["Сумма баллов", "", ""]
+        }
+
+    def update_row(self, row_name: DocumentRow, values: List[str]):
+        """Обновление строки документа"""
+        if row_name.value in self.content:
+            if len(values) == 3:
+                self.content[row_name.value] = values
+            else:
+                self.content[row_name.value][1] = values[0] if len(values) > 0 else ""
+                self.content[row_name.value][2] = values[1] if len(values) > 1 else ""
+
+    def calculate_total_score(self):
+        """Расчет итогового балла"""
+        total_before = 0
+        total_after = 0
+
+        for row in DocumentRow:
+            if row in [DocumentRow.HEADER, DocumentRow.TOTAL_SCORE]:
+                continue
+
+            row_data = self.content.get(row.value, ["", "", ""])
+            try:
+                if row_data[1]:  # "До лечения"
+                    total_before += int(row_data[1])
+                if row_data[2]:  # "После лечения"
+                    total_after += int(row_data[2])
+            except ValueError:
+                continue
+
+        self.content["total_score"] = ["Сумма баллов", str(total_before), str(total_after)]
 
 
 class DocumentSection(Base):

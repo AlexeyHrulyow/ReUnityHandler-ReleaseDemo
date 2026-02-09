@@ -27,11 +27,15 @@ async def list_documents(
         current_user: Doctor = Depends(get_current_active_user)
 ):
     """Получение списка документов"""
+
+    print(f"🔍 Запрос документов: case_id={case_id}, user={current_user.username}, role={current_user.role}")
+
     query = select(Document)
 
     # Применяем фильтры
     if case_id:
         query = query.where(Document.case_id == case_id)
+        print(f"  Фильтр по case_id: {case_id}")
 
     if doctor_id:
         query = query.where(Document.signer_id == doctor_id)
@@ -40,15 +44,18 @@ async def list_documents(
         query = query.where(Document.signed_at.is_not(None))
 
     # Врачи видят только документы своих случаев
-    if current_user.role not in ["admin", "head"]:
-        # Получаем ID случаев, созданных текущим врачом
-        subquery = select(Case.id).where(Case.creator_id == current_user.id)
-        query = query.where(Document.case_id.in_(subquery))
+    # if current_user.role not in ["admin", "head"]:
+    #     # Получаем ID случаев, созданных текущим врачом
+    #     subquery = select(Case.id).where(Case.creator_id == current_user.id)
+    #     query = query.where(Document.case_id.in_(subquery))
+    #     print(f"  Фильтр по создателю: текущий врач ID={current_user.id}")
 
     query = query.offset(skip).limit(limit).order_by(Document.created_at.desc())
 
     result = await db.execute(query)
     documents = result.scalars().all()
+
+    print(f"  Найдено документов: {len(documents)}")
 
     # Формируем ответ с деталями
     documents_with_details = []

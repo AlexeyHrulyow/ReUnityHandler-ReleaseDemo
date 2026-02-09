@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование документа - ReUnityHandler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .patient-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .doctor-status {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .status-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        .status-card.completed {
+            border-left: 4px solid #27ae60;
+        }
+        .status-card.pending {
+            border-left: 4px solid #f39c12;
+        }
+        .status-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .document-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        .document-table th,
+        .document-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            vertical-align: top;
+        }
+        .document-table th {
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        .document-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .document-table tr:hover {
+            background: #f5f5f5;
+        }
+        .row-label {
+            width: 50%;
+            font-weight: bold;
+            background: #f8f9fa;
+        }
+        .cell-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .cell-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .cell-input.readonly {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .cell-input.neurologist {
+            border-left: 3px solid #3498db;
+        }
+        .cell-input.therapist {
+            border-left: 3px solid #9b59b6;
+        }
+        .cell-input.head {
+            border-left: 3px solid #e74c3c;
+        }
+        .row-doctor {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .total-row {
+            background: #e8f4fc !important;
+            font-weight: bold;
+        }
+        .header-row {
+            background: #fff8e1 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Редактирование документа</h1>
+            <div style="margin-top: 10px;">
+                <button class="btn btn-secondary" onclick="window.location.href='/cases'">
+                    ← Назад к списку случаев
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                    ← Панель управления
+                </button>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+        <div id="loading" class="loading">Загрузка документа...</div>
+
+        <div id="documentInfo" class="patient-info" style="display: none;">
+            <h3>Информация о документе</h3>
+            <p><strong>ID:</strong> <span id="docId"></span></p>
+            <p><strong>Пациент:</strong> <span id="patientName"></span></p>
+            <p><strong>Номер полиса:</strong> <span id="insuranceNumber"></span></p>
+            <p><strong>Дата создания:</strong> <span id="createdAt"></span></p>
+        </div>
+
+        <div id="doctorStatus" class="doctor-status" style="display: none;">
+            <div class="status-card" id="neurologistStatus">
+                <div class="status-icon">🧠</div>
+                <h4>Невролог</h4>
+                <p id="neurologistText">Не заполнено</p>
+                <p id="neurologistTime"></p>
+            </div>
+            <div class="status-card" id="therapistStatus">
+                <div class="status-icon">🩺</div>
+                <h4>Терапевт</h4>
+                <p id="therapistText">Не заполнено</p>
+                <p id="therapistTime"></p>
+            </div>
+            <div class="status-card" id="headStatus">
+                <div class="status-icon">👨‍⚕️</div>
+                <h4>Заведующий</h4>
+                <p id="headText">Не заполнено</p>
+                <p id="headTime"></p>
+            </div>
+        </div>
+
+        <div id="documentActions" style="margin: 20px 0; display: none;">
+            <button class="btn btn-success" onclick="completeMySection()" id="completeSectionBtn">
+                ✓ Завершить мой раздел
+            </button>
+            <button class="btn btn-primary" onclick="saveAllChanges()" id="saveAllBtn">
+                💾 Сохранить все изменения
+            </button>
+            <button class="btn btn-success" onclick="signDocument()" id="signDocumentBtn" style="display: none;">
+                📝 Подписать документ
+            </button>
+            <span id="saveStatus" style="margin-left: 20px; color: #666;"></span>
+        </div>
+
+        <div id="documentTable" style="display: none;">
+            <table class="document-table">
+                <thead>
+                    <tr>
+                        <th>Показатель</th>
+                        <th style="width: 25%;">До лечения</th>
+                        <th style="width: 25%;">После лечения</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Таблица будет заполнена через JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('auth_token');
+        let currentUser = null;
+        let documentId = null;
+        let documentData = null;
+        let permissions = null;
+        let doctorRows = null;
+        let completionStatus = null;
+        let unsavedChanges = new Set();
+        let autoSaveTimer = null;
+
+        // Получаем ID документа из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        documentId = urlParams.get('id');
+
+        if (!documentId) {
+            showAlert('ID документа не указан', 'danger');
+            setTimeout(() => window.location.href = '/cases', 2000);
+        }
+
+        // Проверяем аутентификацию
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                } else {
+                    throw new Error('Ошибка загрузки пользователя');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                window.location.href = '/';
+            }
+        }
+
+        async function loadDocumentStructure() {
+            try {
+                showLoading(true);
+
+                // Загружаем структуру документа
+                const response = await fetch(`/api/v1/documents/${documentId}/structure`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    documentData = data.table_data;
+                    permissions = data.permissions;
+                    doctorRows = data.doctor_rows;
+                    completionStatus = data.completion_status;
+
+                    // Загружаем информацию о документе
+                    await loadDocumentInfo();
+
+                    // Отображаем интерфейс
+                    displayDocumentInfo();
+                    displayDoctorStatus();
+                    displayDocumentTable();
+                    setupAutoSave();
+
+                    showLoading(false);
+                } else {
+                    throw new Error('Ошибка загрузки документа');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка загрузки документа: ' + error.message, 'danger');
+                showLoading(false);
+            }
+        }
+
+        async function loadDocumentInfo() {
+            try {
+                const response = await fetch(`/api/v1/documents/${documentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const doc = await response.json();
+
+                    // Обновляем информацию о документе
+                    document.getElementById('docId').textContent = doc.id;
+                    if (doc.case_info) {
+                        document.getElementById('patientName').textContent = doc.case_info.name || 'Не указано';
+                        document.getElementById('insuranceNumber').textContent = doc.case_info.insurance_number || 'Не указан';
+                    }
+                    document.getElementById('createdAt').textContent =
+                        new Date(doc.created_at).toLocaleDateString('ru-RU');
+
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки информации о документе:', error);
+            }
+        }
+
+        function displayDocumentInfo() {
+            document.getElementById('documentInfo').style.display = 'block';
+            document.getElementById('doctorStatus').style.display = 'flex';
+            document.getElementById('documentActions').style.display = 'block';
+            document.getElementById('documentTable').style.display = 'block';
+
+            // Показываем кнопку подписания только для заведующего и админа
+            if (currentUser.role === 'head' || currentUser.role === 'admin') {
+                document.getElementById('signDocumentBtn').style.display = 'inline-block';
+            }
+        }
+
+        function displayDoctorStatus() {
+            const neuroCard = document.getElementById('neurologistStatus');
+            const therapistCard = document.getElementById('therapistStatus');
+            const headCard = document.getElementById('headStatus');
+
+            // Невролог
+            if (completionStatus.neurologist) {
+                neuroCard.classList.add('completed');
+                document.getElementById('neurologistText').textContent = 'Заполнено';
+                document.getElementById('neurologistText').style.color = '#27ae60';
+            } else {
+                neuroCard.classList.remove('completed');
+                document.getElementById('neurologistText').textContent = 'Не заполнено';
+                document.getElementById('neurologistText').style.color = '#e74c3c';
+            }
+
+            // Терапевт
+            if (completionStatus.therapist) {
+                therapistCard.classList.add('completed');
+                document.getElementById('therapistText').textContent = 'Заполнено';
+                document.getElementById('therapistText').style.color = '#27ae60';
+            } else {
+                therapistCard.classList.remove('completed');
+                document.getElementById('therapistText').textContent = 'Не заполнено';
+                document.getElementById('therapistText').style.color = '#e74c3c';
+            }
+
+            // Заведующий
+            if (completionStatus.head) {
+                headCard.classList.add('completed');
+                document.getElementById('headText').textContent = 'Заполнено';
+                document.getElementById('headText').style.color = '#27ae60';
+            } else {
+                headCard.classList.remove('completed');
+                document.getElementById('headText').textContent = 'Не заполнено';
+                document.getElementById('headText').style.color = '#e74c3c';
+            }
+        }
+
+        function displayDocumentTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            // Определяем строки в правильном порядке
+            const rowOrder = [
+                'header',
+                'pain_syndrome',
+                'stato_dynamic',
+                'mental_functions',
+                'internal_organs',
+                'sensory_functions',
+                'vital_activity',
+                'self_care',
+                'mobility',
+                'work_ability',
+                'communication',
+                'total_score'
+            ];
+
+            rowOrder.forEach((rowKey, index) => {
+                const rowData = documentData[rowKey] || ["", "", ""];
+                const tr = document.createElement('tr');
+
+                // Определяем класс строки
+                if (rowKey === 'header') {
+                    tr.classList.add('header-row');
+                } else if (rowKey === 'total_score') {
+                    tr.classList.add('total-row');
+                }
+
+                // Определяем, к какому врачу относится строка
+                let doctorType = '';
+                let doctorName = '';
+
+                if (doctorRows.neurologist.includes(rowKey)) {
+                    doctorType = 'neurologist';
+                    doctorName = 'Невролог';
+                } else if (doctorRows.therapist.includes(rowKey)) {
+                    doctorType = 'therapist';
+                    doctorName = 'Терапевт';
+                } else if (doctorRows.head.includes(rowKey)) {
+                    doctorType = 'head';
+                    doctorName = 'Заведующий';
+                }
+
+                // Проверяем, может ли текущий пользователь редактировать эту строку
+                let canEdit = false;
+                if (permissions.can_edit_all) {
+                    canEdit = true;
+                } else if (doctorType === 'neurologist' && permissions.can_edit_neurologist) {
+                    canEdit = true;
+                } else if (doctorType === 'therapist' && permissions.can_edit_therapist) {
+                    canEdit = true;
+                } else if (doctorType === 'head' && permissions.can_edit_head) {
+                    canEdit = true;
+                }
+
+                // Создаем ячейки
+                tr.innerHTML = `
+                    <td class="row-label">
+                        ${rowData[0]}
+                        <div class="row-doctor">${doctorName}</div>
+                    </td>
+                    <td>
+                        <input type="text"
+                               class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
+                               value="${rowData[1] || ''}"
+                               data-row="${rowKey}"
+                               data-col="1"
+                               ${canEdit ? '' : 'readonly'}
+                               oninput="markAsChanged('${rowKey}', 1, this.value)">
+                    </td>
+                    <td>
+                        <input type="text"
+                               class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
+                               value="${rowData[2] || ''}"
+                               data-row="${rowKey}"
+                               data-col="2"
+                               ${canEdit ? '' : 'readonly'}
+                               oninput="markAsChanged('${rowKey}', 2, this.value)">
+                    </td>
+                `;
+
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function markAsChanged(rowKey, colIndex, value) {
+            const changeId = `${rowKey}_${colIndex}`;
+            unsavedChanges.add(changeId);
+            updateSaveStatus();
+        }
+
+        function updateSaveStatus() {
+            const saveStatus = document.getElementById('saveStatus');
+            if (unsavedChanges.size > 0) {
+                saveStatus.textContent = `Есть несохраненные изменения (${unsavedChanges.size})`;
+                saveStatus.style.color = '#f39c12';
+            } else {
+                saveStatus.textContent = 'Все изменения сохранены';
+                saveStatus.style.color = '#27ae60';
+            }
+        }
+
+        function setupAutoSave() {
+            // Автосохранение каждые 30 секунд
+            autoSaveTimer = setInterval(() => {
+                if (unsavedChanges.size > 0) {
+                    saveAllChanges();
+                }
+            }, 30000);
+        }
+
+        async function saveAllChanges() {
+            if (unsavedChanges.size === 0) {
+                return;
+            }
+
+            try {
+                // Собираем все изменения
+                const changes = Array.from(unsavedChanges).map(changeId => {
+                    const [rowKey, colIndex] = changeId.split('_');
+                    const input = document.querySelector(`input[data-row="${rowKey}"][data-col="${colIndex}"]`);
+                    return {
+                        rowKey,
+                        colIndex: parseInt(colIndex),
+                        value: input.value
+                    };
+                });
+
+                // Группируем по строкам
+                const rowUpdates = {};
+                changes.forEach(change => {
+                    if (!rowUpdates[change.rowKey]) {
+                        rowUpdates[change.rowKey] = {
+                            row_name: change.rowKey,
+                            values: ["", "", ""]
+                        };
+                    }
+                    // Получаем текущие значения строки
+                    const rowData = documentData[change.rowKey] || ["", "", ""];
+                    rowUpdates[change.rowKey].values[change.colIndex] = change.value;
+                    // Сохраняем другие значения
+                    if (change.colIndex === 1) {
+                        rowUpdates[change.rowKey].values[0] = rowData[0];
+                        rowUpdates[change.rowKey].values[2] = rowData[2] || "";
+                    } else if (change.colIndex === 2) {
+                        rowUpdates[change.rowKey].values[0] = rowData[0];
+                        rowUpdates[change.rowKey].values[1] = rowData[1] || "";
+                    }
+                });
+
+                // Отправляем каждое обновление
+                for (const rowKey in rowUpdates) {
+                    const response = await fetch(`/api/v1/documents/${documentId}/row`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(rowUpdates[rowKey])
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Ошибка сохранения');
+                    }
+                }
+
+                // Очищаем список изменений
+                unsavedChanges.clear();
+                updateSaveStatus();
+
+                // Обновляем статус заполнения
+                await updateCompletionStatus();
+
+                showAlert('Изменения сохранены', 'success');
+
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                showAlert('Ошибка сохранения: ' + error.message, 'danger');
+            }
+        }
+
+        async function completeMySection() {
+            if (!confirm('Вы уверены, что завершили заполнение вашего раздела? После завершения редактирование будет ограничено.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/documents/${documentId}/complete-section`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    await updateCompletionStatus();
+                    showAlert('Раздел отмечен как завершенный', 'success');
+
+                    // Обновляем таблицу, чтобы сделать поля readonly
+                    displayDocumentTable();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка завершения раздела');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка: ' + error.message, 'danger');
+            }
+        }
+
+        async function updateCompletionStatus() {
+            try {
+                const response = await fetch(`/api/v1/documents/${documentId}/completion-status`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const status = await response.json();
+                    completionStatus = {
+                        neurologist: status.neurologist.completed,
+                        therapist: status.therapist.completed,
+                        head: status.head.completed
+                    };
+                    displayDoctorStatus();
+
+                    // Если все разделы заполнены, показываем кнопку подписания
+                    if (status.all_completed && (currentUser.role === 'head' || currentUser.role === 'admin')) {
+                        document.getElementById('signDocumentBtn').style.display = 'inline-block';
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка обновления статуса:', error);
+            }
+        }
+
+        async function signDocument() {
+            if (!confirm('Вы уверены, что хотите подписать документ? После подписания редактирование будет невозможно.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/documents/${documentId}/sign`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert('Документ успешно подписан', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/cases';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка подписания');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка: ' + error.message, 'danger');
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertClass = type === 'error' ? 'alert alert-danger' :
+                             type === 'success' ? 'alert alert-success' :
+                             type === 'warning' ? 'alert alert-warning' :
+                             'alert alert-info';
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = alertClass;
+            alertDiv.innerHTML = `
+                ${message}
+                <button style="float: right; background: none; border: none; font-size: 20px; cursor: pointer;"
+                        onclick="this.parentElement.remove()">×</button>
+            `;
+
+            // Удаляем старые алерты
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            container.appendChild(alertDiv);
+
+            // Автоматическое удаление через 5 секунд
+            setTimeout(() => {
+                if (alertDiv.parentNode === container) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadDocumentStructure();
+
+            // Предупреждение о несохраненных данных при закрытии
+            window.addEventListener('beforeunload', (e) => {
+                if (unsavedChanges.size > 0) {
+                    e.preventDefault();
+                    e.returnValue = 'У вас есть несохраненные изменения. Вы уверены, что хотите уйти?';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

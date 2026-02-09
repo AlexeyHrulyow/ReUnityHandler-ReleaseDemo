@@ -1,56 +1,31 @@
-#!/usr/bin/env python3
-"""
-Скрипт для обновления структуры базы данных
-"""
+# update_db_fix_encoding.py
 import asyncio
-from sqlalchemy import text
-from reunity_app.db.session import engine
+import asyncpg
+import os
+import sys
+from pathlib import Path
+import chardet  # Для определения кодировки
 
 
-async def update_database():
-    """Обновление структуры базы данных"""
-    print("🔄 Обновление структуры базы данных...")
+# Устанавливаем chardet если нет
+# pip install chardet
 
-    async with engine.begin() as conn:
-        try:
-            # 1. Добавляем поле notes в таблицу cases, если его нет
-            result = await conn.execute(text("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name='cases' AND column_name='notes'
-            """))
+def get_database_url():
+    env_path = Path(__file__).parent / ".env"
+    if env_path.exists():
+        # Определяем кодировку файла
+        with open(env_path, 'rb') as f:
+            raw_data = f.read()
+            result = chardet.detect(raw_data)
+            encoding = result['encoding']
+            print(f"Определена кодировка .env: {encoding}")
 
-            if result.fetchone() is None:
-                await conn.execute(text("ALTER TABLE cases ADD COLUMN notes TEXT"))
-                print("✅ Добавлено поле 'notes' в таблицу 'cases'")
-            else:
-                print("✅ Поле 'notes' уже существует в таблице 'cases'")
+        # Читаем файл в правильной кодировке
+        with open(env_path, 'r', encoding=encoding) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('DATABASE_URL='):
+                    return line.split('=', 1)[1]
+    return None
 
-            # 2. Проверяем наличие всех необходимых таблиц
-            result = await conn.execute(text("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public'
-            """))
-
-            tables = [row[0] for row in result.fetchall()]
-            required_tables = [
-                'patients', 'doctors', 'cases', 'documents',
-                'document_sections', 'document_templates', 'webmis_field_mapping'
-            ]
-
-            for table in required_tables:
-                if table in tables:
-                    print(f"✅ Таблица '{table}' существует")
-                else:
-                    print(f"⚠️ Таблица '{table}' отсутствует")
-
-            print("\n✅ Обновление базы данных завершено!")
-
-        except Exception as e:
-            print(f"❌ Ошибка при обновлении базы данных: {e}")
-            raise
-
-
-if __name__ == "__main__":
-    asyncio.run(update_database())
+# ... остальной код остается таким же
