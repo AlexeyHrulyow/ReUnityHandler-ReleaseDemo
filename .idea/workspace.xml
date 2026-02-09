@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.1.1&#10;- не работает создание документа">
-      <change afterPath="$PROJECT_DIR$/backend/check_document_id.py" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.1.2&#10;- начал открываться документ">
+      <change afterPath="$PROJECT_DIR$/backend/debug_save.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,40 +48,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.check_doctors.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_documents.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_password.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_tables.executor&quot;: &quot;Run&quot;,
-    &quot;Python.clean_database.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_initial_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_tables.executor&quot;: &quot;Run&quot;,
-    &quot;Python.debug_api.executor&quot;: &quot;Run&quot;,
-    &quot;Python.diagnose_db.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lab2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pyparser.executor&quot;: &quot;Run&quot;,
-    &quot;Python.run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_api_direct.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_auth.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_auth_fix.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_create_case.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_login.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_pythin312.executor&quot;: &quot;Run&quot;,
-    &quot;Python.update_database (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.update_database.executor&quot;: &quot;Run&quot;,
-    &quot;Python.update_password.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/reab/PycharmProjects/ReUnityHandler&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.check_doctors.executor": "Run",
+    "Python.check_document_id.executor": "Run",
+    "Python.check_documents.executor": "Run",
+    "Python.check_password.executor": "Run",
+    "Python.check_tables.executor": "Run",
+    "Python.clean_database.executor": "Run",
+    "Python.create_initial_data.executor": "Run",
+    "Python.create_tables.executor": "Run",
+    "Python.debug_api.executor": "Run",
+    "Python.debug_save.executor": "Run",
+    "Python.diagnose_db.executor": "Run",
+    "Python.lab2.executor": "Run",
+    "Python.pyparser.executor": "Run",
+    "Python.run.executor": "Run",
+    "Python.test_api_direct.executor": "Run",
+    "Python.test_auth.executor": "Run",
+    "Python.test_auth_fix.executor": "Run",
+    "Python.test_create_case.executor": "Run",
+    "Python.test_db.executor": "Run",
+    "Python.test_login.executor": "Run",
+    "Python.test_pythin312.executor": "Run",
+    "Python.update_database (1).executor": "Run",
+    "Python.update_database.executor": "Run",
+    "Python.update_password.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/reab/PycharmProjects/ReUnityHandler",
+    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler" />
@@ -97,28 +100,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.run">
-    <configuration name="check_doctors" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ReUnityHandler" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/check_doctors.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -155,6 +136,28 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/check_documents.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="debug_save" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ReUnityHandler" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/debug_save.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -210,10 +213,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.run" />
+        <item itemvalue="Python.debug_save" />
+        <item itemvalue="Python.pyparser" />
         <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
-        <item itemvalue="Python.check_doctors" />
-        <item itemvalue="Python.pyparser" />
       </list>
     </recent_temporary>
   </component>
@@ -296,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770617544233</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Версия 0.1.2&#10;- начал открываться документ">
+      <option name="closed" value="true" />
+      <created>1770624633333</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770624633333</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -318,6 +329,7 @@
     <MESSAGE value="Версия 0.0.5&#10;- улучшено добавление пациентов&#10;- новые фильтры для поиска" />
     <MESSAGE value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
     <MESSAGE value="Версия 0.1.1&#10;- не работает создание документа" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.1.1&#10;- не работает создание документа" />
+    <MESSAGE value="Версия 0.1.2&#10;- начал открываться документ" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.1.2&#10;- начал открываться документ" />
   </component>
 </project>

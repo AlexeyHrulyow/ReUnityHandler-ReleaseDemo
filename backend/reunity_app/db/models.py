@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 import enum
 from datetime import datetime
 from typing import List, Dict, Any  # Важный импорт!
-
+from sqlalchemy.orm.attributes import flag_modified
 from .base import Base
 
 
@@ -222,14 +222,27 @@ class Document(Base):
             "total_score": ["Сумма баллов", "", ""]
         }
 
+    from sqlalchemy.orm.attributes import flag_modified
+
     def update_row(self, row_name: DocumentRow, values: List[str]):
         """Обновление строки документа"""
         if row_name.value in self.content:
             if len(values) == 3:
                 self.content[row_name.value] = values
             else:
-                self.content[row_name.value][1] = values[0] if len(values) > 0 else ""
-                self.content[row_name.value][2] = values[1] if len(values) > 1 else ""
+                # Обновляем только значения, не меняя название строки
+                current_row = self.content.get(row_name.value, ["", "", ""])
+                if len(values) >= 2:
+                    current_row[1] = values[0] if len(values) > 0 else ""
+                    current_row[2] = values[1] if len(values) > 1 else ""
+                self.content[row_name.value] = current_row
+
+        # ВАЖНО: Помечаем поле как измененное
+        flag_modified(self, "content")
+
+        # Выводим отладочную информацию
+        print(f"📝 Обновление строки {row_name.value}: {values}")
+        print(f"   Новый content: {self.content[row_name.value]}")
 
     def calculate_total_score(self):
         """Расчет итогового балла"""

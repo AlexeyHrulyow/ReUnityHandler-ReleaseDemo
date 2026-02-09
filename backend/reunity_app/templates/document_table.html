@@ -305,7 +305,7 @@
                 showLoading(true);
 
                 // Загружаем структуру документа
-                const response = await fetch(`/api/v1/documents/${documentId}/structure`, {
+                const response = await fetch(`/api/v1/document-table/${documentId}/structure`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -340,6 +340,8 @@
 
         async function loadDocumentInfo() {
             try {
+                console.log('📋 Загрузка информации о документе ID:', documentId);
+
                 const response = await fetch(`/api/v1/documents/${documentId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -348,19 +350,50 @@
 
                 if (response.ok) {
                     const doc = await response.json();
+                    console.log('📄 Полученные данные о документе:', doc);
 
-                    // Обновляем информацию о документе
                     document.getElementById('docId').textContent = doc.id;
+
                     if (doc.case_info) {
-                        document.getElementById('patientName').textContent = doc.case_info.name || 'Не указано';
-                        document.getElementById('insuranceNumber').textContent = doc.case_info.insurance_number || 'Не указан';
+                        console.log('🏥 Информация о случае:', doc.case_info);
+                        document.getElementById('patientName').textContent =
+                            doc.case_info.name || 'Не указано';
+                        document.getElementById('insuranceNumber').textContent =
+                            doc.case_info.insurance_number || 'Не указан';
+                    } else {
+                        console.log('⚠️ Информация о случае не получена');
+                        // Если case_info не пришёл, запрашиваем отдельно
+                        await loadCaseInfo(doc.case_id);
                     }
+
                     document.getElementById('createdAt').textContent =
                         new Date(doc.created_at).toLocaleDateString('ru-RU');
 
+                } else {
+                    console.error('❌ Ошибка загрузки документа:', response.status);
                 }
             } catch (error) {
-                console.error('Ошибка загрузки информации о документе:', error);
+                console.error('❌ Ошибка загрузки информации о документе:', error);
+            }
+        }
+
+        async function loadCaseInfo(caseId) {
+            try {
+                const response = await fetch(`/api/v1/cases/${caseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const caseData = await response.json();
+                    document.getElementById('patientName').textContent =
+                        caseData.patient_name || 'Не указано';
+                    document.getElementById('insuranceNumber').textContent =
+                        caseData.patient_insurance || 'Не указан';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки информации о случае:', error);
             }
         }
 
@@ -416,91 +449,102 @@
         }
 
         function displayDocumentTable() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
+            try {
+                const tableBody = document.getElementById('tableBody');
+                if (!tableBody) return;
 
-            // Определяем строки в правильном порядке
-            const rowOrder = [
-                'header',
-                'pain_syndrome',
-                'stato_dynamic',
-                'mental_functions',
-                'internal_organs',
-                'sensory_functions',
-                'vital_activity',
-                'self_care',
-                'mobility',
-                'work_ability',
-                'communication',
-                'total_score'
-            ];
+                tableBody.innerHTML = '';
 
-            rowOrder.forEach((rowKey, index) => {
-                const rowData = documentData[rowKey] || ["", "", ""];
-                const tr = document.createElement('tr');
+                // Определяем строки в правильном порядке
+                const rowOrder = [
+                    'header',
+                    'pain_syndrome',
+                    'stato_dynamic',
+                    'mental_functions',
+                    'internal_organs',
+                    'sensory_functions',
+                    'vital_activity',
+                    'self_care',
+                    'mobility',
+                    'work_ability',
+                    'communication',
+                    'total_score'
+                ];
 
-                // Определяем класс строки
-                if (rowKey === 'header') {
-                    tr.classList.add('header-row');
-                } else if (rowKey === 'total_score') {
-                    tr.classList.add('total-row');
-                }
+                rowOrder.forEach((rowKey, index) => {
+                    const rowData = documentData[rowKey] || ["", "", ""];
+                    const tr = document.createElement('tr');
 
-                // Определяем, к какому врачу относится строка
-                let doctorType = '';
-                let doctorName = '';
+                    // Определяем класс строки
+                    if (rowKey === 'header') {
+                        tr.classList.add('header-row');
+                    } else if (rowKey === 'total_score') {
+                        tr.classList.add('total-row');
+                    }
 
-                if (doctorRows.neurologist.includes(rowKey)) {
-                    doctorType = 'neurologist';
-                    doctorName = 'Невролог';
-                } else if (doctorRows.therapist.includes(rowKey)) {
-                    doctorType = 'therapist';
-                    doctorName = 'Терапевт';
-                } else if (doctorRows.head.includes(rowKey)) {
-                    doctorType = 'head';
-                    doctorName = 'Заведующий';
-                }
+                    // Определяем, к какому врачу относится строка
+                    let doctorType = '';
+                    let doctorName = '';
+                    let canEdit = false;
 
-                // Проверяем, может ли текущий пользователь редактировать эту строку
-                let canEdit = false;
-                if (permissions.can_edit_all) {
-                    canEdit = true;
-                } else if (doctorType === 'neurologist' && permissions.can_edit_neurologist) {
-                    canEdit = true;
-                } else if (doctorType === 'therapist' && permissions.can_edit_therapist) {
-                    canEdit = true;
-                } else if (doctorType === 'head' && permissions.can_edit_head) {
-                    canEdit = true;
-                }
+                    try {
+                        if (doctorRows?.neurologist?.includes(rowKey)) {
+                            doctorType = 'neurologist';
+                            doctorName = 'Невролог';
+                        } else if (doctorRows?.therapist?.includes(rowKey)) {
+                            doctorType = 'therapist';
+                            doctorName = 'Терапевт';
+                        } else if (doctorRows?.head?.includes(rowKey)) {
+                            doctorType = 'head';
+                            doctorName = 'Заведующий';
+                        }
 
-                // Создаем ячейки
-                tr.innerHTML = `
-                    <td class="row-label">
-                        ${rowData[0]}
-                        <div class="row-doctor">${doctorName}</div>
-                    </td>
-                    <td>
-                        <input type="text"
-                               class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                               value="${rowData[1] || ''}"
-                               data-row="${rowKey}"
-                               data-col="1"
-                               ${canEdit ? '' : 'readonly'}
-                               oninput="markAsChanged('${rowKey}', 1, this.value)">
-                    </td>
-                    <td>
-                        <input type="text"
-                               class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                               value="${rowData[2] || ''}"
-                               data-row="${rowKey}"
-                               data-col="2"
-                               ${canEdit ? '' : 'readonly'}
-                               oninput="markAsChanged('${rowKey}', 2, this.value)">
-                    </td>
-                `;
+                        // Проверяем, может ли текущий пользователь редактировать эту строку
+                        if (permissions?.can_edit_all) {
+                            canEdit = true;
+                        } else if (doctorType === 'neurologist' && permissions?.can_edit_neurologist) {
+                            canEdit = true;
+                        } else if (doctorType === 'therapist' && permissions?.can_edit_therapist) {
+                            canEdit = true;
+                        } else if (doctorType === 'head' && permissions?.can_edit_head) {
+                            canEdit = true;
+                        }
+                    } catch (error) {
+                        console.error('Ошибка определения прав доступа:', error);
+                    }
 
-                tableBody.appendChild(tr);
-            });
+                    // Создаем ячейки с безопасными значениями
+                    tr.innerHTML = `
+                        <td class="row-label">
+                            ${rowData[0] || ''}
+                            ${doctorName ? `<div class="row-doctor">${doctorName}</div>` : ''}
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
+                                   value="${rowData[1] || ''}"
+                                   data-row="${rowKey}"
+                                   data-col="1"
+                                   ${canEdit ? '' : 'readonly'}
+                                   oninput="markAsChanged('${rowKey}', 1, this.value)">
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
+                                   value="${rowData[2] || ''}"
+                                   data-row="${rowKey}"
+                                   data-col="2"
+                                   ${canEdit ? '' : 'readonly'}
+                                   oninput="markAsChanged('${rowKey}', 2, this.value)">
+                        </td>
+                    `;
+
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Ошибка отображения таблицы:', error);
+                showAlert('Ошибка отображения таблицы: ' + error.message, 'danger');
+            }
         }
 
         function markAsChanged(rowKey, colIndex, value) {
@@ -535,59 +579,69 @@
             }
 
             try {
-                // Собираем все изменения
-                const changes = Array.from(unsavedChanges).map(changeId => {
-                    const [rowKey, colIndex] = changeId.split('_');
-                    const input = document.querySelector(`input[data-row="${rowKey}"][data-col="${colIndex}"]`);
-                    return {
-                        rowKey,
-                        colIndex: parseInt(colIndex),
-                        value: input.value
-                    };
-                });
-
-                // Группируем по строкам
+                // Собираем все изменения по строкам
                 const rowUpdates = {};
-                changes.forEach(change => {
-                    if (!rowUpdates[change.rowKey]) {
-                        rowUpdates[change.rowKey] = {
-                            row_name: change.rowKey,
-                            values: ["", "", ""]
+
+                // Сначала получаем все строки, которые нужно обновить
+                for (const changeId of unsavedChanges) {
+                    const [rowKey, colIndex] = changeId.split('_');
+
+                    if (!rowUpdates[rowKey]) {
+                        // Получаем текущие значения для всей строки
+                        const inputBefore = document.querySelector(`input[data-row="${rowKey}"][data-col="1"]`);
+                        const inputAfter = document.querySelector(`input[data-row="${rowKey}"][data-col="2"]`);
+
+                        rowUpdates[rowKey] = {
+                            row_name: rowKey,
+                            values: [
+                                "", // Название строки (не используется при обновлении)
+                                inputBefore ? inputBefore.value : "",
+                                inputAfter ? inputAfter.value : ""
+                            ]
                         };
                     }
-                    // Получаем текущие значения строки
-                    const rowData = documentData[change.rowKey] || ["", "", ""];
-                    rowUpdates[change.rowKey].values[change.colIndex] = change.value;
-                    // Сохраняем другие значения
-                    if (change.colIndex === 1) {
-                        rowUpdates[change.rowKey].values[0] = rowData[0];
-                        rowUpdates[change.rowKey].values[2] = rowData[2] || "";
-                    } else if (change.colIndex === 2) {
-                        rowUpdates[change.rowKey].values[0] = rowData[0];
-                        rowUpdates[change.rowKey].values[1] = rowData[1] || "";
-                    }
-                });
+                }
 
-                // Отправляем каждое обновление
+                // Отправляем каждое обновление строки
                 for (const rowKey in rowUpdates) {
-                    const response = await fetch(`/api/v1/documents/${documentId}/row`, {
+                    const rowUpdate = rowUpdates[rowKey];
+
+                    console.log('Отправка обновления строки:', rowUpdate);
+
+                    const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(rowUpdates[rowKey])
+                        body: JSON.stringify({
+                            row_name: rowKey,
+                            values: [rowUpdate.values[1], rowUpdate.values[2]]
+                        })
                     });
 
                     if (!response.ok) {
                         const error = await response.json();
-                        throw new Error(error.detail || 'Ошибка сохранения');
+                        console.error('Ошибка сохранения строки:', error);
+                        throw new Error(error.detail || `Ошибка сохранения строки ${rowKey}`);
                     }
+
+                    const result = await response.json();
+                    console.log('Ответ сервера:', result);
                 }
 
                 // Очищаем список изменений
                 unsavedChanges.clear();
                 updateSaveStatus();
+
+                // Обновляем локальные данные
+                for (const rowKey in rowUpdates) {
+                    if (!documentData[rowKey]) {
+                        documentData[rowKey] = ["", "", ""];
+                    }
+                    documentData[rowKey][1] = rowUpdates[rowKey].values[1] || "";
+                    documentData[rowKey][2] = rowUpdates[rowKey].values[2] || "";
+                }
 
                 // Обновляем статус заполнения
                 await updateCompletionStatus();
@@ -601,12 +655,17 @@
         }
 
         async function completeMySection() {
+            // Сначала сохраняем все изменения
+            if (unsavedChanges.size > 0) {
+                await saveAllChanges();
+            }
+
             if (!confirm('Вы уверены, что завершили заполнение вашего раздела? После завершения редактирование будет ограничено.')) {
                 return;
             }
 
             try {
-                const response = await fetch(`/api/v1/documents/${documentId}/complete-section`, {
+                const response = await fetch(`/api/v1/document-table/${documentId}/complete-section`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -614,11 +673,14 @@
                 });
 
                 if (response.ok) {
-                    await updateCompletionStatus();
-                    showAlert('Раздел отмечен как завершенный', 'success');
+                    const result = await response.json();
+                    showAlert(result.message || 'Раздел отмечен как заполненный', 'success');
 
-                    // Обновляем таблицу, чтобы сделать поля readonly
-                    displayDocumentTable();
+                    // Обновляем статус заполнения
+                    await updateCompletionStatus();
+
+                    // Перезагружаем таблицу для обновления прав доступа
+                    await loadDocumentStructure();
                 } else {
                     const error = await response.json();
                     throw new Error(error.detail || 'Ошибка завершения раздела');
@@ -631,7 +693,7 @@
 
         async function updateCompletionStatus() {
             try {
-                const response = await fetch(`/api/v1/documents/${documentId}/completion-status`, {
+                const response = await fetch(`/api/v1/document-table/${documentId}/completion-status`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

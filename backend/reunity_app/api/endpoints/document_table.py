@@ -28,26 +28,14 @@ async def get_document_structure(
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    # Проверяем права доступа
-    case_result = await db.execute(
-        select(Case).where(Case.id == document.case_id)
-    )
-    case = case_result.scalar_one_or_none()
-
     # Формируем структуру с правами доступа
     structure = {
         "table_data": document.content or {},
         "permissions": {
-            "can_edit_all": current_user.role in [DoctorRole.ADMIN, DoctorRole.HEAD],
-            "can_edit_neurologist": (
-                    current_user.role == DoctorRole.NEUROLOGIST or
-                    current_user.role in [DoctorRole.ADMIN, DoctorRole.HEAD]
-            ),
-            "can_edit_therapist": (
-                    current_user.role == DoctorRole.THERAPIST or
-                    current_user.role in [DoctorRole.ADMIN, DoctorRole.HEAD]
-            ),
-            "can_edit_head": current_user.role in [DoctorRole.HEAD, DoctorRole.ADMIN],
+            "can_edit_all": current_user.role == DoctorRole.ADMIN,  # Только админ может редактировать все
+            "can_edit_neurologist": current_user.role == DoctorRole.NEUROLOGIST,
+            "can_edit_therapist": current_user.role == DoctorRole.THERAPIST,
+            "can_edit_head": current_user.role == DoctorRole.HEAD,
             "current_user_role": current_user.role.value
         },
         "doctor_rows": {
@@ -73,27 +61,34 @@ async def update_document_row(
         current_user: Doctor = Depends(get_current_active_user)
 ):
     """Обновление строки документа"""
-    # Получаем документ
+    print(f"📥 Получен запрос на обновление строки: {row_update.row_name}, значения: {row_update.values}")
+
     result = await db.execute(
         select(Document).where(Document.id == document_id)
     )
     document = result.scalar_one_or_none()
 
     if not document:
+        print(f"❌ Документ {document_id} не найден")
         raise HTTPException(status_code=404, detail="Документ не найден")
+
+    print(f"📄 Документ найден. Текущий content: {document.content.get(row_update.row_name.value)}")
 
     # Проверяем, может ли пользователь редактировать эту строку
     can_edit = False
 
-    # Админ и заведующий могут редактировать все
-    if current_user.role in [DoctorRole.ADMIN, DoctorRole.HEAD]:
+    # Админ может редактировать все
+    if current_user.role == DoctorRole.ADMIN:
         can_edit = True
     # Невролог может редактировать свои строки
     elif current_user.role == DoctorRole.NEUROLOGIST:
-        can_edit = row_update.row_name in DOCTOR_ROWS.neurologist_rows
+        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.neurologist_rows]
     # Терапевт может редактировать свои строки
     elif current_user.role == DoctorRole.THERAPIST:
-        can_edit = row_update.row_name in DOCTOR_ROWS.therapist_rows
+        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.therapist_rows]
+    # Заведующий может редактировать только свои строки
+    elif current_user.role == DoctorRole.HEAD:
+        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.head_rows]
 
     if not can_edit:
         raise HTTPException(
@@ -101,22 +96,35 @@ async def update_document_row(
             detail=f"У вас нет прав для редактирования строки {row_update.row_name}"
         )
 
-    # Обновляем строку
-    document.update_row(row_update.row_name, row_update.values)
+    # Проверяем и нормализуем значения (разрешаем пустые строки)
+    normalized_values = []
+    for value in row_update.values:
+        if value is None:
+            normalized_values.append("")
+        else:
+            # Преобразуем в строку и обрезаем пробелы
+            normalized_values.append(str(value).strip())
 
-    # Обновляем статус заполнения
+    print(f"🔧 Нормализованные значения: {normalized_values}")
+
+    # Обновляем строку с нормализованными значениями
+    document.update_row(row_update.row_name, normalized_values)
+
+    # Обновляем статус заполнения (но разрешаем пустые значения)
     await update_completion_status(document, row_update.row_name, current_user.role)
 
-    # Пересчитываем итоговый балл
+    # Пересчитываем итоговый балл (только если есть числа)
     document.calculate_total_score()
 
     await db.commit()
     await db.refresh(document)
 
+    print(f"✅ Строка обновлена. Новый content: {document.content.get(row_update.row_name.value)}")
+
     return {
         "message": "Строка обновлена",
-        "row_name": row_update.row_name,
-        "new_values": row_update.values
+        "row_name": row_update.row_name.value,
+        "new_values": normalized_values
     }
 
 
@@ -124,33 +132,20 @@ async def update_completion_status(document: Document, row_name: str, user_role:
     """Обновление статуса заполнения для врача"""
     now = datetime.utcnow()
 
+    print(f"🔄 Обновление статуса для врача: {user_role}, строка: {row_name}")
+
     if user_role == DoctorRole.NEUROLOGIST and row_name in [r.value for r in DOCTOR_ROWS.neurologist_rows]:
         document.neurologist_filled_at = now
-        # Проверяем, все ли строки невролога заполнены
+        # ПРАВИЛЬНАЯ ПРОВЕРКА: строка считается заполненной если есть хотя бы одно значение
         all_filled = all(
-            document.content.get(row.value, ["", "", ""])[1] != "" and
+            document.content.get(row.value, ["", "", ""])[1] != "" or
             document.content.get(row.value, ["", "", ""])[2] != ""
             for row in DOCTOR_ROWS.neurologist_rows
         )
         document.neurologist_completed = all_filled
-
-    elif user_role == DoctorRole.THERAPIST and row_name in [r.value for r in DOCTOR_ROWS.therapist_rows]:
-        document.therapist_filled_at = now
-        all_filled = all(
-            document.content.get(row.value, ["", "", ""])[1] != "" and
-            document.content.get(row.value, ["", "", ""])[2] != ""
-            for row in DOCTOR_ROWS.therapist_rows
-        )
-        document.therapist_completed = all_filled
-
-    elif user_role == DoctorRole.HEAD and row_name in [r.value for r in DOCTOR_ROWS.head_rows]:
-        document.head_filled_at = now
-        all_filled = all(
-            document.content.get(row.value, ["", "", ""])[1] != "" and
-            document.content.get(row.value, ["", "", ""])[2] != ""
-            for row in DOCTOR_ROWS.head_rows
-        )
-        document.head_completed = all_filled
+        print(f"   Невролог заполнен: {all_filled}")
+        print(
+            f"   Данные: { {row.value: document.content.get(row.value, ['', '', '']) for row in DOCTOR_ROWS.neurologist_rows} }")
 
 
 @router.post("/{document_id}/complete-section")

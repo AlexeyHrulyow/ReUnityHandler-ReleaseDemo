@@ -43,6 +43,7 @@ async def list_documents(
     if signed_only:
         query = query.where(Document.signed_at.is_not(None))
 
+    # Убрать фильтрацию по создателю - все врачи видят все документы
     # Врачи видят только документы своих случаев
     # if current_user.role not in ["admin", "head"]:
     #     # Получаем ID случаев, созданных текущим врачом
@@ -165,12 +166,13 @@ async def get_document(
     case = case_result.scalar_one_or_none()
 
     # Проверяем права доступа
-    if current_user.role not in ["admin", "head"]:
-        if not case or case.creator_id != current_user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="Нет доступа к этому документу"
-            )
+    # Убрать строгую проверку, чтобы все врачи могли видеть документы
+    # if current_user.role not in ["admin", "head"]:
+    #     if not case or case.creator_id != current_user.id:
+    #         raise HTTPException(
+    #             status_code=403,
+    #             detail="Нет доступа к этому документу"
+    #         )
 
     # Получаем детальную информацию
     patient_info = None
@@ -298,30 +300,35 @@ async def sign_document(
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    # Проверяем, что все разделы заполнены и подписаны
-    sections_result = await db.execute(
-        select(DocumentSection).where(DocumentSection.document_id == document_id)
-    )
-    sections = sections_result.scalars().all()
+    print(f"🔏 Попытка подписания документа {document_id}")
+    print(
+        f"   Статусы заполнения: Невролог={document.neurologist_completed}, Терапевт={document.therapist_completed}, Заведующий={document.head_completed}")
 
-    if not sections:
+    # Проверяем, что все разделы заполнены
+    if not document.neurologist_completed:
         raise HTTPException(
             status_code=400,
-            detail="Документ не содержит разделов"
+            detail="Раздел невролога не заполнен"
         )
 
-    for section in sections:
-        if not section.is_signed:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Раздел '{section.section_name}' не подписан"
-            )
+    if not document.therapist_completed:
+        raise HTTPException(
+            status_code=400,
+            detail="Раздел терапевта не заполнен"
+        )
+
+    if not document.head_completed:
+        raise HTTPException(
+            status_code=400,
+            detail="Раздел заведующего не заполнен"
+        )
 
     # Подписываем документ
     document.signer_id = current_user.id
     document.signed_at = datetime.utcnow()
 
     await db.commit()
+    print(f"✅ Документ {document_id} подписан пользователем {current_user.username}")
 
     return {"message": "Документ подписан успешно"}
 
