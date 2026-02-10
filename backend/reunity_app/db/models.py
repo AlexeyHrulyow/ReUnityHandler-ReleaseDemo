@@ -244,6 +244,22 @@ class Document(Base):
         print(f"📝 Обновление строки {row_name.value}: {values}")
         print(f"   Новый content: {self.content[row_name.value]}")
 
+    def update_row_string(self, row_name: str, values: List[str]):
+        """Обновление строки документа по строковому имени"""
+        if row_name in self.content:
+            current_row = self.content.get(row_name, ["", "", ""])
+            if len(values) >= 2:
+                current_row[1] = values[0] if len(values) > 0 else ""
+                current_row[2] = values[1] if len(values) > 1 else ""
+            self.content[row_name] = current_row
+
+        # ВАЖНО: Помечаем поле как измененное
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(self, "content")
+
+        print(f"📝 Обновление строки {row_name}: {values}")
+        print(f"   Новый content: {self.content[row_name]}")
+
     def calculate_total_score(self):
         """Расчет итогового балла"""
         total_before = 0

@@ -151,6 +151,8 @@ async def get_document(
         current_user: Doctor = Depends(get_current_active_user)
 ):
     """Получение документа по ID"""
+    print(f"📋 Запрос документа {document_id} от пользователя {current_user.username}")
+
     result = await db.execute(
         select(Document).where(Document.id == document_id)
     )
@@ -159,34 +161,36 @@ async def get_document(
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
+    print(f"✅ Документ найден: case_id={document.case_id}")
+
     # Получаем информацию о случае
     case_result = await db.execute(
         select(Case).where(Case.id == document.case_id)
     )
     case = case_result.scalar_one_or_none()
 
-    # Проверяем права доступа
-    # Убрать строгую проверку, чтобы все врачи могли видеть документы
-    # if current_user.role not in ["admin", "head"]:
-    #     if not case or case.creator_id != current_user.id:
-    #         raise HTTPException(
-    #             status_code=403,
-    #             detail="Нет доступа к этому документу"
-    #         )
+    if not case:
+        print(f"⚠️ Случай {document.case_id} не найден")
+        raise HTTPException(status_code=404, detail="Связанный случай не найден")
 
-    # Получаем детальную информацию
-    patient_info = None
-    if case:
-        patient_result = await db.execute(
-            select(Patient).where(Patient.id == case.patient_id)
-        )
-        patient = patient_result.scalar_one_or_none()
-        if patient:
-            patient_info = {
-                "id": patient.id,
-                "name": patient.full_name,
-                "insurance_number": patient.insurance_number
-            }
+    print(f"✅ Случай найден: patient_id={case.patient_id}")
+
+    # Получаем информацию о пациенте
+    patient_result = await db.execute(
+        select(Patient).where(Patient.id == case.patient_id)
+    )
+    patient = patient_result.scalar_one_or_none()
+
+    if not patient:
+        print(f"⚠️ Пациент {case.patient_id} не найден")
+        patient_info = None
+    else:
+        print(f"✅ Пациент найден: {patient.full_name}, полис: {patient.insurance_number}")
+        patient_info = {
+            "id": patient.id,
+            "name": patient.full_name,
+            "insurance_number": patient.insurance_number
+        }
 
     # Получаем информацию о подписавшем
     signer_name = None

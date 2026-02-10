@@ -7,7 +7,7 @@ from sqlalchemy import select
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
 from reunity_app.db.models import Doctor, Document, DoctorRole, Case
-from reunity_app.schemas.document_structure import DocumentRowUpdate, DocumentContent, DOCTOR_ROWS
+from reunity_app.schemas.document_structure import DocumentRowUpdate, DocumentContent, DOCTOR_ROWS, DocumentRowEnum
 
 router = APIRouter()
 
@@ -62,6 +62,11 @@ async def update_document_row(
 ):
     """Обновление строки документа"""
     print(f"📥 Получен запрос на обновление строки: {row_update.row_name}, значения: {row_update.values}")
+    print(f"👤 Пользователь: {current_user.username}, роль: {current_user.role}")
+
+    # Логируем полный запрос
+    import json
+    print(f"📄 Полный запрос: {json.dumps(row_update.dict(), indent=2)}")
 
     result = await db.execute(
         select(Document).where(Document.id == document_id)
@@ -72,25 +77,44 @@ async def update_document_row(
         print(f"❌ Документ {document_id} не найден")
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    print(f"📄 Документ найден. Текущий content: {document.content.get(row_update.row_name.value)}")
+    print(f"📄 Документ найден. ID: {document.id}, Case ID: {document.case_id}")
+    print(f"📊 Текущий content: {json.dumps(document.content, indent=2, ensure_ascii=False)}")
 
     # Проверяем, может ли пользователь редактировать эту строку
     can_edit = False
+    user_role = current_user.role
+
+    print(f"🔍 Проверка прав для роли {user_role} на строку {row_update.row_name}")
+
+    # Используем строки для сравнения, а не enum.value
+    neurologist_rows = [r.value for r in DOCTOR_ROWS.neurologist_rows]
+    therapist_rows = [r.value for r in DOCTOR_ROWS.therapist_rows]
+    head_rows = [r.value for r in DOCTOR_ROWS.head_rows]
+
+    print(f"📋 Невролог строки: {neurologist_rows}")
+    print(f"📋 Терапевт строки: {therapist_rows}")
+    print(f"📋 Заведующий строки: {head_rows}")
 
     # Админ может редактировать все
-    if current_user.role == DoctorRole.ADMIN:
+    if user_role == DoctorRole.ADMIN:
         can_edit = True
+        print("✅ Админ может редактировать все")
     # Невролог может редактировать свои строки
-    elif current_user.role == DoctorRole.NEUROLOGIST:
-        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.neurologist_rows]
+    elif user_role == DoctorRole.NEUROLOGIST:
+        can_edit = row_update.row_name in neurologist_rows
+        print(f"🧠 Невролог может редактировать: {can_edit}")
     # Терапевт может редактировать свои строки
-    elif current_user.role == DoctorRole.THERAPIST:
-        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.therapist_rows]
+    elif user_role == DoctorRole.THERAPIST:
+        can_edit = row_update.row_name in therapist_rows
+        print(f"🩺 Терапевт может редактировать: {can_edit}")
     # Заведующий может редактировать только свои строки
-    elif current_user.role == DoctorRole.HEAD:
-        can_edit = row_update.row_name in [r.value for r in DOCTOR_ROWS.head_rows]
+    elif user_role == DoctorRole.HEAD:
+        can_edit = row_update.row_name in head_rows
+        print(f"👨‍⚕️ Заведующий может редактировать: {can_edit}")
 
     if not can_edit:
+        print(
+            f"❌ Отказано в доступе: {current_user.username} (роль: {user_role}) не может редактировать {row_update.row_name}")
         raise HTTPException(
             status_code=403,
             detail=f"У вас нет прав для редактирования строки {row_update.row_name}"
@@ -107,11 +131,23 @@ async def update_document_row(
 
     print(f"🔧 Нормализованные значения: {normalized_values}")
 
+    # Преобразуем строку в DocumentRow для обновления
+    try:
+        row_name_enum = DocumentRowEnum(row_update.row_name)
+    except ValueError:
+        print(f"⚠️ Предупреждение: '{row_update.row_name}' не соответствует DocumentRowEnum")
+        # Используем строку напрямую, если enum не подходит
+        row_name_enum = row_update.row_name
+
     # Обновляем строку с нормализованными значениями
-    document.update_row(row_update.row_name, normalized_values)
+    if isinstance(row_name_enum, DocumentRowEnum):
+        document.update_row(row_name_enum, normalized_values)
+    else:
+        # Альтернативный метод для строк
+        document.update_row_string(row_update.row_name, normalized_values)
 
     # Обновляем статус заполнения (но разрешаем пустые значения)
-    await update_completion_status(document, row_update.row_name, current_user.role)
+    await update_completion_status(document, row_update.row_name, user_role)
 
     # Пересчитываем итоговый балл (только если есть числа)
     document.calculate_total_score()
@@ -119,11 +155,13 @@ async def update_document_row(
     await db.commit()
     await db.refresh(document)
 
-    print(f"✅ Строка обновлена. Новый content: {document.content.get(row_update.row_name.value)}")
+    print(
+        f"✅ Строка обновлена. Новый content для {row_update.row_name}: {document.content.get(row_update.row_name, [])}")
+    print(f"📊 Полный content после обновления: {json.dumps(document.content, indent=2, ensure_ascii=False)}")
 
     return {
         "message": "Строка обновлена",
-        "row_name": row_update.row_name.value,
+        "row_name": row_update.row_name,
         "new_values": normalized_values
     }
 
@@ -134,18 +172,39 @@ async def update_completion_status(document: Document, row_name: str, user_role:
 
     print(f"🔄 Обновление статуса для врача: {user_role}, строка: {row_name}")
 
-    if user_role == DoctorRole.NEUROLOGIST and row_name in [r.value for r in DOCTOR_ROWS.neurologist_rows]:
+    # Используем строки для сравнения
+    neurologist_rows = [r.value for r in DOCTOR_ROWS.neurologist_rows]
+    therapist_rows = [r.value for r in DOCTOR_ROWS.therapist_rows]
+    head_rows = [r.value for r in DOCTOR_ROWS.head_rows]
+
+    if user_role == DoctorRole.NEUROLOGIST and row_name in neurologist_rows:
         document.neurologist_filled_at = now
-        # ПРАВИЛЬНАЯ ПРОВЕРКА: строка считается заполненной если есть хотя бы одно значение
+        # Проверяем, что все строки невролога заполнены
         all_filled = all(
-            document.content.get(row.value, ["", "", ""])[1] != "" or
-            document.content.get(row.value, ["", "", ""])[2] != ""
-            for row in DOCTOR_ROWS.neurologist_rows
+            document.content.get(row, ["", "", ""])[1] != "" or
+            document.content.get(row, ["", "", ""])[2] != ""
+            for row in neurologist_rows
         )
         document.neurologist_completed = all_filled
         print(f"   Невролог заполнен: {all_filled}")
-        print(
-            f"   Данные: { {row.value: document.content.get(row.value, ['', '', '']) for row in DOCTOR_ROWS.neurologist_rows} }")
+
+    elif user_role == DoctorRole.THERAPIST and row_name in therapist_rows:
+        document.therapist_filled_at = now
+        all_filled = all(
+            document.content.get(row, ["", "", ""])[1] != "" or
+            document.content.get(row, ["", "", ""])[2] != ""
+            for row in therapist_rows
+        )
+        document.therapist_completed = all_filled
+        print(f"   Терапевт заполнен: {all_filled}")
+
+    elif user_role == DoctorRole.HEAD and row_name in head_rows:
+        document.head_filled_at = now
+        # Для заведующего проверяем только header
+        if row_name == DocumentRowEnum.HEADER.value:
+            header_data = document.content.get(DocumentRowEnum.HEADER.value, ["", "", ""])
+            document.head_completed = header_data[1] != "" and header_data[2] != ""
+        print(f"   Заведующий заполнен: {document.head_completed}")
 
 
 @router.post("/{document_id}/complete-section")

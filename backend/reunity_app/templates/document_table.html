@@ -135,6 +135,10 @@
             background: #95a5a6;
             color: white;
         }
+        .btn-test {
+            background: #9b59b6;
+            color: white;
+        }
         .btn:hover {
             opacity: 0.9;
         }
@@ -234,6 +238,9 @@
             <button class="btn btn-primary" onclick="saveAllChanges()" id="saveAllBtn">
                 💾 Сохранить все изменения
             </button>
+            <button class="btn btn-test" onclick="testSaveSingleRow()" id="testSaveBtn">
+                🧪 Тест сохранения одной строки
+            </button>
             <button class="btn btn-success" onclick="signDocument()" id="signDocumentBtn" style="display: none;">
                 📝 Подписать документ
             </button>
@@ -266,6 +273,8 @@
         let completionStatus = null;
         let unsavedChanges = new Set();
         let autoSaveTimer = null;
+        let lastInputTime = 0;
+        const INPUT_DEBOUNCE = 300; // 300ms задержка для логирования
 
         // Получаем ID документа из URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -303,6 +312,7 @@
         async function loadDocumentStructure() {
             try {
                 showLoading(true);
+                console.log('🚀 Загрузка структуры документа...');
 
                 // Загружаем структуру документа
                 const response = await fetch(`/api/v1/document-table/${documentId}/structure`, {
@@ -318,6 +328,8 @@
                     doctorRows = data.doctor_rows;
                     completionStatus = data.completion_status;
 
+                    console.log('📄 Полученные данные структуры:', data);
+
                     // Загружаем информацию о документе
                     await loadDocumentInfo();
 
@@ -328,11 +340,15 @@
                     setupAutoSave();
 
                     showLoading(false);
+
+                    // Отладочная проверка DOM через 500мс после загрузки
+                    setTimeout(debugDOM, 500);
+
                 } else {
                     throw new Error('Ошибка загрузки документа');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('❌ Ошибка загрузки структуры документа:', error);
                 showAlert('Ошибка загрузки документа: ' + error.message, 'danger');
                 showLoading(false);
             }
@@ -450,8 +466,14 @@
 
         function displayDocumentTable() {
             try {
+                console.log('📊 Начинаем отображение таблицы...');
+                console.log('📋 Данные документа:', documentData);
+
                 const tableBody = document.getElementById('tableBody');
-                if (!tableBody) return;
+                if (!tableBody) {
+                    console.error('❌ Элемент tableBody не найден!');
+                    return;
+                }
 
                 tableBody.innerHTML = '';
 
@@ -473,6 +495,7 @@
 
                 rowOrder.forEach((rowKey, index) => {
                     const rowData = documentData[rowKey] || ["", "", ""];
+
                     const tr = document.createElement('tr');
 
                     // Определяем класс строки
@@ -488,13 +511,44 @@
                     let canEdit = false;
 
                     try {
-                        if (doctorRows?.neurologist?.includes(rowKey)) {
+                        // Извлекаем строки как строковые значения
+                        const neuroRows = (doctorRows?.neurologist || []).map(r => {
+                            if (typeof r === 'string') return r;
+                            if (r && typeof r === 'object') {
+                                if ('value' in r) return r.value;
+                                if ('name' in r) return r.name;
+                                if ('key' in r) return r.key;
+                            }
+                            return String(r);
+                        });
+
+                        const therapistRows = (doctorRows?.therapist || []).map(r => {
+                            if (typeof r === 'string') return r;
+                            if (r && typeof r === 'object') {
+                                if ('value' in r) return r.value;
+                                if ('name' in r) return r.name;
+                                if ('key' in r) return r.key;
+                            }
+                            return String(r);
+                        });
+
+                        const headRows = (doctorRows?.head || []).map(r => {
+                            if (typeof r === 'string') return r;
+                            if (r && typeof r === 'object') {
+                                if ('value' in r) return r.value;
+                                if ('name' in r) return r.name;
+                                if ('key' in r) return r.key;
+                            }
+                            return String(r);
+                        });
+
+                        if (neuroRows.includes(rowKey)) {
                             doctorType = 'neurologist';
                             doctorName = 'Невролог';
-                        } else if (doctorRows?.therapist?.includes(rowKey)) {
+                        } else if (therapistRows.includes(rowKey)) {
                             doctorType = 'therapist';
                             doctorName = 'Терапевт';
-                        } else if (doctorRows?.head?.includes(rowKey)) {
+                        } else if (headRows.includes(rowKey)) {
                             doctorType = 'head';
                             doctorName = 'Заведующий';
                         }
@@ -510,40 +564,72 @@
                             canEdit = true;
                         }
                     } catch (error) {
-                        console.error('Ошибка определения прав доступа:', error);
+                        console.error('Ошибка определения прав доступа для строки', rowKey, ':', error);
                     }
 
                     // Создаем ячейки с безопасными значениями
+                    const rowTitle = rowData[0] || (() => {
+                        // Заглушки для названий строк
+                        const titles = {
+                            'header': '',
+                            'pain_syndrome': 'Болевой синдром',
+                            'stato_dynamic': 'Нарушение стато-динамических функций',
+                            'mental_functions': 'Нарушение психических функций',
+                            'internal_organs': 'Нарушение функций внутренних органов',
+                            'sensory_functions': 'Нарушение сенсорных функций',
+                            'vital_activity': 'Нарушение жизнедеятельности',
+                            'self_care': 'Нарушение самообслуживания',
+                            'mobility': 'Нарушение способности к передвижению',
+                            'work_ability': 'Нарушение способности к трудовой деятельности',
+                            'communication': 'Нарушение способности к общению',
+                            'total_score': 'Сумма баллов'
+                        };
+                        return titles[rowKey] || rowKey;
+                    })();
+
                     tr.innerHTML = `
                         <td class="row-label">
-                            ${rowData[0] || ''}
+                            ${rowTitle}
                             ${doctorName ? `<div class="row-doctor">${doctorName}</div>` : ''}
                         </td>
                         <td>
                             <input type="text"
                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                   value="${rowData[1] || ''}"
+                                   value="${(rowData[1] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
                                    data-row="${rowKey}"
                                    data-col="1"
                                    ${canEdit ? '' : 'readonly'}
-                                   oninput="markAsChanged('${rowKey}', 1, this.value)">
+                                   oninput="debouncedMarkAsChanged('${rowKey}', 1, this.value)">
                         </td>
                         <td>
                             <input type="text"
                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                   value="${rowData[2] || ''}"
+                                   value="${(rowData[2] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
                                    data-row="${rowKey}"
                                    data-col="2"
                                    ${canEdit ? '' : 'readonly'}
-                                   oninput="markAsChanged('${rowKey}', 2, this.value)">
+                                   oninput="debouncedMarkAsChanged('${rowKey}', 2, this.value)">
                         </td>
                     `;
 
                     tableBody.appendChild(tr);
                 });
+
+                console.log('✅ Таблица успешно отображена');
+                console.log('🔍 Элементов input в таблице:', document.querySelectorAll('input[data-row]').length);
+
             } catch (error) {
-                console.error('Ошибка отображения таблицы:', error);
+                console.error('❌ Ошибка отображения таблицы:', error);
                 showAlert('Ошибка отображения таблицы: ' + error.message, 'danger');
+            }
+        }
+
+        // Дебаунс функция для уменьшения количества логов
+        function debouncedMarkAsChanged(rowKey, colIndex, value) {
+            const now = Date.now();
+            if (now - lastInputTime > INPUT_DEBOUNCE) {
+                markAsChanged(rowKey, colIndex, value);
+                lastInputTime = now;
             }
         }
 
@@ -551,6 +637,12 @@
             const changeId = `${rowKey}_${colIndex}`;
             unsavedChanges.add(changeId);
             updateSaveStatus();
+
+            // Логируем только раз в 300ms и только при первом изменении
+            if (unsavedChanges.size === 1) {
+                console.log(`📝 Изменение: ${rowKey}_${colIndex} = "${value}"`);
+                console.log(`   Несохраненных изменений: ${unsavedChanges.size}`);
+            }
         }
 
         function updateSaveStatus() {
@@ -573,92 +665,176 @@
             }, 30000);
         }
 
+        // Новая функция: собирает ВСЕ данные из таблицы
+        function collectAllTableData() {
+            const allData = {};
+            const inputs = document.querySelectorAll('input[data-row]');
+
+            inputs.forEach(input => {
+                const rowKey = input.dataset.row;
+                const colIndex = input.dataset.col;
+
+                if (!allData[rowKey]) {
+                    allData[rowKey] = ["", "", ""];
+                    // Сохраняем название строки из documentData
+                    if (documentData && documentData[rowKey]) {
+                        allData[rowKey][0] = documentData[rowKey][0] || "";
+                    }
+                }
+
+                if (colIndex === '1') {
+                    allData[rowKey][1] = input.value || "";
+                } else if (colIndex === '2') {
+                    allData[rowKey][2] = input.value || "";
+                }
+            });
+
+            return allData;
+        }
+
+        // Функция: собирает данные только для разрешенных строк текущего пользователя
+        function collectMyTableData() {
+            const userRole = currentUser.role;
+            let allowedRows = [];
+
+            // Определяем разрешенные строки для текущего пользователя
+            if (userRole === 'neurologist') {
+                const rows = doctorRows?.neurologist || [];
+                allowedRows = rows.map(r => {
+                    if (typeof r === 'string') return r;
+                    if (r && typeof r === 'object') {
+                        if ('value' in r) return r.value;
+                        if ('name' in r) return r.name;
+                        if ('key' in r) return r.key;
+                    }
+                    return String(r);
+                });
+            } else if (userRole === 'therapist') {
+                const rows = doctorRows?.therapist || [];
+                allowedRows = rows.map(r => {
+                    if (typeof r === 'string') return r;
+                    if (r && typeof r === 'object') {
+                        if ('value' in r) return r.value;
+                        if ('name' in r) return r.name;
+                        if ('key' in r) return r.key;
+                    }
+                    return String(r);
+                });
+            } else if (userRole === 'head') {
+                const rows = doctorRows?.head || [];
+                allowedRows = rows.map(r => {
+                    if (typeof r === 'string') return r;
+                    if (r && typeof r === 'object') {
+                        if ('value' in r) return r.value;
+                        if ('name' in r) return r.name;
+                        if ('key' in r) return r.key;
+                    }
+                    return String(r);
+                });
+            }
+
+            const myData = {};
+            const inputs = document.querySelectorAll('input[data-row]');
+
+            inputs.forEach(input => {
+                const rowKey = input.dataset.row;
+                const colIndex = input.dataset.col;
+
+                // Сохраняем только если строка разрешена
+                if (allowedRows.includes(rowKey)) {
+                    if (!myData[rowKey]) {
+                        myData[rowKey] = ["", "", ""];
+                        if (documentData && documentData[rowKey]) {
+                            myData[rowKey][0] = documentData[rowKey][0] || "";
+                        }
+                    }
+
+                    if (colIndex === '1') {
+                        myData[rowKey][1] = input.value || "";
+                    } else if (colIndex === '2') {
+                        myData[rowKey][2] = input.value || "";
+                    }
+                }
+            });
+
+            return myData;
+        }
+
         async function saveAllChanges() {
             if (unsavedChanges.size === 0) {
+                console.log('📭 Нет изменений для сохранения');
                 return;
             }
 
             try {
-                // Собираем все изменения по строкам
-                const rowUpdates = {};
+                console.log('💾 Начинаем сохранение всех изменений...');
+                console.log('📋 Изменений для сохранения:', unsavedChanges.size);
 
-                // Сначала получаем все строки, которые нужно обновить
-                for (const changeId of unsavedChanges) {
-                    const [rowKey, colIndex] = changeId.split('_');
+                // Собираем ВСЕ данные из таблицы (более надежный способ)
+                const allData = collectAllTableData();
+                console.log('📦 Все данные таблицы:', allData);
 
-                    if (!rowUpdates[rowKey]) {
-                        // Получаем текущие значения для всей строки
-                        const inputBefore = document.querySelector(`input[data-row="${rowKey}"][data-col="1"]`);
-                        const inputAfter = document.querySelector(`input[data-row="${rowKey}"][data-col="2"]`);
+                // Отправляем каждую строку отдельно
+                for (const rowKey in allData) {
+                    const rowUpdate = {
+                        row_name: rowKey,
+                        values: [allData[rowKey][1], allData[rowKey][2]]
+                    };
 
-                        rowUpdates[rowKey] = {
-                            row_name: rowKey,
-                            values: [
-                                "", // Название строки (не используется при обновлении)
-                                inputBefore ? inputBefore.value : "",
-                                inputAfter ? inputAfter.value : ""
-                            ]
-                        };
+                    console.log('📤 Отправка строки:', rowKey, rowUpdate.values);
+
+                    try {
+                        const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(rowUpdate)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            console.log('✅ Ответ сервера для строки', rowKey, ':', result);
+
+                            // Обновляем локальные данные
+                            if (!documentData[rowKey]) {
+                                documentData[rowKey] = ["", "", ""];
+                            }
+                            documentData[rowKey][1] = allData[rowKey][1];
+                            documentData[rowKey][2] = allData[rowKey][2];
+                        } else {
+                            const errorText = await response.text();
+                            console.error('❌ Ошибка сервера для строки', rowKey, ':', response.status, errorText);
+
+                            // Не бросаем ошибку сразу, продолжаем сохранять другие строки
+                            console.warn(`⚠️ Пропускаем строку ${rowKey} из-за ошибки`);
+                        }
+                    } catch (fetchError) {
+                        console.error('❌ Ошибка сети при сохранении строки', rowKey, ':', fetchError);
+                        console.warn(`⚠️ Пропускаем строку ${rowKey} из-за ошибки сети`);
                     }
-                }
-
-                // Отправляем каждое обновление строки
-                for (const rowKey in rowUpdates) {
-                    const rowUpdate = rowUpdates[rowKey];
-
-                    console.log('Отправка обновления строки:', rowUpdate);
-
-                    const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            row_name: rowKey,
-                            values: [rowUpdate.values[1], rowUpdate.values[2]]
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        console.error('Ошибка сохранения строки:', error);
-                        throw new Error(error.detail || `Ошибка сохранения строки ${rowKey}`);
-                    }
-
-                    const result = await response.json();
-                    console.log('Ответ сервера:', result);
                 }
 
                 // Очищаем список изменений
                 unsavedChanges.clear();
                 updateSaveStatus();
 
-                // Обновляем локальные данные
-                for (const rowKey in rowUpdates) {
-                    if (!documentData[rowKey]) {
-                        documentData[rowKey] = ["", "", ""];
-                    }
-                    documentData[rowKey][1] = rowUpdates[rowKey].values[1] || "";
-                    documentData[rowKey][2] = rowUpdates[rowKey].values[2] || "";
-                }
-
                 // Обновляем статус заполнения
                 await updateCompletionStatus();
 
                 showAlert('Изменения сохранены', 'success');
+                console.log('🎉 Все изменения успешно сохранены!');
 
             } catch (error) {
-                console.error('Ошибка сохранения:', error);
+                console.error('❌ Критическая ошибка сохранения:', error);
                 showAlert('Ошибка сохранения: ' + error.message, 'danger');
             }
         }
 
         async function completeMySection() {
-            // Сначала сохраняем все изменения
-            if (unsavedChanges.size > 0) {
-                await saveAllChanges();
-            }
+            // Сначала сохраняем изменения текущего пользователя
+            await saveMyChangesOnly();
 
             if (!confirm('Вы уверены, что завершили заполнение вашего раздела? После завершения редактирование будет ограничено.')) {
                 return;
@@ -688,6 +864,130 @@
             } catch (error) {
                 console.error('Ошибка:', error);
                 showAlert('Ошибка: ' + error.message, 'danger');
+            }
+        }
+
+        async function saveMyChangesOnly() {
+            try {
+                console.log('👤 Сохранение изменений только для текущего пользователя...');
+
+                // Собираем данные только для разрешенных строк
+                const myData = collectMyTableData();
+                console.log('📦 Данные текущего пользователя:', myData);
+
+                if (Object.keys(myData).length === 0) {
+                    console.log('📭 Нет данных для сохранения');
+                    return;
+                }
+
+                // Отправляем каждую строку отдельно
+                for (const rowKey in myData) {
+                    const rowUpdate = {
+                        row_name: rowKey,
+                        values: [myData[rowKey][1], myData[rowKey][2]]
+                    };
+
+                    console.log('📤 Отправка строки пользователя:', rowKey, rowUpdate.values);
+
+                    try {
+                        const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(rowUpdate)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            console.log('✅ Ответ сервера для строки', rowKey, ':', result);
+
+                            // Обновляем локальные данные
+                            if (!documentData[rowKey]) {
+                                documentData[rowKey] = ["", "", ""];
+                            }
+                            documentData[rowKey][1] = myData[rowKey][1];
+                            documentData[rowKey][2] = myData[rowKey][2];
+                        } else {
+                            const errorText = await response.text();
+                            console.error('❌ Ошибка сервера для строки', rowKey, ':', response.status, errorText);
+                            console.warn(`⚠️ Пропускаем строку ${rowKey} из-за ошибки`);
+                        }
+                    } catch (fetchError) {
+                        console.error('❌ Ошибка сети при сохранении строки', rowKey, ':', fetchError);
+                        console.warn(`⚠️ Пропускаем строку ${rowKey} из-за ошибки сети`);
+                    }
+                }
+
+                // Очищаем все изменения (не только свои)
+                unsavedChanges.clear();
+                updateSaveStatus();
+
+                console.log('✅ Изменения пользователя сохранены');
+
+            } catch (error) {
+                console.error('❌ Ошибка сохранения своих изменений:', error);
+                throw error;
+            }
+        }
+
+        async function testSaveSingleRow() {
+            // Тестируем сохранение строки pain_syndrome
+            const rowKey = 'pain_syndrome';
+            const input1 = document.querySelector(`input[data-row="${rowKey}"][data-col="1"]`);
+            const input2 = document.querySelector(`input[data-row="${rowKey}"][data-col="2"]`);
+
+            console.log('🧪 Тест сохранения строки:', rowKey);
+            console.log('   Input1:', input1?.value);
+            console.log('   Input2:', input2?.value);
+
+            if (!input1 || !input2) {
+                console.error('❌ Input элементы не найдены!');
+                showAlert('Input элементы не найдены!', 'danger');
+                return;
+            }
+
+            const rowUpdate = {
+                row_name: rowKey,
+                values: [input1.value || "", input2.value || ""]
+            };
+
+            console.log('📤 Отправка тестового запроса:', rowUpdate);
+
+            try {
+                const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(rowUpdate)
+                });
+
+                console.log('📥 Ответ сервера:', response.status, response.statusText);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Результат:', result);
+                    showAlert('Тестовое сохранение успешно!', 'success');
+
+                    // Обновляем локальные данные
+                    documentData[rowKey][1] = input1.value || "";
+                    documentData[rowKey][2] = input2.value || "";
+
+                    // Убираем эту строку из unsavedChanges если она там была
+                    unsavedChanges.delete(`${rowKey}_1`);
+                    unsavedChanges.delete(`${rowKey}_2`);
+                    updateSaveStatus();
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Ошибка:', errorText);
+                    showAlert('Ошибка тестового сохранения: ' + errorText, 'danger');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка сети:', error);
+                showAlert('Ошибка сети: ' + error.message, 'danger');
             }
         }
 
@@ -778,6 +1078,33 @@
                     alertDiv.remove();
                 }
             }, 5000);
+        }
+
+        // Функция для отладки DOM элементов
+        function debugDOM() {
+            console.log('🔍 Проверка DOM элементов...');
+
+            // Проверяем все input элементы
+            const inputs = document.querySelectorAll('input[data-row]');
+            console.log(`📊 Найдено input элементов: ${inputs.length}`);
+
+            // Логируем только первые 5 элементов, чтобы не засорять консоль
+            for (let i = 0; i < Math.min(5, inputs.length); i++) {
+                const input = inputs[i];
+                console.log(`   Input ${i}: data-row="${input.dataset.row}", data-col="${input.dataset.col}", value="${input.value}"`);
+            }
+
+            if (inputs.length > 5) {
+                console.log(`   ... и еще ${inputs.length - 5} элементов`);
+            }
+
+            // Проверяем таблицу
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody) {
+                console.log('✅ tableBody найден, строк:', tableBody.children.length);
+            } else {
+                console.error('❌ tableBody не найден!');
+            }
         }
 
         // Инициализация при загрузке страницы
