@@ -275,8 +275,7 @@
             <button class="btn btn-danger" onclick="uncompleteCase()" id="uncompleteCaseBtn" style="display: none;">
                 ↩️ Отменить завершение случая
             </button>
-            <button class="btn btn-primary" onclick="exportToWebmis()" id="exportWebmisBtn">📤 Экспорт в ВебМИС
-            </button>
+            <button class="btn btn-primary" onclick="exportToWebmis()" id="exportWebmisBtn" style="display: none;">📤 Экспорт в ВебМИС</button>
             <span id="saveStatus" style="margin-left: 20px; color: #666;"></span>
         </div>
 
@@ -447,8 +446,7 @@
                         caseStatus = caseData.status;
                         console.log('📌 Статус случая изменился:', caseStatus);
                         updateCaseStatusUI();
-                        // Также перерисовываем таблицу, чтобы обновить блокировку полей
-                        displayDocumentTable();
+                        updateExportButtonVisibility();  // обновляем видимость кнопки экспорта
                     }
                 } else {
                     console.error('Ошибка загрузки статуса случая:', response.status);
@@ -459,32 +457,68 @@
         }
 
         async function exportToWebmis() {
-          // Сохраняем все несохранённые изменения
-          await saveAllChanges();
+            // Сохраняем все несохранённые изменения
+            await saveAllChanges();
 
-          // Собираем данные из таблицы
-          const tableData = collectAllTableData();
-          const exportData = {};
+            // Собираем данные из таблицы
+            const tableData = collectAllTableData();
+            const exportData = {};
 
-          for (const [row, values] of Object.entries(tableData)) {
-            exportData[row + '_before'] = values[1] || '';
-            exportData[row + '_after'] = values[2] || '';
-          }
+            for (const [row, values] of Object.entries(tableData)) {
+                exportData[row + '_before'] = values[1] || '';
+                exportData[row + '_after'] = values[2] || '';
+            }
 
-          // Добавляем служебную информацию
-          exportData.document_id = documentId;
-          exportData.case_id = caseId;
-          exportData.patient_name = document.getElementById('patientName').textContent;
-          exportData.insurance_number = document.getElementById('insuranceNumber').textContent;
+            // Добавляем метаданные
+            exportData.document_id = documentId;
+            exportData.case_id = caseId;
+            exportData.exported_at = new Date().toISOString();
 
-          // Создаём и скачиваем JSON-файл
-          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `reunity_export_${documentId}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
+            // Получаем ФИО пациента
+            const patientFullName = document.getElementById('patientName').textContent.trim() || 'Неизвестный';
+            exportData.patient_name = patientFullName;
+
+            // Формируем имя файла: Фамилия_И.О._ГГГГММДД_ЧЧММ.json
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
+            const timeStr = now.toTimeString().slice(0,5).replace(':', '');
+
+            // Преобразуем ФИО в формат "Фамилия_И.О."
+            let fileNamePart = 'export';
+            if (patientFullName !== 'Неизвестный') {
+                const parts = patientFullName.split(' ');
+                if (parts.length >= 2) {
+                    const lastName = parts[0];
+                    const firstNameInitial = parts[1].charAt(0).toUpperCase();
+                    const middleNameInitial = parts.length > 2 ? parts[2].charAt(0).toUpperCase() : '';
+                    fileNamePart = `${lastName}_${firstNameInitial}.${middleNameInitial ? middleNameInitial + '.' : ''}`.replace(/\.$/, '');
+                } else {
+                    fileNamePart = patientFullName.replace(/\s+/g, '_');
+                }
+            }
+            const fileName = `${fileNamePart}_${dateStr}_${timeStr}.json`;
+
+            // Создаём и скачиваем JSON-файл
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Функция для обновления видимости кнопки экспорта
+        function updateExportButtonVisibility() {
+            const exportBtn = document.getElementById('exportWebmisBtn');
+            if (!exportBtn) return;
+
+            // Проверяем роль и статус случая
+            const userRole = currentUser?.role;
+            const isCaseCompleted = (caseStatus === 'completed');
+            const canExport = (userRole === 'head' || userRole === 'admin') && isCaseCompleted;
+
+            exportBtn.style.display = canExport ? 'inline-block' : 'none';
         }
 
         // Запуск периодического опроса статуса случая
