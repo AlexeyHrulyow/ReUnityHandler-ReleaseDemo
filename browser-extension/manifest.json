@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "ReUnityHandler to Webmis Importer",
+  "version": "1.0",
+  "description": "Импорт данных из ReUnityHandler в форму ВебМИС",
+  "permissions": ["activeTab"],
+  "host_permissions": ["http://10.102.33.82/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://10.102.33.82/prod/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

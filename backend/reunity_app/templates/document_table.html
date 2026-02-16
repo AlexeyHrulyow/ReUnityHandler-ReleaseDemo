@@ -275,6 +275,8 @@
             <button class="btn btn-danger" onclick="uncompleteCase()" id="uncompleteCaseBtn" style="display: none;">
                 ↩️ Отменить завершение случая
             </button>
+            <button class="btn btn-primary" onclick="exportToWebmis()" id="exportWebmisBtn">📤 Экспорт в ВебМИС
+            </button>
             <span id="saveStatus" style="margin-left: 20px; color: #666;"></span>
         </div>
 
@@ -454,6 +456,35 @@
             } catch (error) {
                 console.error('Ошибка загрузки статуса случая:', error);
             }
+        }
+
+        async function exportToWebmis() {
+          // Сохраняем все несохранённые изменения
+          await saveAllChanges();
+
+          // Собираем данные из таблицы
+          const tableData = collectAllTableData();
+          const exportData = {};
+
+          for (const [row, values] of Object.entries(tableData)) {
+            exportData[row + '_before'] = values[1] || '';
+            exportData[row + '_after'] = values[2] || '';
+          }
+
+          // Добавляем служебную информацию
+          exportData.document_id = documentId;
+          exportData.case_id = caseId;
+          exportData.patient_name = document.getElementById('patientName').textContent;
+          exportData.insurance_number = document.getElementById('insuranceNumber').textContent;
+
+          // Создаём и скачиваем JSON-файл
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `reunity_export_${documentId}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
         }
 
         // Запуск периодического опроса статуса случая
