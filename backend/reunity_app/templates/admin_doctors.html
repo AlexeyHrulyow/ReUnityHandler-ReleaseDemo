@@ -24,6 +24,20 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
+        .admin-nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .admin-nav .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .admin-nav .btn.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
         .content {
             background: rgba(255, 255, 255, 0.95);
             padding: 20px;
@@ -49,6 +63,8 @@
             cursor: pointer;
             font-size: 14px;
             margin-right: 5px;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-primary {
             background: #3498db;
@@ -64,6 +80,10 @@
         }
         .btn-warning {
             background: #f39c12;
+            color: white;
+        }
+        .btn-secondary {
+            background: #95a5a6;
             color: white;
         }
         .form-group {
@@ -129,10 +149,10 @@
     <div class="container">
         <div class="header">
             <h1>Управление врачами</h1>
-            <div style="margin-top: 10px;">
-                <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
-                    ← Назад в панель управления
-                </button>
+            <div class="admin-nav">
+                <button class="btn active" onclick="window.location.href='/admin/doctors'">👨‍⚕️ Врачи</button>
+                <button class="btn" onclick="window.location.href='/patients'">👥 Пациенты</button>
+                <button class="btn" onclick="window.location.href='/dashboard'">← Назад в панель управления</button>
             </div>
         </div>
 

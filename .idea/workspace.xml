@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.1&#10;- мелкий баг с ролями и экспортом">
-      <change afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.2&#10;- добавлены начальные функции администрирования">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -358,7 +354,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771242855311</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Версия 0.2.2&#10;- добавлены начальные функции администрирования">
+      <option name="closed" value="true" />
+      <created>1771248747826</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1771248747826</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -366,7 +370,14 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ID_WIDTH">
+                <map>
+                  <entry key="Table.Default.Author.ColumnIdWidth" value="104" />
+                  <entry key="Table.Default.Date.ColumnIdWidth" value="104" />
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -387,6 +398,7 @@
     <MESSAGE value="Версия 0.2.0&#10;- реализован экспорт данных в ВебМИС" />
     <MESSAGE value="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
     <MESSAGE value="Версия 0.2.1&#10;- мелкий баг с ролями и экспортом" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.1&#10;- мелкий баг с ролями и экспортом" />
+    <MESSAGE value="Версия 0.2.2&#10;- добавлены начальные функции администрирования" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.2&#10;- добавлены начальные функции администрирования" />
   </component>
 </project>
