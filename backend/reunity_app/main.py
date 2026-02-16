@@ -110,7 +110,7 @@ app = FastAPI(
     docs_url="/docs",  # Включаем документацию
     redoc_url="/redoc",  # Включаем альтернативную документацию
     openapi_url="/api/v1/openapi.json",
-    redirect_slashes=False
+    # redirect_slashes удалён (по умолчанию True) — запросы без слеша будут перенаправляться
 )
 
 # Настройка CORS
@@ -177,6 +177,12 @@ async def case_create_page(request: Request):
 async def document_table_page(request: Request):
     """Страница редактирования таблицы документа"""
     return templates.TemplateResponse("document_table.html", {"request": request})
+
+@app.get("/admin/doctors")
+async def admin_doctors_page(request: Request):
+    """Страница управления врачами (только для админа)"""
+    return templates.TemplateResponse("admin_doctors.html", {"request": request})
+
 
 
 # ========== API ЭНДПОИНТЫ ==========

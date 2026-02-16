@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 from reunity_app.db.models import DoctorRole
@@ -6,7 +6,6 @@ from reunity_app.db.models import DoctorRole
 
 class DoctorBase(BaseModel):
     username: str
-    email: Optional[EmailStr] = None
     last_name: str
     first_name: str
     middle_name: Optional[str] = None
@@ -18,7 +17,6 @@ class DoctorCreate(DoctorBase):
 
 
 class DoctorUpdate(BaseModel):
-    email: Optional[EmailStr] = None
     last_name: Optional[str] = None
     first_name: Optional[str] = None
     middle_name: Optional[str] = None

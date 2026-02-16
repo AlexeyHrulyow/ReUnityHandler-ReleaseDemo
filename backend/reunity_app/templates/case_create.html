@@ -309,14 +309,6 @@
                             <label for="admissionDate" class="required">Дата поступления:</label>
                             <input type="date" id="admissionDate" name="admission_date">
                         </div>
-                        <div class="form-group">
-                            <label for="caseStatus" class="required">Статус случая:</label>
-                            <select id="caseStatus" name="status">
-                                <option value="draft">Черновик</option>
-                                <option value="in_progress" selected>В процессе</option>
-                                <option value="waiting_review">На проверке</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div class="form-group">
@@ -618,11 +610,11 @@
                     patientId = document.getElementById('patientId').value;
                 }
 
-                // Создаем случай
+                // Создаём случай со статусом "in_progress" (фиксированно)
                 const caseData = {
                     patient_id: parseInt(patientId),
                     admission_date: document.getElementById('admissionDate').value + 'T00:00:00',
-                    status: document.getElementById('caseStatus').value,
+                    status: 'in_progress',  // всегда "В процессе"
                     notes: document.getElementById('notes').value.trim() || null
                 };
 

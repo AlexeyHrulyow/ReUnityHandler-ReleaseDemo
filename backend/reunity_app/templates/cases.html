@@ -194,11 +194,8 @@
                 <label for="statusFilter">Статус:</label>
                 <select id="statusFilter" onchange="applyFilters()">
                     <option value="">Все статусы</option>
-                    <option value="draft">Черновик</option>
                     <option value="in_progress">В процессе</option>
-                    <option value="waiting_review">На проверке</option>
-                    <option value="completed">Завершен</option>
-                    <option value="sent">Отправлен</option>
+                    <option value="completed">Завершён</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -478,6 +475,12 @@
                             </button>`;
                 }
 
+                if (currentUser.role === 'admin' || currentUser.role === 'head') {
+                    if (caseItem.status !== 'completed' && caseItem.status !== 'sent') {
+                        actions += `<button class="btn btn-danger" onclick="deleteCase(${caseItem.id})" title="Удалить случай">🗑️ Удалить</button>`;
+                    }
+                }
+
                 row.innerHTML = `
                     <td>${caseItem.id || 'N/A'}</td>
                     <td>${caseItem.patient_name || 'Не указан'}</td>
@@ -511,6 +514,34 @@
             currentFilters = { search: '', status: '', date: '' };
             currentPage = 0;
             loadCases();
+        }
+
+        async function deleteCase(caseId) {
+            if (!confirm('Вы уверены, что хотите удалить этот случай? Это действие необратимо.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/cases/${caseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Случай успешно удалён');
+                    currentPage = 0;
+                    await loadCases();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Ошибка: ${errorText || 'Не удалось удалить случай'}`);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка подключения к серверу: ' + error.message);
+            }
         }
 
         function loadMore() {
@@ -613,6 +644,34 @@
                 } else {
                     const errorText = await response.text();
                     alert(`Ошибка: ${errorText || 'Не удалось завершить случай'}`);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка подключения к серверу: ' + error.message);
+            }
+        }
+
+        async function deleteCase(caseId) {
+            if (!confirm('Вы уверены, что хотите удалить этот случай? Это действие необратимо.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/cases/${caseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Случай успешно удалён');
+                    currentPage = 0;
+                    await loadCases();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Ошибка: ${errorText || 'Не удалось удалить случай'}`);
                 }
             } catch (error) {
                 console.error('Ошибка:', error);

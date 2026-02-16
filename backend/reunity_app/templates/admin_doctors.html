@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление врачами - ReUnityHandler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            max-width: 90%;
+        }
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Управление врачами</h1>
+            <div style="margin-top: 10px;">
+                <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
+                    ← Назад в панель управления
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="alertContainer"></div>
+            <button class="btn btn-success" onclick="openCreateModal()">＋ Добавить врача</button>
+
+            <div id="loading" class="loading">Загрузка списка врачей...</div>
+            <div id="doctorsTable" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ФИО</th>
+                            <th>Логин</th>
+                            <th>Роль</th>
+                            <th>Активен</th>
+                            <th>Создан</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctorsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания/редактирования врача -->
+    <div id="doctorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">Добавление врача</h3>
+            <form id="doctorForm">
+                <input type="hidden" id="doctorId">
+                <div class="form-group">
+                    <label for="lastName">Фамилия *</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstName">Имя *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="middleName">Отчество</label>
+                    <input type="text" id="middleName">
+                </div>
+                <div class="form-group">
+                    <label for="username">Логин *</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group" id="passwordGroup">
+                    <label for="password">Пароль *</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Роль *</label>
+                    <select id="role" required>
+                        <option value="therapist">Терапевт</option>
+                        <option value="neurologist">Невролог</option>
+                        <option value="head">Заведующий</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="isActive">Активен</label>
+                    <input type="checkbox" id="isActive" checked>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('auth_token');
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        let currentUser = null;
+        let doctors = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadDoctors();
+        });
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (currentUser.role !== 'admin') {
+                        showAlert('Доступ запрещён', 'danger');
+                        setTimeout(() => window.location.href = '/dashboard', 2000);
+                    }
+                } else {
+                    throw new Error('Ошибка загрузки пользователя');
+                }
+            } catch (error) {
+                console.error(error);
+                window.location.href = '/';
+            }
+        }
+
+        async function loadDoctors() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('doctorsTable').style.display = 'none';
+
+                const response = await fetch('/api/v1/doctors?active_only=false', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    doctors = await response.json();
+                    displayDoctors(doctors);
+                } else {
+                    showAlert('Ошибка загрузки врачей', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayDoctors(doctors) {
+            const tbody = document.getElementById('doctorsTableBody');
+            tbody.innerHTML = '';
+
+            doctors.forEach(doc => {
+                const roleNames = {
+                    'therapist': 'Терапевт',
+                    'neurologist': 'Невролог',
+                    'head': 'Заведующий',
+                    'admin': 'Администратор'
+                };
+                const roleName = roleNames[doc.role] || doc.role;
+                const activeText = doc.is_active ? 'Да' : 'Нет';
+                const created = new Date(doc.created_at).toLocaleDateString('ru-RU');
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${doc.id}</td>
+                    <td>${doc.last_name} ${doc.first_name} ${doc.middle_name || ''}</td>
+                    <td>${doc.username}</td>
+                    <td>${roleName}</td>
+                    <td>${activeText}</td>
+                    <td>${created}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editDoctor(${doc.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id})" ${doc.id === currentUser.id ? 'disabled' : ''}>🗑️</button>
+                        ${doc.is_active ?
+                            `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false)">🔒 Деактивировать</button>` :
+                            `<button class="btn btn-success btn-sm" onclick="toggleActive(${doc.id}, true)">🔓 Активировать</button>`
+                        }
+                    </td>
+                `;
+            });
+
+            document.getElementById('doctorsTable').style.display = 'block';
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Добавление врача';
+            document.getElementById('doctorId').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('firstName').value = '';
+            document.getElementById('middleName').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = true;
+            document.getElementById('role').value = 'therapist';
+            document.getElementById('isActive').checked = true;
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('doctorModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('doctorModal').style.display = 'none';
+        }
+
+        async function editDoctor(id) {
+            const doctor = doctors.find(d => d.id === id);
+            if (!doctor) return;
+
+            document.getElementById('modalTitle').textContent = 'Редактирование врача';
+            document.getElementById('doctorId').value = doctor.id;
+            document.getElementById('lastName').value = doctor.last_name;
+            document.getElementById('firstName').value = doctor.first_name;
+            document.getElementById('middleName').value = doctor.middle_name || '';
+            document.getElementById('username').value = doctor.username;
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = false;
+            document.getElementById('role').value = doctor.role;
+            document.getElementById('isActive').checked = doctor.is_active;
+            document.getElementById('passwordGroup').style.display = 'none'; // при редактировании пароль не обязателен
+            document.getElementById('doctorModal').style.display = 'block';
+        }
+
+        document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('doctorId').value;
+            const isEditing = !!id;
+
+            const data = {
+                last_name: document.getElementById('lastName').value.trim(),
+                first_name: document.getElementById('firstName').value.trim(),
+                middle_name: document.getElementById('middleName').value.trim() || null,
+                username: document.getElementById('username').value.trim(),
+                role: document.getElementById('role').value,
+                is_active: document.getElementById('isActive').checked
+            };
+
+            if (!isEditing) {
+                data.password = document.getElementById('password').value;
+                if (!data.password) {
+                    showAlert('Пароль обязателен при создании', 'danger');
+                    return;
+                }
+            }
+
+            const url = isEditing ? `/api/v1/doctors/${id}` : '/api/v1/doctors/';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showAlert(isEditing ? 'Врач обновлён' : 'Врач создан', 'success');
+                    closeModal();
+                    await loadDoctors();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка сохранения', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        });
+
+        async function deleteDoctor(id) {
+            if (!confirm('Вы уверены, что хотите удалить этого врача? Это действие необратимо.')) return;
+
+            try {
+                const response = await fetch(`/api/v1/doctors/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert('Врач удалён', 'success');
+                    await loadDoctors();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка удаления', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        }
+
+        async function toggleActive(id, activate) {
+            const action = activate ? 'activate' : 'deactivate';
+            try {
+                const response = await fetch(`/api/v1/doctors/${id}/${action}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert(activate ? 'Врач активирован' : 'Врач деактивирован', 'success');
+                    await loadDoctors();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка изменения статуса', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

@@ -993,6 +993,9 @@
                 unsavedChanges.clear();
                 updateSaveStatus();
 
+                // Перерисовываем таблицу, чтобы отобразить актуальные данные (включая пересчитанную сумму)
+                displayDocumentTable();
+
                 await updateCompletionStatus();
 
                 showAlert('Изменения сохранены', 'success');
