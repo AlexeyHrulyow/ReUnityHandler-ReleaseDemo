@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.0&#10;- реализован экспорт данных в ВебМИС">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
-    </list>
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -336,7 +333,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771229584189</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом">
+      <option name="closed" value="true" />
+      <created>1771242822549</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1771242822549</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -363,6 +368,7 @@
     <MESSAGE value="Версия 0.1.5&#10;- сохранение данных в докуменет реализовано&#10;- есть мелкие баги" />
     <MESSAGE value="Версия 0.1.6&#10;- мелкие исправления интерфейса" />
     <MESSAGE value="Версия 0.2.0&#10;- реализован экспорт данных в ВебМИС" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.0&#10;- реализован экспорт данных в ВебМИС" />
+    <MESSAGE value="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
   </component>
 </project>
