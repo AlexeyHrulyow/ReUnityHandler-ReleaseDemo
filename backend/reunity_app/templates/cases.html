@@ -178,9 +178,6 @@
                 <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
                     ← Назад в панель управления
                 </button>
-                <button class="btn btn-primary" onclick="window.location.href='/'">
-                    🏠 Главная
-                </button>
                 <button class="btn btn-success" onclick="createNewCase()">
                     ＋ Создать новый случай
                 </button>
@@ -235,6 +232,7 @@
                         <th>Создатель</th>
                         <th>Статус</th>
                         <th>Статус врачей</th>
+                        <th>Примечания</th>
                         <th>Создан</th>
                         <th>Действия</th>
                     </tr>
@@ -406,6 +404,10 @@
                 const createdDate = caseItem.created_at ?
                     new Date(caseItem.created_at).toLocaleDateString('ru-RU') : 'Не указана';
 
+                const notes = caseItem.notes
+                    ? (caseItem.notes.length > 50 ? caseItem.notes.substring(0, 50) + '…' : caseItem.notes)
+                    : '';
+
                 // Определяем класс для статуса
                 let statusClass = '';
                 let statusText = '';
@@ -483,6 +485,7 @@
                     <td>${caseItem.creator_name || 'Неизвестно'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${doctorStatusHTML}</td>
+                    <td>${notes}</td>
                     <td>${createdDate}</td>
                     <td>${actions}</td>
                 `;

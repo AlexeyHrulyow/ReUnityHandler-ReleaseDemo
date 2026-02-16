@@ -246,6 +246,86 @@ async def complete_section(
         "completed_at": now.isoformat()
     }
 
+@router.post("/{document_id}/uncomplete-my-section")
+async def uncomplete_my_section(
+        document_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: Doctor = Depends(get_current_active_user)
+):
+    """
+    Отмена завершения собственного раздела.
+    Доступно для врачей (невролог, терапевт) и заведующего.
+    """
+    result = await db.execute(
+        select(Document).where(Document.id == document_id)
+    )
+    document = result.scalar_one_or_none()
+    if not document:
+        raise HTTPException(status_code=404, detail="Документ не найден")
+
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
+
+    # Определяем, какой раздел сбрасывать в зависимости от роли
+    role = current_user.role
+    if role == DoctorRole.NEUROLOGIST:
+        document.neurologist_completed = False
+        document.neurologist_filled_at = None
+    elif role == DoctorRole.THERAPIST:
+        document.therapist_completed = False
+        document.therapist_filled_at = None
+    elif role == DoctorRole.HEAD:
+        document.head_completed = False
+        document.head_filled_at = None
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail="Только невролог, терапевт или заведующий могут отменить свой раздел"
+        )
+
+    await db.commit()
+    return {"message": f"Завершение раздела '{role.value}' отменено"}
+
+
+@router.post("/{document_id}/uncomplete-section/{target_role}")
+async def uncomplete_section_by_admin(
+        document_id: int,
+        target_role: str,
+        db: AsyncSession = Depends(get_db),
+        current_user: Doctor = Depends(require_role("admin", "head"))
+):
+    """
+    Отмена завершения раздела указанной роли.
+    Только для администратора и заведующего.
+    target_role: neurologist, therapist, head
+    """
+    # Проверяем допустимость целевой роли
+    if target_role not in ["neurologist", "therapist", "head"]:
+        raise HTTPException(status_code=400, detail="Недопустимая целевая роль")
+
+    result = await db.execute(
+        select(Document).where(Document.id == document_id)
+    )
+    document = result.scalar_one_or_none()
+    if not document:
+        raise HTTPException(status_code=404, detail="Документ не найден")
+
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
+
+    # Сбрасываем соответствующий раздел
+    if target_role == "neurologist":
+        document.neurologist_completed = False
+        document.neurologist_filled_at = None
+    elif target_role == "therapist":
+        document.therapist_completed = False
+        document.therapist_filled_at = None
+    elif target_role == "head":
+        document.head_completed = False
+        document.head_filled_at = None
+
+    await db.commit()
+    return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
 
 @router.get("/{document_id}/completion-status")
 async def get_completion_status(

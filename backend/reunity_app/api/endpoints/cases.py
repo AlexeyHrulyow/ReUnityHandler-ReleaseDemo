@@ -306,6 +306,24 @@ async def complete_case(
     return {"message": "Случай завершен"}
 
 
+@router.post("/{case_id}/uncomplete")
+async def uncomplete_case(
+        case_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: Doctor = Depends(require_role("admin", "head"))
+):
+    """Отмена завершения случая (только для админа и заведующего)"""
+    result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
+    case = result.scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=404, detail="Случай не найден")
+
+    # Возвращаем статус в "in_progress" (можно выбрать другое значение по умолчанию)
+    case.status = CaseStatus.IN_PROGRESS
+    case.completed_at = None
+    await db.commit()
+    return {"message": "Завершение случая отменено"}
+
 @router.post("/{case_id}/send-to-webmis")
 async def send_case_to_webmis(
         case_id: int,
