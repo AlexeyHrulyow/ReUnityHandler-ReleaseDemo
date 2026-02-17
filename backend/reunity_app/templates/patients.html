@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пациенты - ReUnityHandler</title>
+    <title>Управление пациентами - ReUnityHandler</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,19 +24,41 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
-        .filters {
+        .admin-nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .admin-nav .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .admin-nav .btn.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+        .content {
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
+        }
+        .filters {
             margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filters input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 5px;
-            overflow: hidden;
         }
         th, td {
             border: 1px solid #ddd;
@@ -48,13 +70,16 @@
             color: white;
             font-weight: bold;
         }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
         .btn {
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-right: 5px;
             text-decoration: none;
             display: inline-block;
         }
@@ -62,23 +87,88 @@
             background: #3498db;
             color: white;
         }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
         .btn-secondary {
             background: #95a5a6;
             color: white;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 500px;
+            max-width: 90%;
+        }
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
         }
         .loading {
             text-align: center;
             padding: 40px;
             color: #6c757d;
-            background: rgba(255,255,255,0.9);
-            border-radius: 5px;
         }
-        .error {
-            color: #e74c3c;
-            padding: 10px;
-            background: #f8d7da;
-            border-radius: 4px;
-            margin-bottom: 20px;
+        .no-patients {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
         }
     </style>
 </head>
@@ -86,36 +176,75 @@
     <div class="container">
         <div class="header">
             <h1>Управление пациентами</h1>
-            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
-                ← Назад в панель управления
-            </button>
+            <div class="admin-nav">
+                <button class="btn" onclick="window.location.href='/admin/doctors'">👨‍⚕️ Врачи</button>
+                <button class="btn active" onclick="window.location.href='/patients'">👥 Пациенты</button>
+                <button class="btn" onclick="window.location.href='/dashboard'">← На главную</button>
+            </div>
         </div>
 
-        <div class="filters">
-            <input type="text" id="searchInput" placeholder="Поиск пациентов...">
-            <button class="btn btn-primary" onclick="searchPatients()">Поиск</button>
+        <div class="content">
+            <div id="alertContainer"></div>
+
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="Поиск по ФИО или номеру полиса...">
+                <button class="btn btn-primary" onclick="searchPatients()">🔍 Поиск</button>
+                <button class="btn btn-success" onclick="openCreateModal()">＋ Добавить пациента</button>
+            </div>
+
+            <div id="loading" class="loading">Загрузка пациентов...</div>
+
+            <div id="patientsTable" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ФИО</th>
+                            <th>Дата рождения</th>
+                            <th>Номер полиса</th>
+                            <th>Дата создания</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </div>
 
-        <div id="errorContainer" style="display: none;"></div>
-
-        <div id="loading" class="loading">Загрузка пациентов...</div>
-        <div id="patientsTable" style="display: none;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Фамилия</th>
-                        <th>Имя</th>
-                        <th>Отчество</th>
-                        <th>Дата рождения</th>
-                        <th>Номер полиса</th>
-                        <th>Дата создания</th>
-                    </tr>
-                </thead>
-                <tbody id="patientsTableBody">
-                    <!-- Данные будут загружены через JavaScript -->
-                </tbody>
-            </table>
+    <!-- Модальное окно для создания/редактирования пациента -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">Добавление пациента</h3>
+            <form id="patientForm">
+                <input type="hidden" id="patientId">
+                <div class="form-group">
+                    <label for="lastName">Фамилия *</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstName">Имя *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="middleName">Отчество</label>
+                    <input type="text" id="middleName">
+                </div>
+                <div class="form-group">
+                    <label for="birthDate">Дата рождения</label>
+                    <input type="date" id="birthDate">
+                </div>
+                <div class="form-group">
+                    <label for="insuranceNumber">Номер полиса</label>
+                    <input type="text" id="insuranceNumber" maxlength="20">
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -125,116 +254,227 @@
             window.location.href = '/';
         }
 
-        document.addEventListener('DOMContentLoaded', loadPatients);
+        let currentUser = null;
+        let patients = [];
 
-       async function loadPatients() {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadPatients();
+        });
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                } else {
+                    throw new Error('Ошибка загрузки пользователя');
+                }
+            } catch (error) {
+                console.error(error);
+                window.location.href = '/';
+            }
+        }
+
+        async function loadPatients() {
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('patientsTable').style.display = 'none';
-                document.getElementById('errorContainer').style.display = 'none';
 
                 const response = await fetch('/api/v1/patients/', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
-                    const patients = await response.json();
+                    patients = await response.json();
                     displayPatients(patients);
-                } else if (response.status === 401) {
-                    // Если не авторизован, перенаправляем на страницу входа
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/';
                 } else {
-                    const errorText = await response.text();
-                    showError('Ошибка загрузки пациентов. Код ошибки: ' + response.status + ' - ' + errorText);
+                    showAlert('Ошибка загрузки пациентов', 'danger');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                showError('Ошибка подключения к серверу: ' + error.message);
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function searchPatients() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                await loadPatients();
+                return;
+            }
+
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('patientsTable').style.display = 'none';
+
+                const response = await fetch(`/api/v1/patients/search?q=${encodeURIComponent(searchTerm)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    displayPatients(patients);
+                } else {
+                    showAlert('Ошибка поиска', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
         function displayPatients(patients) {
-            const tableBody = document.getElementById('patientsTableBody');
-            const patientsTable = document.getElementById('patientsTable');
+            const tbody = document.getElementById('patientsTableBody');
+            const table = document.getElementById('patientsTable');
+            tbody.innerHTML = '';
 
             if (patients.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7">Пациенты не найдены</td></tr>';
-                patientsTable.style.display = 'table';
+                tbody.innerHTML = '<tr><td colspan="6" class="no-patients">Пациенты не найдены</td></tr>';
+                table.style.display = 'table';
                 return;
             }
 
-            let html = '';
             patients.forEach(patient => {
-                const birthDate = patient.birth_date ? new Date(patient.birth_date).toLocaleDateString('ru-RU') : 'Не указана';
-                const createdDate = new Date(patient.created_at).toLocaleDateString('ru-RU');
+                const row = tbody.insertRow();
+                const birthDate = patient.birth_date
+                    ? new Date(patient.birth_date).toLocaleDateString('ru-RU')
+                    : '—';
+                const created = new Date(patient.created_at).toLocaleDateString('ru-RU');
 
-                html += `
-                    <tr>
-                        <td>${patient.id}</td>
-                        <td>${patient.last_name}</td>
-                        <td>${patient.first_name}</td>
-                        <td>${patient.middle_name || ''}</td>
-                        <td>${birthDate}</td>
-                        <td>${patient.insurance_number || 'Не указан'}</td>
-                        <td>${createdDate}</td>
-                    </tr>
+                // Проверка прав на удаление (admin или head)
+                const canDelete = currentUser && (currentUser.role === 'admin' || currentUser.role === 'head');
+
+                row.innerHTML = `
+                    <td>${patient.id}</td>
+                    <td>${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}</td>
+                    <td>${birthDate}</td>
+                    <td>${patient.insurance_number || '—'}</td>
+                    <td>${created}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editPatient(${patient.id})">✏️</button>
+                        ${canDelete ? `<button class="btn btn-danger btn-sm" onclick="deletePatient(${patient.id})">🗑️</button>` : ''}
+                    </td>
                 `;
             });
 
-            tableBody.innerHTML = html;
-            patientsTable.style.display = 'table';
+            table.style.display = 'table';
         }
 
-        async function searchPatients() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Добавление пациента';
+            document.getElementById('patientId').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('firstName').value = '';
+            document.getElementById('middleName').value = '';
+            document.getElementById('birthDate').value = '';
+            document.getElementById('insuranceNumber').value = '';
+            document.getElementById('patientModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('patientModal').style.display = 'none';
+        }
+
+        async function editPatient(id) {
+            const patient = patients.find(p => p.id === id);
+            if (!patient) return;
+
+            document.getElementById('modalTitle').textContent = 'Редактирование пациента';
+            document.getElementById('patientId').value = patient.id;
+            document.getElementById('lastName').value = patient.last_name;
+            document.getElementById('firstName').value = patient.first_name;
+            document.getElementById('middleName').value = patient.middle_name || '';
+            document.getElementById('birthDate').value = patient.birth_date ? patient.birth_date.split('T')[0] : '';
+            document.getElementById('insuranceNumber').value = patient.insurance_number || '';
+            document.getElementById('patientModal').style.display = 'block';
+        }
+
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('patientId').value;
+            const isEditing = !!id;
+
+            const data = {
+                last_name: document.getElementById('lastName').value.trim(),
+                first_name: document.getElementById('firstName').value.trim(),
+                middle_name: document.getElementById('middleName').value.trim() || null,
+                birth_date: document.getElementById('birthDate').value || null,
+                insurance_number: document.getElementById('insuranceNumber').value.trim() || null
+            };
+
+            const url = isEditing ? `/api/v1/patients/${id}` : '/api/v1/patients/';
+            const method = isEditing ? 'PUT' : 'POST';
+
             try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('patientsTable').style.display = 'none';
-
-                const url = searchTerm ?
-                    `/api/v1/patients/search?q=${encodeURIComponent(searchTerm)}` :
-                    '/api/v1/patients';
-
                 const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify(data)
                 });
 
                 if (response.ok) {
-                    const patients = await response.json();
-                    displayPatients(patients);
-                } else if (response.status === 401) {
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/';
+                    showAlert(isEditing ? 'Пациент обновлён' : 'Пациент создан', 'success');
+                    closeModal();
+                    await loadPatients();
                 } else {
-                    showError('Ошибка поиска пациентов. Код ошибки: ' + response.status);
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка сохранения', 'danger');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                showError('Ошибка подключения к серверу');
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        });
+
+        async function deletePatient(id) {
+            if (!confirm('Вы уверены, что хотите удалить этого пациента? Это действие необратимо.')) return;
+
+            try {
+                const response = await fetch(`/api/v1/patients/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert('Пациент удалён', 'success');
+                    await loadPatients();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка удаления', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
             }
         }
 
-        function showError(message) {
-            const errorContainer = document.getElementById('errorContainer');
-            errorContainer.innerHTML = `
-                <div class="error">
-                    <strong>Ошибка:</strong> ${message}
-                    <button onclick="location.reload()" style="float: right; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                        Повторить
-                    </button>
-                </div>
-            `;
-            errorContainer.style.display = 'block';
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
         }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('patientModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
     </script>
 </body>
 </html>

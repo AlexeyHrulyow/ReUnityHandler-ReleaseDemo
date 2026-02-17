@@ -149,9 +149,6 @@ async def update_document_row(
     # Обновляем статус заполнения (но разрешаем пустые значения)
     await update_completion_status(document, row_update.row_name, user_role)
 
-    # Пересчитываем итоговый балл (только если есть числа)
-    document.calculate_total_score()
-
     await db.commit()
     await db.refresh(document)
 

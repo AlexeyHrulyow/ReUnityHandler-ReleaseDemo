@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.2&#10;- добавлены начальные функции администрирования">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.2&#10;- чуть-чуть доработано администрирование">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -362,7 +361,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771248747826</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Версия 0.2.2&#10;- чуть-чуть доработано администрирование">
+      <option name="closed" value="true" />
+      <created>1771249844317</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1771249844317</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -399,6 +406,7 @@
     <MESSAGE value="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
     <MESSAGE value="Версия 0.2.1&#10;- мелкий баг с ролями и экспортом" />
     <MESSAGE value="Версия 0.2.2&#10;- добавлены начальные функции администрирования" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.2&#10;- добавлены начальные функции администрирования" />
+    <MESSAGE value="Версия 0.2.2&#10;- чуть-чуть доработано администрирование" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.2&#10;- чуть-чуть доработано администрирование" />
   </component>
 </project>
