@@ -146,8 +146,18 @@ async def update_document_row(
         # Альтернативный метод для строк
         document.update_row_string(row_update.row_name, normalized_values)
 
-    # Обновляем статус заполнения (но разрешаем пустые значения)
-    await update_completion_status(document, row_update.row_name, user_role)
+    # Обновляем время последнего изменения для врача, если он редактирует свою строку
+    now = datetime.utcnow()
+    if user_role == DoctorRole.NEUROLOGIST and row_update.row_name in neurologist_rows:
+        document.neurologist_filled_at = now
+        print(f"⏱ Обновлено neurologist_filled_at для невролога")
+    elif user_role == DoctorRole.THERAPIST and row_update.row_name in therapist_rows:
+        document.therapist_filled_at = now
+        print(f"⏱ Обновлено therapist_filled_at для терапевта")
+    elif user_role == DoctorRole.HEAD and row_update.row_name in head_rows:
+        document.head_filled_at = now
+        print(f"⏱ Обновлено head_filled_at для заведующего")
+    # Администратор не обновляет filled_at для врачей
 
     await db.commit()
     await db.refresh(document)
@@ -161,47 +171,6 @@ async def update_document_row(
         "row_name": row_update.row_name,
         "new_values": normalized_values
     }
-
-
-async def update_completion_status(document: Document, row_name: str, user_role: DoctorRole):
-    """Обновление статуса заполнения для врача"""
-    now = datetime.utcnow()
-
-    print(f"🔄 Обновление статуса для врача: {user_role}, строка: {row_name}")
-
-    # Используем строки для сравнения
-    neurologist_rows = [r.value for r in DOCTOR_ROWS.neurologist_rows]
-    therapist_rows = [r.value for r in DOCTOR_ROWS.therapist_rows]
-    head_rows = [r.value for r in DOCTOR_ROWS.head_rows]
-
-    if user_role == DoctorRole.NEUROLOGIST and row_name in neurologist_rows:
-        document.neurologist_filled_at = now
-        # Проверяем, что все строки невролога заполнены
-        all_filled = all(
-            document.content.get(row, ["", "", ""])[1] != "" or
-            document.content.get(row, ["", "", ""])[2] != ""
-            for row in neurologist_rows
-        )
-        document.neurologist_completed = all_filled
-        print(f"   Невролог заполнен: {all_filled}")
-
-    elif user_role == DoctorRole.THERAPIST and row_name in therapist_rows:
-        document.therapist_filled_at = now
-        all_filled = all(
-            document.content.get(row, ["", "", ""])[1] != "" or
-            document.content.get(row, ["", "", ""])[2] != ""
-            for row in therapist_rows
-        )
-        document.therapist_completed = all_filled
-        print(f"   Терапевт заполнен: {all_filled}")
-
-    elif user_role == DoctorRole.HEAD and row_name in head_rows:
-        document.head_filled_at = now
-        # Для заведующего проверяем только header
-        if row_name == DocumentRowEnum.HEADER.value:
-            header_data = document.content.get(DocumentRowEnum.HEADER.value, ["", "", ""])
-            document.head_completed = header_data[1] != "" and header_data[2] != ""
-        print(f"   Заведующий заполнен: {document.head_completed}")
 
 
 @router.post("/{document_id}/complete-section")
@@ -242,6 +211,7 @@ async def complete_section(
         "message": f"Раздел {current_user.role.value} отмечен как заполненный",
         "completed_at": now.isoformat()
     }
+
 
 @router.post("/{document_id}/uncomplete-my-section")
 async def uncomplete_my_section(
@@ -323,6 +293,7 @@ async def uncomplete_section_by_admin(
 
     await db.commit()
     return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
+
 
 @router.get("/{document_id}/completion-status")
 async def get_completion_status(
