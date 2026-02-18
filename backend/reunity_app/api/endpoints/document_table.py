@@ -8,9 +8,9 @@ from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
 from reunity_app.db.models import Doctor, Document, DoctorRole, Case
 from reunity_app.schemas.document_structure import (
-    MainTableRowUpdate, ProcedureRowUpdate, GoalsUpdate, OtherFieldsUpdate,
+    MainTableRowUpdate, ProcedureRowUpdate, GoalsUpdate,
     HeaderFieldsUpdate, TableDatesUpdate,
-    DocumentStructureResponse, MainTableRow, ProcedureRow, Goals, OtherFields,
+    DocumentStructureResponse, MainTableRow, ProcedureRow, Goals,
     HeaderFields, TableDates
 )
 
@@ -47,12 +47,11 @@ async def get_document_structure(
     # Получаем данные из content
     content = document.content
 
-    # header_fields
+    # header_fields (clinical_diagnosis_mkb удалено)
     header_fields = HeaderFields(
         diagnosis_mkb=content.get("diagnosis_mkb", ""),
         rehab_potential=content.get("rehab_potential", ""),
-        rehab_prognosis=content.get("rehab_prognosis", ""),
-        clinical_diagnosis_mkb=content.get("clinical_diagnosis_mkb", "")
+        rehab_prognosis=content.get("rehab_prognosis", "")
     )
 
     # table_dates
@@ -86,22 +85,11 @@ async def get_document_structure(
             )
         )
 
-    # Целевой блок (новый)
+    # Целевой блок
     goals_data = content.get("goals", {"short_term": "", "long_term": ""})
     goals = Goals(
         short_term=goals_data.get("short_term", ""),
         long_term=goals_data.get("long_term", "")
-    )
-
-    other_fields_data = content.get("other_fields", {
-        "electrophysiological": "",
-        "testing": "",
-        "medication": ""
-    })
-    other_fields = OtherFields(
-        electrophysiological=other_fields_data.get("electrophysiological", ""),
-        testing=other_fields_data.get("testing", ""),
-        medication=other_fields_data.get("medication", "")
     )
 
     # Права доступа
@@ -122,7 +110,6 @@ async def get_document_structure(
         main_table=main_table_rows,
         procedures_table=procedure_rows,
         goals=goals,
-        other_fields=other_fields,
         permissions=permissions,
         completion_status=completion_status
     )
@@ -150,8 +137,6 @@ async def update_header_fields(
         document.content["rehab_potential"] = fields_update.rehab_potential
     if fields_update.rehab_prognosis is not None:
         document.content["rehab_prognosis"] = fields_update.rehab_prognosis
-    if fields_update.clinical_diagnosis_mkb is not None:
-        document.content["clinical_diagnosis_mkb"] = fields_update.clinical_diagnosis_mkb
 
     from sqlalchemy.orm.attributes import flag_modified
     flag_modified(document, "content")
@@ -312,43 +297,6 @@ async def update_goals(
     await db.commit()
 
     return {"message": "Цели обновлены"}
-
-
-@router.put("/{document_id}/other-fields")
-async def update_other_fields(
-        document_id: int,
-        fields_update: OtherFieldsUpdate,
-        db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(get_current_active_user)
-):
-    """Обновление дополнительных полей"""
-    print(f"📥 Обновление дополнительных полей")
-
-    document = await get_document_or_404(document_id, db)
-
-    if document.signed_at:
-        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
-
-    if "other_fields" not in document.content:
-        document.content["other_fields"] = {}
-    document.content["other_fields"]["electrophysiological"] = fields_update.electrophysiological
-    document.content["other_fields"]["testing"] = fields_update.testing
-    document.content["other_fields"]["medication"] = fields_update.medication
-
-    from sqlalchemy.orm.attributes import flag_modified
-    flag_modified(document, "content")
-
-    now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
-
-    await db.commit()
-
-    return {"message": "Дополнительные поля обновлены"}
 
 
 # Оставшиеся эндпоинты для совместимости (можно оставить, если используются)

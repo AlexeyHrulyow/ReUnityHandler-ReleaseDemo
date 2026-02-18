@@ -70,7 +70,7 @@ class ProcedureRowUpdate(BaseModel):
         return v
 
 
-# Новый целевой блок (два поля)
+# Целевой блок (два поля)
 class Goals(BaseModel):
     short_term: str
     long_term: str
@@ -81,32 +81,17 @@ class GoalsUpdate(BaseModel):
     long_term: Optional[str] = None
 
 
-# Дополнительные поля (оставляем как есть)
-class OtherFields(BaseModel):
-    electrophysiological: str
-    testing: str
-    medication: str
-
-
-class OtherFieldsUpdate(BaseModel):
-    electrophysiological: Optional[str] = None
-    testing: Optional[str] = None
-    medication: Optional[str] = None
-
-
-# Поля верхней части документа
+# Поля верхней части документа (clinical_diagnosis_mkb удалено)
 class HeaderFields(BaseModel):
     diagnosis_mkb: str
     rehab_potential: str
     rehab_prognosis: str
-    clinical_diagnosis_mkb: str
 
 
 class HeaderFieldsUpdate(BaseModel):
     diagnosis_mkb: Optional[str] = None
     rehab_potential: Optional[str] = None
     rehab_prognosis: Optional[str] = None
-    clinical_diagnosis_mkb: Optional[str] = None
 
 
 # Даты в шапке таблицы
@@ -122,14 +107,13 @@ class TableDatesUpdate(BaseModel):
     discharge: Optional[str] = None
 
 
-# Полная структура документа для ответа
+# Полная структура документа для ответа (other_fields удалено)
 class DocumentStructureResponse(BaseModel):
     header_fields: HeaderFields
     table_dates: TableDates
     main_table: List[MainTableRow]
     procedures_table: List[ProcedureRow]
     goals: Goals
-    other_fields: OtherFields
     permissions: Dict[str, Any]
     completion_status: Dict[str, bool]
 

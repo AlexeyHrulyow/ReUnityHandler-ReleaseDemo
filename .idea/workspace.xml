@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.2.4&#10;- испавлена ошибка завершения раздела">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.0&#10;- внедрена новая версия документа">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
@@ -99,7 +99,7 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.run">
+  <component name="RunManager" selected="Python.pyparser">
     <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -212,8 +212,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.run" />
         <item itemvalue="Python.pyparser" />
+        <item itemvalue="Python.run" />
         <item itemvalue="Python.debug_save" />
         <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
@@ -387,7 +387,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771336392282</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Версия 0.3.0&#10;- внедрена новая версия документа">
+      <option name="closed" value="true" />
+      <created>1771407720005</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1771407720005</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -427,6 +435,7 @@
     <MESSAGE value="Версия 0.2.2&#10;- чуть-чуть доработано администрирование" />
     <MESSAGE value="Версия 0.2.3&#10;- администрирование реализовано&#10;- исправлены мелкие баги" />
     <MESSAGE value="Версия 0.2.4&#10;- испавлена ошибка завершения раздела" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.2.4&#10;- испавлена ошибка завершения раздела" />
+    <MESSAGE value="Версия 0.3.0&#10;- внедрена новая версия документа" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.0&#10;- внедрена новая версия документа" />
   </component>
 </project>

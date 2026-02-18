@@ -385,11 +385,10 @@ class Document(Base):
         ]
 
         self.content = {
-            # Поля из верхней части документа
+            # Поля из верхней части документа (clinical_diagnosis_mkb удалено)
             "diagnosis_mkb": "",
             "rehab_potential": "",
             "rehab_prognosis": "",
-            "clinical_diagnosis_mkb": "",
             # Даты в шапке таблицы
             "table_dates": {
                 "admission": "",
@@ -407,7 +406,7 @@ class Document(Base):
                     for row in ALL_ROWS
                 ]
             },
-            # Новый целевой блок с двумя полями
+            # Целевой блок с двумя полями
             "goals": {
                 "short_term": "",
                 "long_term": ""
@@ -421,11 +420,6 @@ class Document(Base):
                     }
                     for row in PROCEDURE_TABLE_ROWS
                 ]
-            },
-            "other_fields": {
-                "electrophysiological": "",
-                "testing": "",
-                "medication": ""
             }
         }
 
@@ -478,8 +472,8 @@ class Document(Base):
         flag_modified(self, "content")
 
     def update_header_field(self, field_name: str, value: str):
-        """Обновление поля из верхней части документа"""
-        if field_name in ["diagnosis_mkb", "rehab_potential", "rehab_prognosis", "clinical_diagnosis_mkb"]:
+        """Обновление поля из верхней части документа (без clinical_diagnosis_mkb)"""
+        if field_name in ["diagnosis_mkb", "rehab_potential", "rehab_prognosis"]:
             self.content[field_name] = value
             flag_modified(self, "content")
 

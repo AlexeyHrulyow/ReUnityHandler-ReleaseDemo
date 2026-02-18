@@ -64,27 +64,106 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
-        /* Стили для верхних полей */
+        /* Верхние поля */
         .header-fields {
             background: white;
             padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
             border: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         .header-fields .form-group {
-            margin-bottom: 15px;
+            flex: 1 1 200px;
+            min-width: 200px;
         }
         .header-fields label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .header-fields input {
+        .header-fields input, .header-fields select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            background: white;
+        }
+        /* Поиск и навигация */
+        .search-section {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .search-section input {
+            flex: 2;
+            min-width: 300px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .search-section select {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background: white;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 500px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .search-results div {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-results div:last-child {
+            border-bottom: none;
+        }
+        .search-results div:hover {
+            background: #f0f0f0;
+        }
+        .search-results .section-item {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .search-results .section-item::before {
+            content: "📂";
+            margin-right: 5px;
+        }
+        .search-results .row-item::before {
+            content: "🔹";
+            margin-right: 5px;
+        }
+        .search-results .selected {
+            background: #3498db;
+            color: white;
+        }
+        .highlight-row {
+            background-color: #fff3cd !important;
+            transition: background-color 0.5s;
         }
         .document-table {
             width: 100%;
@@ -135,10 +214,6 @@
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 5px rgba(52,152,219,0.5);
-        }
-        .cell-input.readonly {
-            background: #f5f5f5;
-            cursor: not-allowed;
         }
         .btn {
             padding: 10px 20px;
@@ -204,9 +279,12 @@
             border-radius: 5px;
             margin: 20px 0;
             border: 1px solid #ddd;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
         }
         .goals-block .form-group {
-            margin-bottom: 15px;
+            flex: 1 1 300px;
         }
         .goals-block label {
             display: block;
@@ -219,31 +297,9 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .other-fields {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-        }
-        .other-fields div {
-            margin-bottom: 15px;
-        }
-        .other-fields label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .other-fields input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
         #documentActions {
             margin: 20px 0;
         }
-        /* Стили для таблицы с датами */
         .table-dates-row {
             background: #f0f0f0;
             font-weight: bold;
@@ -317,17 +373,33 @@
                 <input type="text" id="diagnosisMKB" class="cell-input header-field" data-field="diagnosis_mkb" placeholder="Введите диагноз">
             </div>
             <div class="form-group">
-                <label for="rehabPotential">Реабилитационный потенциал (высокий, удовлетворительный, низкий):</label>
-                <input type="text" id="rehabPotential" class="cell-input header-field" data-field="rehab_potential" placeholder="Введите потенциал">
+                <label for="rehabPotential">Реабилитационный потенциал:</label>
+                <select id="rehabPotential" class="cell-input header-field" data-field="rehab_potential">
+                    <option value="">— Выберите —</option>
+                    <option value="высокий">высокий</option>
+                    <option value="удовлетворительный">удовлетворительный</option>
+                    <option value="низкий">низкий</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="rehabPrognosis">Реабилитационный прогноз (благоприятный, относительно благоприятный, неблагоприятный):</label>
-                <input type="text" id="rehabPrognosis" class="cell-input header-field" data-field="rehab_prognosis" placeholder="Введите прогноз">
+                <label for="rehabPrognosis">Реабилитационный прогноз:</label>
+                <select id="rehabPrognosis" class="cell-input header-field" data-field="rehab_prognosis">
+                    <option value="">— Выберите —</option>
+                    <option value="благоприятный">благоприятный</option>
+                    <option value="относительно благоприятный">относительно благоприятный</option>
+                    <option value="неблагоприятный">неблагоприятный</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label for="clinicalDiagnosisMKB">Клинический диагноз по МКБ:</label>
-                <input type="text" id="clinicalDiagnosisMKB" class="cell-input header-field" data-field="clinical_diagnosis_mkb" placeholder="Введите клинический диагноз">
-            </div>
+        </div>
+
+        <!-- Панель поиска и навигации -->
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="Поиск по номеру или названию (например, b110, функции сознания)" autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+            <select id="sectionSelect">
+                <option value="">— Перейти к разделу —</option>
+                <!-- будут заполнены из данных -->
+            </select>
         </div>
 
         <!-- Основная таблица МКФ -->
@@ -344,9 +416,9 @@
                 <!-- Строка для ввода дат в шапке таблицы -->
                 <tr class="table-dates-row">
                     <td><strong>Даты осмотров</strong></td>
-                    <td><input type="text" id="tableDateAdmission" class="cell-input table-date-input" data-date-type="admission" placeholder="__.__.____"></td>
-                    <td><input type="text" id="tableDateIntermediate" class="cell-input table-date-input" data-date-type="intermediate" placeholder="__.__.____"></td>
-                    <td><input type="text" id="tableDateDischarge" class="cell-input table-date-input" data-date-type="discharge" placeholder="__.__.____"></td>
+                    <td><input type="date" id="tableDateAdmission" class="cell-input table-date-input" data-date-type="admission"></td>
+                    <td><input type="date" id="tableDateIntermediate" class="cell-input table-date-input" data-date-type="intermediate"></td>
+                    <td><input type="date" id="tableDateDischarge" class="cell-input table-date-input" data-date-type="discharge"></td>
                     <td></td>
                 </tr>
             </thead>
@@ -355,7 +427,7 @@
             </tbody>
         </table>
 
-        <!-- Целевой блок (новый) -->
+        <!-- Целевой блок -->
         <h2>Целевой блок</h2>
         <div class="goals-block">
             <div class="form-group">
@@ -365,23 +437,6 @@
             <div class="form-group">
                 <label for="longTermGoal">Долгосрочная:</label>
                 <input type="text" id="longTermGoal" class="cell-input goal-input" data-goal="long_term" placeholder="Введите долгосрочную цель">
-            </div>
-        </div>
-
-        <!-- Планы реабилитационных мероприятий (доп. поля) -->
-        <h2>Планы реабилитационных мероприятий</h2>
-        <div class="other-fields">
-            <div>
-                <label for="electrophysiologicalField">1. Электрофизиологическое исследование:</label>
-                <input type="text" id="electrophysiologicalField" class="cell-input" placeholder="Введите данные">
-            </div>
-            <div>
-                <label for="testingField">2. Тестирование (примерные шкалы оценки здоровья пациента):</label>
-                <input type="text" id="testingField" class="cell-input" placeholder="Введите данные">
-            </div>
-            <div>
-                <label for="medicationField">3. Курс медикаментозной терапии:</label>
-                <input type="text" id="medicationField" class="cell-input" placeholder="Введите данные">
             </div>
         </div>
 
@@ -414,17 +469,21 @@
         }
 
         let currentUser = null;
-        let documentData = null; // полная структура из API
+        let documentData = null;
         let permissions = null;
         let completionStatus = null;
         let caseId = null;
         let caseCreatorId = null;
-        let caseStatus = null; // 'in_progress', 'completed'
+        let caseStatus = null;
 
         // Множество для отслеживания несохранённых изменений
         let unsavedChanges = new Set();
-        let lastInputTime = 0;
         const INPUT_DEBOUNCE = 500;
+
+        // Ссылки на DOM-элементы
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const sectionSelect = document.getElementById('sectionSelect');
 
         // ---- Вспомогательные функции ----
         function showLoading(show) {
@@ -471,6 +530,109 @@
             }
         }
 
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            if (isNaN(d.getTime())) return dateString;
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // ---- Функции поиска и навигации ----
+        function buildSearchIndex() {
+            if (!documentData || !documentData.main_table) return [];
+            return documentData.main_table.map(row => ({
+                id: row.id,
+                label: row.label,
+                text: `${row.id} — ${row.label}`.toLowerCase(),
+                isSection: row.is_section || false
+            }));
+        }
+
+        function showSearchResults(query) {
+            const index = buildSearchIndex();
+            const q = query.toLowerCase();
+            if (q.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            const matches = index.filter(item => item.text.includes(q));
+            // Сортируем: сначала разделы, потом обычные строки
+            const sections = matches.filter(m => m.isSection);
+            const rows = matches.filter(m => !m.isSection);
+            const limited = [...sections, ...rows].slice(0, 10);
+
+            searchResults.innerHTML = '';
+            if (limited.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            limited.forEach(match => {
+                const div = document.createElement('div');
+                div.className = match.isSection ? 'section-item' : 'row-item';
+                div.textContent = `${match.id} — ${match.label}`;
+                div.dataset.id = match.id;
+                div.addEventListener('click', () => {
+                    scrollToRow(match.id);
+                    searchResults.style.display = 'none';
+                    searchInput.value = match.id; // оставляем ID
+                });
+                searchResults.appendChild(div);
+            });
+            searchResults.style.display = 'block';
+        }
+
+        function scrollToRow(rowId) {
+            // Ищем элемент с атрибутом data-row-id, равным rowId
+            const target = document.querySelector(`[data-row-id="${rowId}"]`);
+            if (!target) {
+                console.warn('Строка с ID', rowId, 'не найдена');
+                return;
+            }
+            const row = target.closest('tr');
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                highlightRow(row);
+            }
+        }
+
+        function highlightRow(row) {
+            document.querySelectorAll('.highlight-row').forEach(r => r.classList.remove('highlight-row'));
+            row.classList.add('highlight-row');
+            setTimeout(() => row.classList.remove('highlight-row'), 2000);
+        }
+
+        function buildSectionSelect() {
+            if (!documentData || !documentData.main_table) return;
+            const sections = documentData.main_table.filter(row => row.is_section);
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.id;
+                option.textContent = section.label;
+                sectionSelect.appendChild(option);
+            });
+        }
+
+        sectionSelect.addEventListener('change', (e) => {
+            const sectionId = e.target.value;
+            if (!sectionId) return;
+            scrollToRow(sectionId);
+            e.target.value = '';
+        });
+
+        searchInput.addEventListener('input', debounce((e) => {
+            showSearchResults(e.target.value);
+        }, 300));
+
+        document.addEventListener('click', (e) => {
+            if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                searchResults.style.display = 'none';
+            }
+        });
+
         // ---- Загрузка данных ----
         async function loadCurrentUser() {
             try {
@@ -498,24 +660,21 @@
                     documentData = await response.json();
                     console.log('📄 Загружена структура:', documentData);
 
-                    // Сохраняем permissions и статусы
                     permissions = documentData.permissions;
                     completionStatus = documentData.completion_status;
 
-                    // Отображаем
-                    await loadDocumentInfo(); // загружает информацию о документе и caseId
+                    await loadDocumentInfo();
                     displayDocumentInfo();
                     displayDoctorStatus();
 
-                    // Заполняем новые поля
                     fillHeaderFields(documentData.header_fields);
                     fillTableDates(documentData.table_dates);
                     renderMainTable(documentData.main_table);
                     renderProceduresTable(documentData.procedures_table);
                     fillGoals(documentData.goals);
-                    fillOtherFields(documentData.other_fields);
 
-                    // Обновляем UI в зависимости от статуса случая
+                    buildSectionSelect();
+
                     updateSectionButtons();
                     showLoading(false);
                 } else {
@@ -575,27 +734,30 @@
             }, 5000);
         }
 
-        // ---- Заполнение новых полей ----
+        // ---- Заполнение полей ----
         function fillHeaderFields(headerFields) {
             document.getElementById('diagnosisMKB').value = headerFields.diagnosis_mkb || '';
             document.getElementById('rehabPotential').value = headerFields.rehab_potential || '';
             document.getElementById('rehabPrognosis').value = headerFields.rehab_prognosis || '';
-            document.getElementById('clinicalDiagnosisMKB').value = headerFields.clinical_diagnosis_mkb || '';
 
-            document.getElementById('header-fields').style.display = 'block';
+            document.getElementById('header-fields').style.display = 'flex';
 
-            // Добавляем обработчики для автосохранения
             document.querySelectorAll('.header-field').forEach(input => {
                 input.addEventListener('input', debounce(function(e) {
                     markAsChanged(`header_${e.target.dataset.field}`);
                 }, INPUT_DEBOUNCE));
+                if (input.tagName === 'SELECT') {
+                    input.addEventListener('change', function(e) {
+                        markAsChanged(`header_${e.target.dataset.field}`);
+                    });
+                }
             });
         }
 
         function fillTableDates(tableDates) {
-            document.getElementById('tableDateAdmission').value = tableDates.admission || '';
-            document.getElementById('tableDateIntermediate').value = tableDates.intermediate || '';
-            document.getElementById('tableDateDischarge').value = tableDates.discharge || '';
+            document.getElementById('tableDateAdmission').value = formatDateForInput(tableDates.admission);
+            document.getElementById('tableDateIntermediate').value = formatDateForInput(tableDates.intermediate);
+            document.getElementById('tableDateDischarge').value = formatDateForInput(tableDates.discharge);
 
             document.querySelectorAll('.table-date-input').forEach(input => {
                 input.addEventListener('input', debounce(function(e) {
@@ -622,15 +784,14 @@
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 if (row.is_section) {
-                    // Заголовок раздела
                     tr.classList.add('section-header');
+                    tr.setAttribute('data-row-id', row.id); // добавляем атрибут для навигации
                     tr.innerHTML = `
-                        <td colspan="5" style="text-align: center;">${row.label}</td>
+                        <td colspan="5" style="text-align: center;">${escapeHtml(row.label)}</td>
                     `;
                 } else {
-                    // Обычная строка с данными
                     tr.innerHTML = `
-                        <td class="row-label">${row.label}</td>
+                        <td class="row-label" data-row-id="${row.id}">${escapeHtml(row.label)}</td>
                         <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
                         <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
                         <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="2" value="${escapeHtml(row.values[2] || '')}"></td>
@@ -640,7 +801,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Добавляем обработчики для автосохранения (только для обычных строк)
             document.querySelectorAll('.main-table-input').forEach(input => {
                 input.addEventListener('input', debounce(function(e) {
                     const rowId = e.target.dataset.rowId;
@@ -656,7 +816,7 @@
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="row-label">${row.label}</td>
+                    <td class="row-label">${escapeHtml(row.label)}</td>
                     <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
                     <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
                 `;
@@ -671,15 +831,6 @@
             });
         }
 
-        function fillOtherFields(otherFields) {
-            document.getElementById('electrophysiologicalField').value = otherFields.electrophysiological || '';
-            document.getElementById('testingField').value = otherFields.testing || '';
-            document.getElementById('medicationField').value = otherFields.medication || '';
-            document.getElementById('electrophysiologicalField').addEventListener('input', () => markAsChanged('electrophysiological'));
-            document.getElementById('testingField').addEventListener('input', () => markAsChanged('testing'));
-            document.getElementById('medicationField').addEventListener('input', () => markAsChanged('medication'));
-        }
-
         function escapeHtml(unsafe) {
             return unsafe.replace(/[&<>"]/g, function(m) {
                 if (m === '&') return '&amp;';
@@ -690,7 +841,7 @@
             });
         }
 
-        // ---- Отображение информации о документе и статусах ----
+        // ---- Отображение статусов ----
         function displayDocumentInfo() {
             document.getElementById('documentInfo').style.display = 'block';
             document.getElementById('doctorStatus').style.display = 'flex';
@@ -834,12 +985,10 @@
             showLoading(true);
             let success = true;
 
-            // Сохраняем поля верхней части
             const headerData = {
                 diagnosis_mkb: document.getElementById('diagnosisMKB').value,
                 rehab_potential: document.getElementById('rehabPotential').value,
-                rehab_prognosis: document.getElementById('rehabPrognosis').value,
-                clinical_diagnosis_mkb: document.getElementById('clinicalDiagnosisMKB').value
+                rehab_prognosis: document.getElementById('rehabPrognosis').value
             };
             try {
                 const response = await fetch(`/api/v1/document-table/${documentId}/header-fields`, {
@@ -856,7 +1005,6 @@
                 success = false;
             }
 
-            // Сохраняем даты таблицы
             const tableDatesData = {
                 admission: document.getElementById('tableDateAdmission').value,
                 intermediate: document.getElementById('tableDateIntermediate').value,
@@ -877,7 +1025,6 @@
                 success = false;
             }
 
-            // Сохраняем основную таблицу (только обычные строки)
             const mainRows = collectMainTableData();
             for (const [rowId, values] of Object.entries(mainRows)) {
                 try {
@@ -899,7 +1046,6 @@
                 }
             }
 
-            // Сохраняем таблицу процедур
             const procRows = collectProcedureTableData();
             for (const [rowId, values] of Object.entries(procRows)) {
                 try {
@@ -918,7 +1064,6 @@
                 }
             }
 
-            // Сохраняем цели
             const goalsData = {
                 short_term: document.getElementById('shortTermGoal').value,
                 long_term: document.getElementById('longTermGoal').value
@@ -938,27 +1083,6 @@
                 success = false;
             }
 
-            // Дополнительные поля
-            try {
-                const otherData = {
-                    electrophysiological: document.getElementById('electrophysiologicalField').value,
-                    testing: document.getElementById('testingField').value,
-                    medication: document.getElementById('medicationField').value
-                };
-                const response = await fetch(`/api/v1/document-table/${documentId}/other-fields`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(otherData)
-                });
-                if (!response.ok) success = false;
-            } catch (err) {
-                console.error(err);
-                success = false;
-            }
-
             showLoading(false);
             if (success) {
                 unsavedChanges.clear();
@@ -971,7 +1095,7 @@
 
         // ---- Завершение / отмена разделов ----
         async function completeMySection() {
-            await saveAllChanges(); // сначала сохраняем
+            await saveAllChanges();
             if (!confirm('Вы уверены, что завершили заполнение вашего раздела?')) return;
 
             try {
@@ -981,7 +1105,7 @@
                 });
                 if (response.ok) {
                     showAlert('Раздел отмечен как заполненный', 'success');
-                    await loadDocumentStructure(); // перезагружаем статусы
+                    await loadDocumentStructure();
                 } else {
                     const error = await response.json();
                     throw new Error(error.detail || 'Ошибка');
@@ -1057,15 +1181,13 @@
         }
 
         function exportToWebmis() {
-            // Генерация JSON-файла из текущих данных
             const data = {
                 document_id: documentId,
                 case_id: caseId,
                 header_fields: {
                     diagnosis_mkb: document.getElementById('diagnosisMKB').value,
                     rehab_potential: document.getElementById('rehabPotential').value,
-                    rehab_prognosis: document.getElementById('rehabPrognosis').value,
-                    clinical_diagnosis_mkb: document.getElementById('clinicalDiagnosisMKB').value
+                    rehab_prognosis: document.getElementById('rehabPrognosis').value
                 },
                 table_dates: {
                     admission: document.getElementById('tableDateAdmission').value,
@@ -1077,11 +1199,6 @@
                 goals: {
                     short_term: document.getElementById('shortTermGoal').value,
                     long_term: document.getElementById('longTermGoal').value
-                },
-                other_fields: {
-                    electrophysiological: document.getElementById('electrophysiologicalField').value,
-                    testing: document.getElementById('testingField').value,
-                    medication: document.getElementById('medicationField').value
                 },
                 exported_at: new Date().toISOString()
             };
