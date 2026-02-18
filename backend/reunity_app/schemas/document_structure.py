@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from enum import Enum
 
+# Для обратной совместимости (можно оставить, если где-то используются)
 class DocumentRowEnum(str, Enum):
     HEADER = "header"
     PAIN_SYNDROME = "pain_syndrome"
@@ -17,42 +18,128 @@ class DocumentRowEnum(str, Enum):
     TOTAL_SCORE = "total_score"
 
 
-class DocumentRowUpdate(BaseModel):
-    row_name: str  # Оставляем строку для упрощения
-    values: List[str]  # [before, after]
+# Новая схема для строки основной таблицы с поддержкой заголовков разделов
+class MainTableRow(BaseModel):
+    id: str
+    label: str
+    is_section: bool = False
+    values: Optional[List[str]] = None  # Для заголовков sections values = None или пустой список
 
-    @validator('row_name')
-    def validate_row_name(cls, v):
-        # Проверяем, что имя строки допустимо
-        valid_names = [item.value for item in DocumentRowEnum]
-        if v not in valid_names:
-            # Логируем, но не вызываем ошибку для отладки
-            print(f"⚠️ Предупреждение: '{v}' не точно соответствует допустимым именам: {valid_names}")
-            # Пробуем найти похожее имя
-            for valid_name in valid_names:
-                if v in valid_name or valid_name in v:
-                    print(f"   Возможно имели в виду: '{valid_name}'")
-                    # Автоматически исправляем
-                    v = valid_name
-                    break
+    @validator('values', always=True)
+    def validate_values(cls, v, values):
+        if not values.get('is_section', False):
+            if v is None or len(v) != 4:
+                raise ValueError("Для обычной строки требуется ровно 4 значения")
+        return v if v is not None else []
+
+
+# Схема для обновления строки основной таблицы (только для обычных строк)
+class MainTableRowUpdate(BaseModel):
+    row_id: str
+    values: List[str]
+
+    @validator('values')
+    def validate_values(cls, v):
+        if len(v) != 4:
+            raise ValueError("Для основной таблицы требуется 4 значения")
         return v
+
+
+# Схема для строки таблицы процедур
+class ProcedureRow(BaseModel):
+    id: str
+    label: str
+    values: List[str]  # 2 элемента: [количество, примечание]
 
     @validator('values')
     def validate_values(cls, v):
         if len(v) != 2:
-            raise ValueError(f"values должен содержать 2 элемента [до, после], получено: {len(v)}")
+            raise ValueError("Для таблицы процедур требуется 2 значения")
         return v
 
-class DocumentContent(BaseModel):
-    table_data: Dict[str, List[str]]
-    neurologist_completed: bool = False
-    therapist_completed: bool = False
-    head_completed: bool = False
 
+# Схема для обновления строки таблицы процедур
+class ProcedureRowUpdate(BaseModel):
+    row_id: str
+    values: List[str]
+
+    @validator('values')
+    def validate_values(cls, v):
+        if len(v) != 2:
+            raise ValueError("Для таблицы процедур требуется 2 значения")
+        return v
+
+
+# Новый целевой блок (два поля)
+class Goals(BaseModel):
+    short_term: str
+    long_term: str
+
+
+class GoalsUpdate(BaseModel):
+    short_term: Optional[str] = None
+    long_term: Optional[str] = None
+
+
+# Дополнительные поля (оставляем как есть)
+class OtherFields(BaseModel):
+    electrophysiological: str
+    testing: str
+    medication: str
+
+
+class OtherFieldsUpdate(BaseModel):
+    electrophysiological: Optional[str] = None
+    testing: Optional[str] = None
+    medication: Optional[str] = None
+
+
+# Поля верхней части документа
+class HeaderFields(BaseModel):
+    diagnosis_mkb: str
+    rehab_potential: str
+    rehab_prognosis: str
+    clinical_diagnosis_mkb: str
+
+
+class HeaderFieldsUpdate(BaseModel):
+    diagnosis_mkb: Optional[str] = None
+    rehab_potential: Optional[str] = None
+    rehab_prognosis: Optional[str] = None
+    clinical_diagnosis_mkb: Optional[str] = None
+
+
+# Даты в шапке таблицы
+class TableDates(BaseModel):
+    admission: str
+    intermediate: str
+    discharge: str
+
+
+class TableDatesUpdate(BaseModel):
+    admission: Optional[str] = None
+    intermediate: Optional[str] = None
+    discharge: Optional[str] = None
+
+
+# Полная структура документа для ответа
+class DocumentStructureResponse(BaseModel):
+    header_fields: HeaderFields
+    table_dates: TableDates
+    main_table: List[MainTableRow]
+    procedures_table: List[ProcedureRow]
+    goals: Goals
+    other_fields: OtherFields
+    permissions: Dict[str, Any]
+    completion_status: Dict[str, bool]
+
+
+# Для совместимости со старыми эндпоинтами, если они ещё используются
 class DoctorRows(BaseModel):
     neurologist_rows: List[DocumentRowEnum]
     therapist_rows: List[DocumentRowEnum]
     head_rows: List[DocumentRowEnum]
+
 
 DOCTOR_ROWS = DoctorRows(
     neurologist_rows=[

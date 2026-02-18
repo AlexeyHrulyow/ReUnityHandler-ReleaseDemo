@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
+            background: #f4f4f4;
         }
         .container {
             max-width: 1400px;
@@ -63,16 +64,39 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
+        /* Стили для верхних полей */
+        .header-fields {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .header-fields .form-group {
+            margin-bottom: 15px;
+        }
+        .header-fields label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .header-fields input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
         .document-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
+            table-layout: fixed;
         }
         .document-table th,
         .document-table td {
             border: 1px solid #ddd;
-            padding: 12px;
+            padding: 10px;
             vertical-align: top;
         }
         .document-table th {
@@ -87,44 +111,34 @@
             background: #f9f9f9;
         }
         .document-table tr:hover {
-            background: #f5f5f5;
+            background: #f1f1f1;
         }
         .row-label {
-            width: 50%;
             font-weight: bold;
-            background: #f8f9fa;
+            background: #eef2f5;
+        }
+        .section-header td {
+            background: #d9e1e8;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
         }
         .cell-input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 4px;
-            text-align: center;
-            font-size: 14px;
             box-sizing: border-box;
+            font-size: 14px;
         }
         .cell-input:focus {
             outline: none;
             border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 5px rgba(52,152,219,0.5);
         }
         .cell-input.readonly {
             background: #f5f5f5;
             cursor: not-allowed;
-        }
-        .cell-input.neurologist {
-            border-left: 3px solid #3498db;
-        }
-        .cell-input.therapist {
-            border-left: 3px solid #9b59b6;
-        }
-        .cell-input.head {
-            border-left: 3px solid #e74c3c;
-        }
-        .row-doctor {
-            font-size: 11px;
-            color: #666;
-            margin-top: 5px;
         }
         .btn {
             padding: 10px 20px;
@@ -151,19 +165,9 @@
             background: #f39c12;
             color: white;
         }
-        .btn-warning:hover {
-            background: #e67e22;
-        }
         .btn-danger {
             background: #e74c3c;
             color: white;
-        }
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         .btn:hover {
             opacity: 0.9;
@@ -173,37 +177,79 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
         .alert-success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
         }
         .alert-danger {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
         }
         .loading {
             text-align: center;
             padding: 40px;
             color: #6c757d;
         }
-        .total-row {
-            background: #e8f4fc !important;
+        h2, h3 {
+            margin-top: 30px;
+            color: #2c3e50;
+        }
+        .goals-block {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .goals-block .form-group {
+            margin-bottom: 15px;
+        }
+        .goals-block label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-        .header-row {
-            background: #fff8e1 !important;
+        .goals-block input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .other-fields {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .other-fields div {
+            margin-bottom: 15px;
+        }
+        .other-fields label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .other-fields input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #documentActions {
+            margin: 20px 0;
+        }
+        /* Стили для таблицы с датами */
+        .table-dates-row {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+        .table-dates-row input {
+            font-weight: normal;
         }
     </style>
 </head>
@@ -211,13 +257,9 @@
     <div class="container">
         <div class="header">
             <h1>Редактирование документа</h1>
-            <div style="margin-top: 10px;">
-                <button class="btn btn-secondary" onclick="window.location.href='/cases'">
-                    ← Назад к списку случаев
-                </button>
-                <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
-                    ← Панель управления
-                </button>
+            <div>
+                <button class="btn btn-secondary" onclick="window.location.href='/cases'">← Назад к списку случаев</button>
+                <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">← Панель управления</button>
             </div>
         </div>
 
@@ -232,9 +274,10 @@
             <p><strong>Дата создания:</strong> <span id="createdAt"></span></p>
         </div>
 
-        <!-- Блок сообщения о статусе случая -->
+        <!-- Статус завершения случая -->
         <div id="caseStatusMessage" class="case-status-message" style="display: none;"></div>
 
+        <!-- Статус заполнения врачами -->
         <div id="doctorStatus" class="doctor-status" style="display: none;">
             <div class="status-card" id="neurologistStatus">
                 <div class="status-icon">🧠</div>
@@ -256,75 +299,179 @@
             </div>
         </div>
 
-        <div id="documentActions" style="margin: 20px 0; display: none;">
-            <!-- Обычные кнопки (показываются, если случай не завершён) -->
-            <button class="btn btn-success" onclick="completeMySection()" id="completeSectionBtn">
-                ✓ Завершить мой раздел
-            </button>
-            <button class="btn btn-warning" onclick="uncompleteMySection()" id="uncompleteSectionBtn" style="display: none;">
-                ↩️ Отменить завершение раздела
-            </button>
-            <button class="btn btn-primary" onclick="saveAllChanges()" id="saveAllBtn">
-                💾 Сохранить все изменения
-            </button>
-            <!-- Кнопка завершения случая (только для админа/зав., если случай не завершён и все разделы заполнены) -->
-            <button class="btn btn-success" onclick="completeCaseFromDocument()" id="signDocumentBtn" style="display: none;">
-                📝 Завершить случай
-            </button>
-            <!-- Кнопка отмены завершения случая (только для админа/зав., если случай завершён) -->
-            <button class="btn btn-danger" onclick="uncompleteCase()" id="uncompleteCaseBtn" style="display: none;">
-                ↩️ Отменить завершение случая
-            </button>
+        <!-- Кнопки действий -->
+        <div id="documentActions" style="display: none;">
+            <button class="btn btn-success" onclick="completeMySection()" id="completeSectionBtn">✓ Завершить мой раздел</button>
+            <button class="btn btn-warning" onclick="uncompleteMySection()" id="uncompleteSectionBtn" style="display: none;">↩️ Отменить завершение раздела</button>
+            <button class="btn btn-primary" onclick="saveAllChanges()" id="saveAllBtn">💾 Сохранить все изменения</button>
+            <button class="btn btn-success" onclick="completeCaseFromDocument()" id="signDocumentBtn" style="display: none;">📝 Завершить случай</button>
+            <button class="btn btn-danger" onclick="uncompleteCase()" id="uncompleteCaseBtn" style="display: none;">↩️ Отменить завершение случая</button>
             <button class="btn btn-primary" onclick="exportToWebmis()" id="exportWebmisBtn" style="display: none;">📤 Экспорт в ВебМИС</button>
             <span id="saveStatus" style="margin-left: 20px; color: #666;"></span>
         </div>
 
-        <div id="documentTable" style="display: none;">
-            <table class="document-table">
-                <thead>
-                    <tr>
-                        <th>Показатель</th>
-                        <th style="width: 25%;">До лечения</th>
-                        <th style="width: 25%;">После лечения</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Таблица будет заполнена через JavaScript -->
-                </tbody>
-            </table>
+        <!-- Поля верхней части -->
+        <div class="header-fields" id="header-fields" style="display: none;">
+            <div class="form-group">
+                <label for="diagnosisMKB">Диагноз по МКБ:</label>
+                <input type="text" id="diagnosisMKB" class="cell-input header-field" data-field="diagnosis_mkb" placeholder="Введите диагноз">
+            </div>
+            <div class="form-group">
+                <label for="rehabPotential">Реабилитационный потенциал (высокий, удовлетворительный, низкий):</label>
+                <input type="text" id="rehabPotential" class="cell-input header-field" data-field="rehab_potential" placeholder="Введите потенциал">
+            </div>
+            <div class="form-group">
+                <label for="rehabPrognosis">Реабилитационный прогноз (благоприятный, относительно благоприятный, неблагоприятный):</label>
+                <input type="text" id="rehabPrognosis" class="cell-input header-field" data-field="rehab_prognosis" placeholder="Введите прогноз">
+            </div>
+            <div class="form-group">
+                <label for="clinicalDiagnosisMKB">Клинический диагноз по МКБ:</label>
+                <input type="text" id="clinicalDiagnosisMKB" class="cell-input header-field" data-field="clinical_diagnosis_mkb" placeholder="Введите клинический диагноз">
+            </div>
         </div>
+
+        <!-- Основная таблица МКФ -->
+        <h2>Оценка функций по МКФ</h2>
+        <table class="document-table" id="mainTable">
+            <thead>
+                <tr>
+                    <th>Домен / Функция</th>
+                    <th style="width: 15%;">Дата (поступление)</th>
+                    <th style="width: 15%;">Дата (промежуточная)</th>
+                    <th style="width: 15%;">Дата (выписка)</th>
+                    <th style="width: 25%;">Примечание</th>
+                </tr>
+                <!-- Строка для ввода дат в шапке таблицы -->
+                <tr class="table-dates-row">
+                    <td><strong>Даты осмотров</strong></td>
+                    <td><input type="text" id="tableDateAdmission" class="cell-input table-date-input" data-date-type="admission" placeholder="__.__.____"></td>
+                    <td><input type="text" id="tableDateIntermediate" class="cell-input table-date-input" data-date-type="intermediate" placeholder="__.__.____"></td>
+                    <td><input type="text" id="tableDateDischarge" class="cell-input table-date-input" data-date-type="discharge" placeholder="__.__.____"></td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody id="mainTableBody">
+                <!-- будут заполнены динамически -->
+            </tbody>
+        </table>
+
+        <!-- Целевой блок (новый) -->
+        <h2>Целевой блок</h2>
+        <div class="goals-block">
+            <div class="form-group">
+                <label for="shortTermGoal">Краткосрочная:</label>
+                <input type="text" id="shortTermGoal" class="cell-input goal-input" data-goal="short_term" placeholder="Введите краткосрочную цель">
+            </div>
+            <div class="form-group">
+                <label for="longTermGoal">Долгосрочная:</label>
+                <input type="text" id="longTermGoal" class="cell-input goal-input" data-goal="long_term" placeholder="Введите долгосрочную цель">
+            </div>
+        </div>
+
+        <!-- Планы реабилитационных мероприятий (доп. поля) -->
+        <h2>Планы реабилитационных мероприятий</h2>
+        <div class="other-fields">
+            <div>
+                <label for="electrophysiologicalField">1. Электрофизиологическое исследование:</label>
+                <input type="text" id="electrophysiologicalField" class="cell-input" placeholder="Введите данные">
+            </div>
+            <div>
+                <label for="testingField">2. Тестирование (примерные шкалы оценки здоровья пациента):</label>
+                <input type="text" id="testingField" class="cell-input" placeholder="Введите данные">
+            </div>
+            <div>
+                <label for="medicationField">3. Курс медикаментозной терапии:</label>
+                <input type="text" id="medicationField" class="cell-input" placeholder="Введите данные">
+            </div>
+        </div>
+
+        <!-- Таблица процедур -->
+        <h2>Назначенные процедуры</h2>
+        <table class="document-table" id="proceduresTable">
+            <thead>
+                <tr>
+                    <th>Наименование процедур</th>
+                    <th style="width: 15%;">Количество</th>
+                    <th style="width: 25%;">Примечание</th>
+                </tr>
+            </thead>
+            <tbody id="proceduresTableBody">
+                <!-- будут заполнены динамически -->
+            </tbody>
+        </table>
     </div>
 
     <script>
+        // Глобальные переменные
         let token = localStorage.getItem('auth_token');
-        let currentUser = null;
-        let documentId = null;
-        let documentData = null;
-        let permissions = null;
-        let doctorRows = null;
-        let completionStatus = null;
-        let unsavedChanges = new Set();
-        let autoSaveTimer = null;
-        let lastInputTime = 0;
-        const INPUT_DEBOUNCE = 300;
-
-        // Переменные для статуса случая и polling
-        let caseStatus = null;          // Текущий статус случая (например, 'in_progress', 'completed')
-        let caseId = null;              // ID случая, полученный из документа
-        let pollingInterval = null;      // Интервал для опроса статуса случая
+        if (!token) window.location.href = '/';
 
         const urlParams = new URLSearchParams(window.location.search);
-        documentId = urlParams.get('id');
-
+        const documentId = urlParams.get('id');
         if (!documentId) {
-            showAlert('ID документа не указан', 'danger');
-            setTimeout(() => window.location.href = '/cases', 2000);
+            alert('ID документа не указан');
+            window.location.href = '/cases';
         }
 
-        if (!token) {
-            window.location.href = '/';
+        let currentUser = null;
+        let documentData = null; // полная структура из API
+        let permissions = null;
+        let completionStatus = null;
+        let caseId = null;
+        let caseCreatorId = null;
+        let caseStatus = null; // 'in_progress', 'completed'
+
+        // Множество для отслеживания несохранённых изменений
+        let unsavedChanges = new Set();
+        let lastInputTime = 0;
+        const INPUT_DEBOUNCE = 500;
+
+        // ---- Вспомогательные функции ----
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button style="float: right; background: none; border: none; font-size: 20px; cursor: pointer;" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function markAsChanged(changeId) {
+            unsavedChanges.add(changeId);
+            updateSaveStatus();
+        }
+
+        function updateSaveStatus() {
+            const statusEl = document.getElementById('saveStatus');
+            if (unsavedChanges.size > 0) {
+                statusEl.textContent = `Есть несохраненные изменения (${unsavedChanges.size})`;
+                statusEl.style.color = '#f39c12';
+            } else {
+                statusEl.textContent = 'Все изменения сохранены';
+                statusEl.style.color = '#27ae60';
+            }
+        }
+
+        // ---- Загрузка данных ----
         async function loadCurrentUser() {
             try {
                 const response = await fetch('/api/v1/auth/me', {
@@ -336,44 +483,46 @@
                     throw new Error('Ошибка загрузки пользователя');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error(error);
                 window.location.href = '/';
             }
         }
 
         async function loadDocumentStructure() {
+            showLoading(true);
             try {
-                showLoading(true);
-                console.log('🚀 Загрузка структуры документа...');
-
                 const response = await fetch(`/api/v1/document-table/${documentId}/structure`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    const data = await response.json();
-                    documentData = data.table_data;
-                    permissions = data.permissions;
-                    doctorRows = data.doctor_rows;
-                    completionStatus = data.completion_status;
+                    documentData = await response.json();
+                    console.log('📄 Загружена структура:', documentData);
 
-                    console.log('📄 Полученные данные структуры:', data);
+                    // Сохраняем permissions и статусы
+                    permissions = documentData.permissions;
+                    completionStatus = documentData.completion_status;
 
-                    await updateSectionButtons();
-
-                    await loadDocumentInfo();  // загружает информацию о документе и статус случая
-
+                    // Отображаем
+                    await loadDocumentInfo(); // загружает информацию о документе и caseId
                     displayDocumentInfo();
                     displayDoctorStatus();
-                    displayDocumentTable();
-                    setupAutoSave();
 
+                    // Заполняем новые поля
+                    fillHeaderFields(documentData.header_fields);
+                    fillTableDates(documentData.table_dates);
+                    renderMainTable(documentData.main_table);
+                    renderProceduresTable(documentData.procedures_table);
+                    fillGoals(documentData.goals);
+                    fillOtherFields(documentData.other_fields);
+
+                    // Обновляем UI в зависимости от статуса случая
+                    updateSectionButtons();
                     showLoading(false);
                 } else {
-                    throw new Error('Ошибка загрузки документа');
+                    throw new Error('Ошибка загрузки структуры');
                 }
             } catch (error) {
-                console.error('❌ Ошибка загрузки структуры документа:', error);
+                console.error(error);
                 showAlert('Ошибка загрузки документа: ' + error.message, 'danger');
                 showLoading(false);
             }
@@ -381,59 +530,28 @@
 
         async function loadDocumentInfo() {
             try {
-                console.log('📋 Загрузка информации о документе ID:', documentId);
-
                 const response = await fetch(`/api/v1/documents/${documentId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
                     const doc = await response.json();
-                    console.log('📄 Полученные данные о документе:', doc);
-
                     document.getElementById('docId').textContent = doc.id;
-
                     if (doc.case_info) {
                         document.getElementById('patientName').textContent = doc.case_info.name || 'Не указано';
                         document.getElementById('insuranceNumber').textContent = doc.case_info.insurance_number || 'Не указан';
-                    } else {
-                        await loadCaseInfo(doc.case_id);
                     }
-
-                    document.getElementById('createdAt').textContent =
-                        new Date(doc.created_at).toLocaleDateString('ru-RU');
-
-                    // Сохраняем case_id и загружаем статус случая
+                    document.getElementById('createdAt').textContent = new Date(doc.created_at).toLocaleDateString('ru-RU');
                     if (doc.case_id) {
                         caseId = doc.case_id;
                         await fetchCaseStatus(caseId);
-                        startPollingCaseStatus(); // запускаем периодическую проверку
+                        startPollingCaseStatus();
                     }
-                } else {
-                    console.error('❌ Ошибка загрузки документа:', response.status);
                 }
             } catch (error) {
-                console.error('❌ Ошибка загрузки информации о документе:', error);
+                console.error('Ошибка загрузки информации о документе:', error);
             }
         }
 
-        async function loadCaseInfo(caseId) {
-            try {
-                const response = await fetch(`/api/v1/cases/${caseId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const caseData = await response.json();
-                    document.getElementById('patientName').textContent = caseData.patient_name || 'Не указано';
-                    document.getElementById('insuranceNumber').textContent = caseData.patient_insurance || 'Не указан';
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки информации о случае:', error);
-            }
-        }
-
-        // Загрузка статуса случая
         async function fetchCaseStatus(caseId) {
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}`, {
@@ -441,205 +559,169 @@
                 });
                 if (response.ok) {
                     const caseData = await response.json();
-                    // Если статус изменился, обновляем интерфейс
-                    if (caseData.status !== caseStatus) {
-                        caseStatus = caseData.status;
-                        console.log('📌 Статус случая изменился:', caseStatus);
-                        updateCaseStatusUI();
-                        updateExportButtonVisibility();  // обновляем видимость кнопки экспорта
-                    }
-                } else {
-                    console.error('Ошибка загрузки статуса случая:', response.status);
+                    caseStatus = caseData.status;
+                    caseCreatorId = caseData.creator_id;
+                    console.log('📌 Статус случая:', caseStatus, 'creator:', caseCreatorId);
+                    updateCaseStatusUI();
                 }
             } catch (error) {
                 console.error('Ошибка загрузки статуса случая:', error);
             }
         }
 
-        async function exportToWebmis() {
-            // Сохраняем все несохранённые изменения
-            await saveAllChanges();
-
-            // Собираем данные из таблицы
-            const tableData = collectAllTableData();
-            const exportData = {};
-
-            for (const [row, values] of Object.entries(tableData)) {
-                exportData[row + '_before'] = values[1] || '';
-                exportData[row + '_after'] = values[2] || '';
-            }
-
-            // Добавляем метаданные
-            exportData.document_id = documentId;
-            exportData.case_id = caseId;
-            exportData.exported_at = new Date().toISOString();
-
-            // Получаем ФИО пациента
-            const patientFullName = document.getElementById('patientName').textContent.trim() || 'Неизвестный';
-            exportData.patient_name = patientFullName;
-
-            // Формируем имя файла: Фамилия_И.О._ГГГГММДД_ЧЧММ.json
-            const now = new Date();
-            const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
-            const timeStr = now.toTimeString().slice(0,5).replace(':', '');
-
-            // Преобразуем ФИО в формат "Фамилия_И.О."
-            let fileNamePart = 'export';
-            if (patientFullName !== 'Неизвестный') {
-                const parts = patientFullName.split(' ');
-                if (parts.length >= 2) {
-                    const lastName = parts[0];
-                    const firstNameInitial = parts[1].charAt(0).toUpperCase();
-                    const middleNameInitial = parts.length > 2 ? parts[2].charAt(0).toUpperCase() : '';
-                    fileNamePart = `${lastName}_${firstNameInitial}.${middleNameInitial ? middleNameInitial + '.' : ''}`.replace(/\.$/, '');
-                } else {
-                    fileNamePart = patientFullName.replace(/\s+/g, '_');
-                }
-            }
-            const fileName = `${fileNamePart}_${dateStr}_${timeStr}.json`;
-
-            // Создаём и скачиваем JSON-файл
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Функция для обновления видимости кнопки экспорта
-        function updateExportButtonVisibility() {
-            const exportBtn = document.getElementById('exportWebmisBtn');
-            if (!exportBtn) return;
-
-            // Проверяем роль и статус случая
-            const userRole = currentUser?.role;
-            const isCaseCompleted = (caseStatus === 'completed');
-            const canExport = (userRole === 'head' || userRole === 'admin') && isCaseCompleted;
-
-            exportBtn.style.display = canExport ? 'inline-block' : 'none';
-        }
-
-        // Запуск периодического опроса статуса случая
         function startPollingCaseStatus() {
-            if (pollingInterval) clearInterval(pollingInterval);
-            pollingInterval = setInterval(() => {
-                if (caseId) {
-                    fetchCaseStatus(caseId);
-                }
-            }, 5000); // каждые 5 секунд
+            setInterval(() => {
+                if (caseId) fetchCaseStatus(caseId);
+            }, 5000);
         }
 
-        // Остановка опроса (при уходе со страницы)
-        function stopPollingCaseStatus() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
-            }
+        // ---- Заполнение новых полей ----
+        function fillHeaderFields(headerFields) {
+            document.getElementById('diagnosisMKB').value = headerFields.diagnosis_mkb || '';
+            document.getElementById('rehabPotential').value = headerFields.rehab_potential || '';
+            document.getElementById('rehabPrognosis').value = headerFields.rehab_prognosis || '';
+            document.getElementById('clinicalDiagnosisMKB').value = headerFields.clinical_diagnosis_mkb || '';
+
+            document.getElementById('header-fields').style.display = 'block';
+
+            // Добавляем обработчики для автосохранения
+            document.querySelectorAll('.header-field').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    markAsChanged(`header_${e.target.dataset.field}`);
+                }, INPUT_DEBOUNCE));
+            });
         }
 
-        // Обновление интерфейса в зависимости от статуса случая
-        function updateCaseStatusUI() {
-            const caseMessageDiv = document.getElementById('caseStatusMessage');
-            const actionsDiv = document.getElementById('documentActions');
-            const completeSectionBtn = document.getElementById('completeSectionBtn');
-            const uncompleteSectionBtn = document.getElementById('uncompleteSectionBtn');
-            const saveAllBtn = document.getElementById('saveAllBtn');
-            const signDocumentBtn = document.getElementById('signDocumentBtn');
-            const uncompleteCaseBtn = document.getElementById('uncompleteCaseBtn');
+        function fillTableDates(tableDates) {
+            document.getElementById('tableDateAdmission').value = tableDates.admission || '';
+            document.getElementById('tableDateIntermediate').value = tableDates.intermediate || '';
+            document.getElementById('tableDateDischarge').value = tableDates.discharge || '';
 
-            if (!caseStatus) return;
+            document.querySelectorAll('.table-date-input').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    markAsChanged(`tabledate_${e.target.dataset.dateType}`);
+                }, INPUT_DEBOUNCE));
+            });
+        }
 
-            const isCaseCompleted = (caseStatus === 'completed');
+        function fillGoals(goals) {
+            document.getElementById('shortTermGoal').value = goals.short_term || '';
+            document.getElementById('longTermGoal').value = goals.long_term || '';
 
-            if (isCaseCompleted) {
-                caseMessageDiv.textContent = 'Случай завершён';
-                caseMessageDiv.className = 'case-status-message case-status-completed';
-                caseMessageDiv.style.display = 'block';
+            document.querySelectorAll('.goal-input').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    markAsChanged(`goal_${e.target.dataset.goal}`);
+                }, INPUT_DEBOUNCE));
+            });
+        }
 
-                // В зависимости от роли показываем разные элементы
-                if (currentUser.role === 'admin' || currentUser.role === 'head') {
-                    // Админ/зав.: показываем только кнопку отмены завершения случая
-                    completeSectionBtn.style.display = 'none';
-                    uncompleteSectionBtn.style.display = 'none';
-                    saveAllBtn.style.display = 'none';
-                    signDocumentBtn.style.display = 'none';
-                    uncompleteCaseBtn.style.display = 'inline-block';
+        // ---- Отрисовка таблиц ----
+        function renderMainTable(rows) {
+            const tbody = document.getElementById('mainTableBody');
+            tbody.innerHTML = '';
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                if (row.is_section) {
+                    // Заголовок раздела
+                    tr.classList.add('section-header');
+                    tr.innerHTML = `
+                        <td colspan="5" style="text-align: center;">${row.label}</td>
+                    `;
                 } else {
-                    // Невролог/терапевт: показываем только кнопку "Отменить завершение раздела" в disabled
-                    completeSectionBtn.style.display = 'none';
-                    uncompleteSectionBtn.style.display = 'inline-block';
-                    uncompleteSectionBtn.disabled = true;
-                    uncompleteSectionBtn.title = 'Недоступно, так как случай завершён';
-                    saveAllBtn.style.display = 'none';
-                    signDocumentBtn.style.display = 'none';
-                    uncompleteCaseBtn.style.display = 'none';
+                    // Обычная строка с данными
+                    tr.innerHTML = `
+                        <td class="row-label">${row.label}</td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="2" value="${escapeHtml(row.values[2] || '')}"></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="3" value="${escapeHtml(row.values[3] || '')}"></td>
+                    `;
                 }
-            } else {
-                // Случай не завершён – показываем обычный интерфейс
-                caseMessageDiv.style.display = 'none';
-                actionsDiv.style.display = 'block';
+                tbody.appendChild(tr);
+            });
 
-                // Восстанавливаем обычное состояние кнопок (снимаем disabled)
-                uncompleteSectionBtn.disabled = false;
-                uncompleteSectionBtn.title = '';
-
-                // Восстанавливаем видимость основных кнопок
-                saveAllBtn.style.display = 'inline-block';
-                // Кнопку завершения случая НЕ показываем принудительно – она будет показана
-                // только если все разделы заполнены (через updateCompletionStatus)
-                signDocumentBtn.style.display = 'none'; // сбрасываем на всякий случай
-                uncompleteCaseBtn.style.display = 'none';
-
-                // Вызываем updateSectionButtons для корректного отображения кнопок завершения/отмены раздела
-                updateSectionButtons();
-            }
+            // Добавляем обработчики для автосохранения (только для обычных строк)
+            document.querySelectorAll('.main-table-input').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    const rowId = e.target.dataset.rowId;
+                    const col = e.target.dataset.col;
+                    markAsChanged(`main_${rowId}_${col}`);
+                }, INPUT_DEBOUNCE));
+            });
         }
 
+        function renderProceduresTable(rows) {
+            const tbody = document.getElementById('proceduresTableBody');
+            tbody.innerHTML = '';
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="row-label">${row.label}</td>
+                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
+                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.querySelectorAll('.procedure-input').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    const rowId = e.target.dataset.rowId;
+                    const col = e.target.dataset.col;
+                    markAsChanged(`proc_${rowId}_${col}`);
+                }, INPUT_DEBOUNCE));
+            });
+        }
+
+        function fillOtherFields(otherFields) {
+            document.getElementById('electrophysiologicalField').value = otherFields.electrophysiological || '';
+            document.getElementById('testingField').value = otherFields.testing || '';
+            document.getElementById('medicationField').value = otherFields.medication || '';
+            document.getElementById('electrophysiologicalField').addEventListener('input', () => markAsChanged('electrophysiological'));
+            document.getElementById('testingField').addEventListener('input', () => markAsChanged('testing'));
+            document.getElementById('medicationField').addEventListener('input', () => markAsChanged('medication'));
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // ---- Отображение информации о документе и статусах ----
         function displayDocumentInfo() {
             document.getElementById('documentInfo').style.display = 'block';
             document.getElementById('doctorStatus').style.display = 'flex';
             document.getElementById('documentActions').style.display = 'block';
-            document.getElementById('documentTable').style.display = 'block';
-
-            // Первоначально кнопка завершения случая скрыта – будет показана при необходимости
-            // (в updateCompletionStatus)
         }
 
         function displayDoctorStatus() {
-            const neuroCard = document.getElementById('neurologistStatus');
-            const therapistCard = document.getElementById('therapistStatus');
-            const headCard = document.getElementById('headStatus');
+            const neuro = document.getElementById('neurologistStatus');
+            const therapist = document.getElementById('therapistStatus');
+            const head = document.getElementById('headStatus');
 
             if (completionStatus.neurologist) {
-                neuroCard.classList.add('completed');
+                neuro.classList.add('completed');
                 document.getElementById('neurologistText').textContent = 'Заполнено';
-                document.getElementById('neurologistText').style.color = '#27ae60';
             } else {
-                neuroCard.classList.remove('completed');
+                neuro.classList.remove('completed');
                 document.getElementById('neurologistText').textContent = 'Не заполнено';
-                document.getElementById('neurologistText').style.color = '#e74c3c';
             }
-
             if (completionStatus.therapist) {
-                therapistCard.classList.add('completed');
+                therapist.classList.add('completed');
                 document.getElementById('therapistText').textContent = 'Заполнено';
-                document.getElementById('therapistText').style.color = '#27ae60';
             } else {
-                therapistCard.classList.remove('completed');
+                therapist.classList.remove('completed');
                 document.getElementById('therapistText').textContent = 'Не заполнено';
-                document.getElementById('therapistText').style.color = '#e74c3c';
             }
-
             if (completionStatus.head) {
-                headCard.classList.add('completed');
+                head.classList.add('completed');
                 document.getElementById('headText').textContent = 'Заполнено';
-                document.getElementById('headText').style.color = '#27ae60';
             } else {
-                headCard.classList.remove('completed');
+                head.classList.remove('completed');
                 document.getElementById('headText').textContent = 'Не заполнено';
-                document.getElementById('headText').style.color = '#e74c3c';
             }
         }
 
@@ -649,10 +731,6 @@
             const userRole = currentUser?.role;
 
             if (!completionStatus) return;
-
-            // Сбрасываем disabled (если случай не завершён, кнопка должна быть активна)
-            uncompleteBtn.disabled = false;
-            uncompleteBtn.title = '';
 
             let isCompleted = false;
             if (userRole === 'neurologist') isCompleted = completionStatus.neurologist;
@@ -673,569 +751,357 @@
             }
         }
 
-        function displayDocumentTable() {
-            try {
-                console.log('📊 Начинаем отображение таблицы...');
-                console.log('📋 Данные документа:', documentData);
+        function updateCaseStatusUI() {
+            const caseMessageDiv = document.getElementById('caseStatusMessage');
+            const actionsDiv = document.getElementById('documentActions');
+            const completeSectionBtn = document.getElementById('completeSectionBtn');
+            const uncompleteSectionBtn = document.getElementById('uncompleteSectionBtn');
+            const saveAllBtn = document.getElementById('saveAllBtn');
+            const signDocumentBtn = document.getElementById('signDocumentBtn');
+            const uncompleteCaseBtn = document.getElementById('uncompleteCaseBtn');
+            const exportBtn = document.getElementById('exportWebmisBtn');
 
-                const tableBody = document.getElementById('tableBody');
-                if (!tableBody) {
-                    console.error('❌ Элемент tableBody не найден!');
-                    return;
+            if (!caseStatus) return;
+
+            const isCaseCompleted = (caseStatus === 'completed');
+            const isAdminOrHead = (currentUser.role === 'admin' || currentUser.role === 'head');
+            const isCreator = (currentUser.id === caseCreatorId);
+
+            if (isCaseCompleted) {
+                caseMessageDiv.textContent = 'Случай завершён';
+                caseMessageDiv.className = 'case-status-message case-status-completed';
+                caseMessageDiv.style.display = 'block';
+
+                if (isAdminOrHead || isCreator) {
+                    completeSectionBtn.style.display = 'none';
+                    uncompleteSectionBtn.style.display = 'none';
+                    saveAllBtn.style.display = 'none';
+                    signDocumentBtn.style.display = 'none';
+                    uncompleteCaseBtn.style.display = 'inline-block';
+                    exportBtn.style.display = 'inline-block';
+                } else {
+                    completeSectionBtn.style.display = 'none';
+                    uncompleteSectionBtn.style.display = 'inline-block';
+                    uncompleteSectionBtn.disabled = true;
+                    uncompleteSectionBtn.title = 'Недоступно, так как случай завершён';
+                    saveAllBtn.style.display = 'none';
+                    signDocumentBtn.style.display = 'none';
+                    uncompleteCaseBtn.style.display = 'none';
+                    exportBtn.style.display = 'none';
                 }
-
-                tableBody.innerHTML = '';
-
-                const rowOrder = [
-                    'header',
-                    'pain_syndrome',
-                    'stato_dynamic',
-                    'mental_functions',
-                    'internal_organs',
-                    'sensory_functions',
-                    'vital_activity',
-                    'self_care',
-                    'mobility',
-                    'work_ability',
-                    'communication',
-                    'total_score'
-                ];
-
-                const isCaseCompleted = (caseStatus === 'completed');
-
-                rowOrder.forEach(rowKey => {
-                    const rowData = documentData[rowKey] || ["", "", ""];
-                    const tr = document.createElement('tr');
-
-                    if (rowKey === 'header') tr.classList.add('header-row');
-                    else if (rowKey === 'total_score') tr.classList.add('total-row');
-
-                    let doctorType = '';
-                    let doctorName = '';
-                    let canEdit = false;
-
-                    try {
-                        const neuroRows = (doctorRows?.neurologist || []).map(r =>
-                            typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                        );
-                        const therapistRows = (doctorRows?.therapist || []).map(r =>
-                            typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                        );
-                        const headRows = (doctorRows?.head || []).map(r =>
-                            typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                        );
-
-                        if (neuroRows.includes(rowKey)) {
-                            doctorType = 'neurologist';
-                            doctorName = 'Невролог';
-                        } else if (therapistRows.includes(rowKey)) {
-                            doctorType = 'therapist';
-                            doctorName = 'Терапевт';
-                        } else if (headRows.includes(rowKey)) {
-                            doctorType = 'head';
-                            doctorName = 'Заведующий';
-                        }
-
-                        // Блокировка редактирования, если раздел завершён
-                        let isSectionCompleted = false;
-                        if (doctorType === 'neurologist') isSectionCompleted = completionStatus?.neurologist;
-                        else if (doctorType === 'therapist') isSectionCompleted = completionStatus?.therapist;
-                        else if (doctorType === 'head') isSectionCompleted = completionStatus?.head;
-
-                        // Определяем возможность редактирования с учётом статуса случая
-                        if (isCaseCompleted) {
-                            // Если случай завершён, редактирование запрещено всем
-                            canEdit = false;
-                        } else {
-                            // Иначе проверяем права доступа (если раздел не завершён)
-                            if (!isSectionCompleted) {
-                                if (permissions?.can_edit_all) {
-                                    canEdit = true;
-                                } else if (doctorType === 'neurologist' && permissions?.can_edit_neurologist) {
-                                    canEdit = true;
-                                } else if (doctorType === 'therapist' && permissions?.can_edit_therapist) {
-                                    canEdit = true;
-                                } else if (doctorType === 'head' && permissions?.can_edit_head) {
-                                    canEdit = true;
-                                }
-                            } else {
-                                canEdit = false; // раздел завершён – никому нельзя
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Ошибка определения прав для строки', rowKey, ':', error);
-                    }
-
-                    // Заголовок строки
-                    const rowTitle = rowKey === 'header' ? 'Дата' : (rowData[0] || (() => {
-                        const titles = {
-                            'pain_syndrome': 'Болевой синдром',
-                            'stato_dynamic': 'Нарушение стато-динамических функций',
-                            'mental_functions': 'Нарушение психических функций',
-                            'internal_organs': 'Нарушение функций внутренних органов',
-                            'sensory_functions': 'Нарушение сенсорных функций',
-                            'vital_activity': 'Нарушение жизнедеятельности',
-                            'self_care': 'Нарушение самообслуживания',
-                            'mobility': 'Нарушение способности к передвижению',
-                            'work_ability': 'Нарушение способности к трудовой деятельности',
-                            'communication': 'Нарушение способности к общению',
-                            'total_score': 'Сумма баллов'
-                        }[rowKey] || rowKey;
-                    })());
-
-                    // Формируем ячейки
-                    let col1Html, col2Html;
-
-                    if (rowKey === 'header') {
-                        col1Html = `<input type="date"
-                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                    value="${(rowData[1] || '').replace(/"/g, '&quot;')}"
-                                    data-row="${rowKey}"
-                                    data-col="1"
-                                    ${canEdit ? '' : 'readonly'}
-                                    oninput="debouncedMarkAsChanged('${rowKey}', 1, this.value)">`;
-
-                        col2Html = `<input type="date"
-                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                    value="${(rowData[2] || '').replace(/"/g, '&quot;')}"
-                                    data-row="${rowKey}"
-                                    data-col="2"
-                                    ${canEdit ? '' : 'readonly'}
-                                    oninput="debouncedMarkAsChanged('${rowKey}', 2, this.value)">`;
-                    } else {
-                        col1Html = `<input type="text"
-                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                    value="${(rowData[1] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
-                                    data-row="${rowKey}"
-                                    data-col="1"
-                                    ${canEdit ? '' : 'readonly'}
-                                    oninput="debouncedMarkAsChanged('${rowKey}', 1, this.value)">`;
-
-                        col2Html = `<input type="text"
-                                    class="cell-input ${doctorType} ${canEdit ? '' : 'readonly'}"
-                                    value="${(rowData[2] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
-                                    data-row="${rowKey}"
-                                    data-col="2"
-                                    ${canEdit ? '' : 'readonly'}
-                                    oninput="debouncedMarkAsChanged('${rowKey}', 2, this.value)">`;
-                    }
-
-                    tr.innerHTML = `
-                        <td class="row-label">
-                            ${rowTitle}
-                            ${doctorName ? `<div class="row-doctor">${doctorName}</div>` : ''}
-                        </td>
-                        <td>${col1Html}</td>
-                        <td>${col2Html}</td>
-                    `;
-
-                    tableBody.appendChild(tr);
-                });
-
-                console.log('✅ Таблица успешно отображена');
-                console.log('🔍 Элементов input в таблице:', document.querySelectorAll('input[data-row]').length);
-            } catch (error) {
-                console.error('❌ Ошибка отображения таблицы:', error);
-                showAlert('Ошибка отображения таблицы: ' + error.message, 'danger');
-            }
-        }
-
-        function debouncedMarkAsChanged(rowKey, colIndex, value) {
-            const now = Date.now();
-            if (now - lastInputTime > INPUT_DEBOUNCE) {
-                markAsChanged(rowKey, colIndex, value);
-                lastInputTime = now;
-            }
-        }
-
-        function markAsChanged(rowKey, colIndex, value) {
-            const changeId = `${rowKey}_${colIndex}`;
-            unsavedChanges.add(changeId);
-            updateSaveStatus();
-
-            if (unsavedChanges.size === 1) {
-                console.log(`📝 Изменение: ${rowKey}_${colIndex} = "${value}"`);
-                console.log(`   Несохраненных изменений: ${unsavedChanges.size}`);
-            }
-        }
-
-        function updateSaveStatus() {
-            const saveStatus = document.getElementById('saveStatus');
-            if (unsavedChanges.size > 0) {
-                saveStatus.textContent = `Есть несохраненные изменения (${unsavedChanges.size})`;
-                saveStatus.style.color = '#f39c12';
             } else {
-                saveStatus.textContent = 'Все изменения сохранены';
-                saveStatus.style.color = '#27ae60';
+                caseMessageDiv.style.display = 'none';
+                actionsDiv.style.display = 'block';
+                uncompleteSectionBtn.disabled = false;
+                uncompleteSectionBtn.title = '';
+                saveAllBtn.style.display = 'inline-block';
+                signDocumentBtn.style.display = 'none';
+                uncompleteCaseBtn.style.display = 'none';
+                exportBtn.style.display = 'none';
+                updateSectionButtons();
             }
         }
 
-        function setupAutoSave() {
-            autoSaveTimer = setInterval(() => {
-                if (unsavedChanges.size > 0) {
-                    saveAllChanges();
-                }
-            }, 30000);
+        // ---- Сохранение изменений ----
+        function collectMainTableData() {
+            const rows = {};
+            document.querySelectorAll('.main-table-input').forEach(input => {
+                const rowId = input.dataset.rowId;
+                const col = parseInt(input.dataset.col);
+                if (!rows[rowId]) rows[rowId] = ["", "", "", ""];
+                rows[rowId][col] = input.value;
+            });
+            return rows;
         }
 
-        function collectAllTableData() {
-            const allData = {};
-            const inputs = document.querySelectorAll('input[data-row]');
-            inputs.forEach(input => {
-                const rowKey = input.dataset.row;
-                const colIndex = input.dataset.col;
-
-                if (!allData[rowKey]) {
-                    allData[rowKey] = ["", "", ""];
-                    if (documentData && documentData[rowKey]) {
-                        allData[rowKey][0] = documentData[rowKey][0] || "";
-                    }
-                }
-                if (colIndex === '1') {
-                    allData[rowKey][1] = input.value || "";
-                } else if (colIndex === '2') {
-                    allData[rowKey][2] = input.value || "";
-                }
+        function collectProcedureTableData() {
+            const rows = {};
+            document.querySelectorAll('.procedure-input').forEach(input => {
+                const rowId = input.dataset.rowId;
+                const col = parseInt(input.dataset.col);
+                if (!rows[rowId]) rows[rowId] = ["", ""];
+                rows[rowId][col] = input.value;
             });
-            return allData;
-        }
-
-        function collectMyTableData() {
-            const userRole = currentUser.role;
-            let allowedRows = [];
-
-            if (userRole === 'neurologist') {
-                allowedRows = (doctorRows?.neurologist || []).map(r =>
-                    typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                );
-            } else if (userRole === 'therapist') {
-                allowedRows = (doctorRows?.therapist || []).map(r =>
-                    typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                );
-            } else if (userRole === 'head') {
-                allowedRows = (doctorRows?.head || []).map(r =>
-                    typeof r === 'string' ? r : (r.value || r.name || r.key || String(r))
-                );
-            }
-
-            const myData = {};
-            const inputs = document.querySelectorAll('input[data-row]');
-            inputs.forEach(input => {
-                const rowKey = input.dataset.row;
-                const colIndex = input.dataset.col;
-
-                if (allowedRows.includes(rowKey)) {
-                    if (!myData[rowKey]) {
-                        myData[rowKey] = ["", "", ""];
-                        if (documentData && documentData[rowKey]) {
-                            myData[rowKey][0] = documentData[rowKey][0] || "";
-                        }
-                    }
-                    if (colIndex === '1') {
-                        myData[rowKey][1] = input.value || "";
-                    } else if (colIndex === '2') {
-                        myData[rowKey][2] = input.value || "";
-                    }
-                }
-            });
-            return myData;
+            return rows;
         }
 
         async function saveAllChanges() {
             if (unsavedChanges.size === 0) {
-                console.log('📭 Нет изменений для сохранения');
+                showAlert('Нет изменений для сохранения', 'info');
                 return;
             }
 
+            showLoading(true);
+            let success = true;
+
+            // Сохраняем поля верхней части
+            const headerData = {
+                diagnosis_mkb: document.getElementById('diagnosisMKB').value,
+                rehab_potential: document.getElementById('rehabPotential').value,
+                rehab_prognosis: document.getElementById('rehabPrognosis').value,
+                clinical_diagnosis_mkb: document.getElementById('clinicalDiagnosisMKB').value
+            };
             try {
-                console.log('💾 Начинаем сохранение всех изменений...');
-                console.log('📋 Изменений для сохранения:', unsavedChanges.size);
+                const response = await fetch(`/api/v1/document-table/${documentId}/header-fields`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(headerData)
+                });
+                if (!response.ok) success = false;
+            } catch (err) {
+                console.error(err);
+                success = false;
+            }
 
-                const allData = collectAllTableData();
-                console.log('📦 Все данные таблицы:', allData);
+            // Сохраняем даты таблицы
+            const tableDatesData = {
+                admission: document.getElementById('tableDateAdmission').value,
+                intermediate: document.getElementById('tableDateIntermediate').value,
+                discharge: document.getElementById('tableDateDischarge').value
+            };
+            try {
+                const response = await fetch(`/api/v1/document-table/${documentId}/table-dates`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(tableDatesData)
+                });
+                if (!response.ok) success = false;
+            } catch (err) {
+                console.error(err);
+                success = false;
+            }
 
-                for (const rowKey in allData) {
-                    const rowUpdate = {
-                        row_name: rowKey,
-                        values: [allData[rowKey][1], allData[rowKey][2]]
-                    };
-
-                    console.log('📤 Отправка строки:', rowKey, rowUpdate.values);
-
-                    try {
-                        const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(rowUpdate)
-                        });
-
-                        if (response.ok) {
-                            const result = await response.json();
-                            console.log('✅ Ответ сервера для строки', rowKey, ':', result);
-
-                            if (!documentData[rowKey]) {
-                                documentData[rowKey] = ["", "", ""];
-                            }
-                            documentData[rowKey][1] = allData[rowKey][1];
-                            documentData[rowKey][2] = allData[rowKey][2];
-                        } else {
-                            const errorText = await response.text();
-                            console.error('❌ Ошибка сервера для строки', rowKey, ':', response.status, errorText);
-                        }
-                    } catch (fetchError) {
-                        console.error('❌ Ошибка сети при сохранении строки', rowKey, ':', fetchError);
+            // Сохраняем основную таблицу (только обычные строки)
+            const mainRows = collectMainTableData();
+            for (const [rowId, values] of Object.entries(mainRows)) {
+                try {
+                    const response = await fetch(`/api/v1/document-table/${documentId}/main-table-row`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ row_id: rowId, values: values })
+                    });
+                    if (!response.ok) {
+                        console.error('Ошибка сохранения строки', rowId);
+                        success = false;
                     }
+                } catch (err) {
+                    console.error(err);
+                    success = false;
                 }
+            }
 
+            // Сохраняем таблицу процедур
+            const procRows = collectProcedureTableData();
+            for (const [rowId, values] of Object.entries(procRows)) {
+                try {
+                    const response = await fetch(`/api/v1/document-table/${documentId}/procedure-row`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ row_id: rowId, values: values })
+                    });
+                    if (!response.ok) success = false;
+                } catch (err) {
+                    console.error(err);
+                    success = false;
+                }
+            }
+
+            // Сохраняем цели
+            const goalsData = {
+                short_term: document.getElementById('shortTermGoal').value,
+                long_term: document.getElementById('longTermGoal').value
+            };
+            try {
+                const response = await fetch(`/api/v1/document-table/${documentId}/goals`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(goalsData)
+                });
+                if (!response.ok) success = false;
+            } catch (err) {
+                console.error(err);
+                success = false;
+            }
+
+            // Дополнительные поля
+            try {
+                const otherData = {
+                    electrophysiological: document.getElementById('electrophysiologicalField').value,
+                    testing: document.getElementById('testingField').value,
+                    medication: document.getElementById('medicationField').value
+                };
+                const response = await fetch(`/api/v1/document-table/${documentId}/other-fields`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(otherData)
+                });
+                if (!response.ok) success = false;
+            } catch (err) {
+                console.error(err);
+                success = false;
+            }
+
+            showLoading(false);
+            if (success) {
                 unsavedChanges.clear();
                 updateSaveStatus();
-
-                // Перерисовываем таблицу, чтобы отобразить актуальные данные (включая пересчитанную сумму)
-                displayDocumentTable();
-
-                await updateCompletionStatus();
-
-                showAlert('Изменения сохранены', 'success');
-                console.log('🎉 Все изменения успешно сохранены!');
-
-            } catch (error) {
-                console.error('❌ Критическая ошибка сохранения:', error);
-                showAlert('Ошибка сохранения: ' + error.message, 'danger');
+                showAlert('Все изменения сохранены', 'success');
+            } else {
+                showAlert('Некоторые изменения не сохранились. Проверьте консоль.', 'danger');
             }
         }
 
+        // ---- Завершение / отмена разделов ----
         async function completeMySection() {
-            await saveMyChangesOnly();
-
-            if (!confirm('Вы уверены, что завершили заполнение вашего раздела? После завершения редактирование будет ограничено.')) {
-                return;
-            }
+            await saveAllChanges(); // сначала сохраняем
+            if (!confirm('Вы уверены, что завершили заполнение вашего раздела?')) return;
 
             try {
                 const response = await fetch(`/api/v1/document-table/${documentId}/complete-section`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    const result = await response.json();
-                    showAlert(result.message || 'Раздел отмечен как заполненный', 'success');
-
-                    await updateCompletionStatus();
-                    await loadDocumentStructure();
+                    showAlert('Раздел отмечен как заполненный', 'success');
+                    await loadDocumentStructure(); // перезагружаем статусы
                 } else {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Ошибка завершения раздела');
+                    throw new Error(error.detail || 'Ошибка');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
                 showAlert('Ошибка: ' + error.message, 'danger');
             }
         }
 
         async function uncompleteMySection() {
-            if (!confirm('Вы уверены, что хотите отменить завершение раздела? Редактирование снова станет доступным.')) {
-                return;
-            }
+            if (!confirm('Вы уверены, что хотите отменить завершение раздела?')) return;
 
             try {
                 const response = await fetch(`/api/v1/document-table/${documentId}/uncomplete-my-section`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    const result = await response.json();
-                    showAlert(result.message || 'Завершение раздела отменено', 'success');
+                    showAlert('Завершение раздела отменено', 'success');
                     await loadDocumentStructure();
                 } else {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Ошибка отмены завершения');
+                    throw new Error(error.detail || 'Ошибка');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
                 showAlert('Ошибка: ' + error.message, 'danger');
             }
         }
 
-        async function saveMyChangesOnly() {
-            try {
-                console.log('👤 Сохранение изменений только для текущего пользователя...');
-
-                const myData = collectMyTableData();
-                console.log('📦 Данные текущего пользователя:', myData);
-
-                if (Object.keys(myData).length === 0) {
-                    console.log('📭 Нет данных для сохранения');
-                    return;
-                }
-
-                for (const rowKey in myData) {
-                    const rowUpdate = {
-                        row_name: rowKey,
-                        values: [myData[rowKey][1], myData[rowKey][2]]
-                    };
-
-                    console.log('📤 Отправка строки пользователя:', rowKey, rowUpdate.values);
-
-                    try {
-                        const response = await fetch(`/api/v1/document-table/${documentId}/row`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(rowUpdate)
-                        });
-
-                        if (response.ok) {
-                            const result = await response.json();
-                            console.log('✅ Ответ сервера для строки', rowKey, ':', result);
-
-                            if (!documentData[rowKey]) {
-                                documentData[rowKey] = ["", "", ""];
-                            }
-                            documentData[rowKey][1] = myData[rowKey][1];
-                            documentData[rowKey][2] = myData[rowKey][2];
-                        } else {
-                            const errorText = await response.text();
-                            console.error('❌ Ошибка сервера для строки', rowKey, ':', response.status, errorText);
-                        }
-                    } catch (fetchError) {
-                        console.error('❌ Ошибка сети при сохранении строки', rowKey, ':', fetchError);
-                    }
-                }
-
-                unsavedChanges.clear();
-                updateSaveStatus();
-
-                console.log('✅ Изменения пользователя сохранены');
-
-            } catch (error) {
-                console.error('❌ Ошибка сохранения своих изменений:', error);
-                throw error;
-            }
-        }
-
-        async function updateCompletionStatus() {
-            try {
-                const response = await fetch(`/api/v1/document-table/${documentId}/completion-status`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const status = await response.json();
-                    completionStatus = {
-                        neurologist: status.neurologist.completed,
-                        therapist: status.therapist.completed,
-                        head: status.head.completed
-                    };
-                    displayDoctorStatus();
-                    await updateSectionButtons();
-
-                    // Показываем кнопку завершения случая только если все разделы заполнены,
-                    // пользователь админ/зав. И случай ещё не завершён
-                    if (status.all_completed && (currentUser.role === 'head' || currentUser.role === 'admin') && caseStatus !== 'completed') {
-                        document.getElementById('signDocumentBtn').style.display = 'inline-block';
-                    } else {
-                        // Иначе скрываем
-                        document.getElementById('signDocumentBtn').style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                console.error('Ошибка обновления статуса:', error);
-            }
-        }
-
-        // Функция завершения случая (вызывает /cases/{caseId}/complete)
+        // ---- Завершение случая и экспорт ----
         async function completeCaseFromDocument() {
             if (!caseId) {
                 showAlert('ID случая не найден', 'danger');
                 return;
             }
-            if (!confirm('Вы уверены, что хотите завершить случай? После завершения редактирование будет невозможно.')) {
-                return;
-            }
+            if (!confirm('Вы уверены, что хотите завершить случай?')) return;
 
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}/complete`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
                     showAlert('Случай успешно завершён', 'success');
-                    await fetchCaseStatus(caseId); // обновит интерфейс
+                    await fetchCaseStatus(caseId);
                 } else {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Ошибка завершения случая');
+                    throw new Error(error.detail || 'Ошибка');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
                 showAlert('Ошибка: ' + error.message, 'danger');
             }
         }
 
-        // Функция отмены завершения случая
         async function uncompleteCase() {
-            if (!confirm('Вы уверены, что хотите отменить завершение случая? После отмены редактирование снова станет возможным.')) {
-                return;
-            }
+            if (!confirm('Вы уверены, что хотите отменить завершение случая?')) return;
 
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}/uncomplete`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    const result = await response.json();
-                    showAlert(result.message || 'Завершение случая отменено', 'success');
+                    showAlert('Завершение случая отменено', 'success');
                     await fetchCaseStatus(caseId);
                 } else {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Ошибка отмены завершения случая');
+                    throw new Error(error.detail || 'Ошибка');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
                 showAlert('Ошибка: ' + error.message, 'danger');
             }
         }
 
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        function exportToWebmis() {
+            // Генерация JSON-файла из текущих данных
+            const data = {
+                document_id: documentId,
+                case_id: caseId,
+                header_fields: {
+                    diagnosis_mkb: document.getElementById('diagnosisMKB').value,
+                    rehab_potential: document.getElementById('rehabPotential').value,
+                    rehab_prognosis: document.getElementById('rehabPrognosis').value,
+                    clinical_diagnosis_mkb: document.getElementById('clinicalDiagnosisMKB').value
+                },
+                table_dates: {
+                    admission: document.getElementById('tableDateAdmission').value,
+                    intermediate: document.getElementById('tableDateIntermediate').value,
+                    discharge: document.getElementById('tableDateDischarge').value
+                },
+                main_table: collectMainTableData(),
+                procedures_table: collectProcedureTableData(),
+                goals: {
+                    short_term: document.getElementById('shortTermGoal').value,
+                    long_term: document.getElementById('longTermGoal').value
+                },
+                other_fields: {
+                    electrophysiological: document.getElementById('electrophysiologicalField').value,
+                    testing: document.getElementById('testingField').value,
+                    medication: document.getElementById('medicationField').value
+                },
+                exported_at: new Date().toISOString()
+            };
+
+            const patientName = document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_') || 'patient';
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
+            const timeStr = now.toTimeString().slice(0,5).replace(':', '');
+            const fileName = `${patientName}_${dateStr}_${timeStr}.json`;
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
-        function showAlert(message, type) {
-            const container = document.getElementById('alertContainer');
-            const alertClass = type === 'error' ? 'alert alert-danger' :
-                             type === 'success' ? 'alert alert-success' :
-                             type === 'warning' ? 'alert alert-warning' :
-                             'alert alert-info';
-
-            const alertDiv = document.createElement('div');
-            alertDiv.className = alertClass;
-            alertDiv.innerHTML = `
-                ${message}
-                <button style="float: right; background: none; border: none; font-size: 20px; cursor: pointer;"
-                        onclick="this.parentElement.remove()">×</button>
-            `;
-
-            while (container.firstChild) {
-                container.removeChild(container.firstChild);
-            }
-            container.appendChild(alertDiv);
-
-            setTimeout(() => {
-                if (alertDiv.parentNode === container) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
+        // ---- Инициализация ----
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
             await loadDocumentStructure();
@@ -1245,7 +1111,6 @@
                     e.preventDefault();
                     e.returnValue = 'У вас есть несохраненные изменения. Вы уверены, что хотите уйти?';
                 }
-                stopPollingCaseStatus(); // останавливаем polling при уходе
             });
         });
     </script>
