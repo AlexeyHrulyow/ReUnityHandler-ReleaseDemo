@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.1&#10;- реализован поиск по документу">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.2&#10;- разработка дизайна сайта">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -408,7 +402,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771420860474</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Версия 0.3.2&#10;- разработка дизайна сайта">
+      <option name="closed" value="true" />
+      <created>1771504182190</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1771504182190</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -450,6 +452,7 @@
     <MESSAGE value="Версия 0.2.4&#10;- испавлена ошибка завершения раздела" />
     <MESSAGE value="Версия 0.3.0&#10;- внедрена новая версия документа" />
     <MESSAGE value="Версия 0.3.1&#10;- реализован поиск по документу" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.1&#10;- реализован поиск по документу" />
+    <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.2&#10;- разработка дизайна сайта" />
   </component>
 </project>
