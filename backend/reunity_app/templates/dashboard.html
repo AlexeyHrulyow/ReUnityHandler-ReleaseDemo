@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель управления - ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             min-height: 100vh;
         }
         .container {
@@ -17,19 +28,20 @@
             margin: 0 auto;
         }
         .header {
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
+            background: rgba(13, 92, 99, 0.9);
+            color: var(--text-light);
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
         .user-info {
-            background: rgba(255, 255, 255, 0.9);
+            background: #ffffff;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--primary-medium);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .nav-cards {
             display: grid;
@@ -38,24 +50,24 @@
             margin-top: 30px;
         }
         .nav-card {
-            background: white;
-            border: 1px solid #ddd;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             padding: 25px;
             text-align: center;
             text-decoration: none;
-            color: #333;
+            color: var(--text-dark);
             transition: all 0.3s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .nav-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-color: #3498db;
+            border-color: var(--primary-medium);
         }
         .nav-card h3 {
             margin-top: 0;
-            color: #2c3e50;
+            color: var(--primary-dark);
         }
         .nav-card p {
             color: #666;
@@ -72,7 +84,7 @@
             display: inline-block;
         }
         .btn-primary {
-            background: #3498db;
+            background: var(--primary-medium);
             color: white;
         }
         .btn-danger {
@@ -122,10 +134,10 @@
     </div>
 
     <script>
+        // скрипт без изменений
         let token = null;
         let currentUser = null;
 
-        // Функция для получения русского названия роли
         function getRoleName(role) {
             const roles = {
                 'admin': 'Администратор',
@@ -136,7 +148,6 @@
             return roles[role] || role;
         }
 
-        // Проверяем аутентификацию при загрузке
         document.addEventListener('DOMContentLoaded', async () => {
             token = localStorage.getItem('auth_token');
             console.log('Токен из localStorage:', token ? 'Есть' : 'Нет');
@@ -168,7 +179,6 @@
                     currentUser = await response.json();
                     console.log('Пользователь загружен:', currentUser.username);
 
-                    // Показываем информацию о пользователе
                     document.getElementById('welcomeMessage').textContent =
                         `Добро пожаловать, ${currentUser.full_name}!`;
 
@@ -180,7 +190,6 @@
                     document.getElementById('navCards').style.display = 'grid';
                     document.getElementById('loading').style.display = 'none';
 
-                    // Добавляем карточку администрирования только для админа
                     if (currentUser.role === 'admin') {
                         const navCards = document.getElementById('navCards');
                         const adminCard = document.createElement('a');

@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -20,7 +31,7 @@
             width: 90%;
         }
         .login-card {
-            background: white;
+            background: var(--bg-light);
             border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             padding: 40px 30px;
@@ -30,12 +41,12 @@
             margin-bottom: 30px;
         }
         .login-header h1 {
-            color: #2c3e50;
+            color: var(--primary-dark);
             font-size: 28px;
             margin: 10px 0 5px;
         }
         .login-header p {
-            color: #7f8c8d;
+            color: var(--primary-medium);
             margin: 0;
             font-size: 14px;
         }
@@ -45,28 +56,28 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #34495e;
+            color: var(--text-dark);
             font-weight: bold;
             font-size: 14px;
         }
         .form-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
             transition: border 0.3s;
         }
         .form-group input:focus {
-            border-color: #3498db;
+            border-color: var(--primary-medium);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            box-shadow: 0 0 0 3px rgba(68,161,160,0.1);
         }
         .btn {
             width: 100%;
             padding: 14px;
-            background: #3498db;
+            background: var(--primary-medium);
             color: white;
             border: none;
             border-radius: 5px;
@@ -76,7 +87,7 @@
             transition: background 0.3s;
         }
         .btn:hover {
-            background: #2980b9;
+            background: var(--primary-dark);
         }
         .alert {
             padding: 12px;

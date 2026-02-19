@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление врачами - ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             min-height: 100vh;
         }
         .container {
@@ -17,8 +28,8 @@
             margin: 0 auto;
         }
         .header {
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
+            background: rgba(13, 92, 99, 0.9);
+            color: var(--text-light);
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -28,6 +39,7 @@
             display: flex;
             gap: 10px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
         .admin-nav .btn {
             background: rgba(255,255,255,0.2);
@@ -35,26 +47,31 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
         .admin-nav .btn.active {
-            background: #3498db;
-            border-color: #3498db;
+            background: var(--primary-medium);
+            border-color: var(--primary-medium);
         }
         .content {
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             padding: 20px;
             border-radius: 5px;
+            overflow-x: auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            min-width: 800px;
         }
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             padding: 10px;
             text-align: left;
+            white-space: nowrap;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: var(--primary-dark);
+            color: white;
         }
         .btn {
             padding: 8px 16px;
@@ -66,26 +83,11 @@
             text-decoration: none;
             display: inline-block;
         }
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
+        .btn-primary { background: var(--primary-medium); color: white; }
+        .btn-success { background: var(--primary-deep); color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
         .form-group {
             margin-bottom: 15px;
         }
@@ -97,7 +99,7 @@
         .form-group input, .form-group select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             box-sizing: border-box;
         }
@@ -112,7 +114,7 @@
             background-color: rgba(0,0,0,0.5);
         }
         .modal-content {
-            background-color: white;
+            background-color: var(--bg-light);
             margin: 10% auto;
             padding: 20px;
             border-radius: 5px;
@@ -130,14 +132,8 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
         .loading {
             text-align: center;
             padding: 40px;
@@ -146,6 +142,7 @@
     </style>
 </head>
 <body>
+    <!-- тело без изменений (как в исходном файле) -->
     <div class="container">
         <div class="header">
             <h1>Управление врачами</h1>
@@ -230,6 +227,7 @@
     </div>
 
     <script>
+        // скрипт без изменений (как в исходном)
         let token = localStorage.getItem('auth_token');
         if (!token) {
             window.location.href = '/';
@@ -356,7 +354,7 @@
             document.getElementById('password').required = false;
             document.getElementById('role').value = doctor.role;
             document.getElementById('isActive').checked = doctor.is_active;
-            document.getElementById('passwordGroup').style.display = 'none'; // при редактировании пароль не обязателен
+            document.getElementById('passwordGroup').style.display = 'none';
             document.getElementById('doctorModal').style.display = 'block';
         }
 

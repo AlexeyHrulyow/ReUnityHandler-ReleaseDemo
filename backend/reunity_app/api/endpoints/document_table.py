@@ -1,8 +1,9 @@
-from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from sqlalchemy import select
+from pydantic import BaseModel
+from typing import Dict, List, Optional
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
@@ -298,6 +299,72 @@ async def update_goals(
 
     return {"message": "Цели обновлены"}
 
+# Схема для приёма полного обновления документа
+class FullDocumentUpdate(BaseModel):
+    diagnosis_mkb: str
+    rehab_potential: str
+    rehab_prognosis: str
+    table_dates: Dict[str, str]  # ожидается {admission, intermediate, discharge}
+    main_table: Dict[str, List[str]]  # {row_id: [val1,val2,val3,val4]}
+    procedures_table: Dict[str, List[str]]  # {row_id: [val1,val2]}
+    goals: Dict[str, str]  # {short_term, long_term}
+
+
+@router.put("/{document_id}/full-content")
+async def update_document_full(
+        document_id: int,
+        update_data: FullDocumentUpdate,
+        db: AsyncSession = Depends(get_db),
+        current_user: Doctor = Depends(get_current_active_user)
+):
+    """Полное обновление документа одной пачкой (оптимизированное сохранение)"""
+    document = await get_document_or_404(document_id, db)
+
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+
+    # Обновляем верхние поля
+    document.content["diagnosis_mkb"] = update_data.diagnosis_mkb
+    document.content["rehab_potential"] = update_data.rehab_potential
+    document.content["rehab_prognosis"] = update_data.rehab_prognosis
+
+    # Обновляем даты в шапке
+    if "table_dates" not in document.content:
+        document.content["table_dates"] = {}
+    document.content["table_dates"]["admission"] = update_data.table_dates.get("admission", "")
+    document.content["table_dates"]["intermediate"] = update_data.table_dates.get("intermediate", "")
+    document.content["table_dates"]["discharge"] = update_data.table_dates.get("discharge", "")
+
+    # Обновляем основную таблицу (только обычные строки, заголовки пропускаем)
+    for row_id, values in update_data.main_table.items():
+        # Проверяем, что это не заголовок (заголовки не должны присылаться, но на всякий случай)
+        for row in document.content.get("main_table", {}).get("rows", []):
+            if row["id"] == row_id and row.get("is_section", False):
+                continue  # пропускаем заголовки
+        document.update_main_table_row(row_id, values)
+
+    # Обновляем таблицу процедур
+    for row_id, values in update_data.procedures_table.items():
+        document.update_procedure_row(row_id, values)
+
+    # Обновляем цели
+    document.update_goals(
+        short_term=update_data.goals.get("short_term", ""),
+        long_term=update_data.goals.get("long_term", "")
+    )
+
+    # Отмечаем время заполнения в зависимости от роли
+    now = datetime.utcnow()
+    if current_user.role == DoctorRole.NEUROLOGIST:
+        document.neurologist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST:
+        document.therapist_filled_at = now
+    elif current_user.role == DoctorRole.HEAD:
+        document.head_filled_at = now
+
+    await db.commit()
+
+    return {"message": "Документ успешно обновлён"}
 
 # Оставшиеся эндпоинты для совместимости (можно оставить, если используются)
 @router.post("/{document_id}/complete-section")

@@ -5,37 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создание нового случая - ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
+            min-height: 100vh;
         }
         .container {
             max-width: 900px;
             margin: 0 auto;
         }
         .header {
-            background: #2c3e50;
+            background: rgba(13, 92, 99, 0.9);
             color: white;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
+            backdrop-filter: blur(5px);
         }
         .form-container {
-            background: #f8f9fa;
+            background: #ffffff;
             padding: 30px;
             border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .form-section {
             margin-bottom: 30px;
             padding: 20px;
-            background: white;
+            background: var(--bg-light);
             border-radius: 5px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--primary-medium);
         }
         .form-section h3 {
             margin-top: 0;
-            color: #2c3e50;
+            color: var(--text-dark);
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
         }
@@ -46,14 +61,14 @@
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #333;
+            color: var(--text-dark);
         }
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
@@ -62,9 +77,10 @@
             display: flex;
             gap: 20px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .form-row .form-group {
-            flex: 1;
+            flex: 1 1 200px;
             margin-bottom: 0;
         }
         .required::after {
@@ -81,15 +97,15 @@
             min-width: 120px;
         }
         .btn-primary {
-            background: #3498db;
+            background: var(--primary-medium);
             color: white;
         }
         .btn-secondary {
-            background: #95a5a6;
-            color: white;
+            background: var(--primary-light);
+            color: var(--text-dark);
         }
         .btn-success {
-            background: #27ae60;
+            background: var(--primary-deep);
             color: white;
         }
         .patient-search-container {
@@ -101,7 +117,7 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             max-height: 300px;
             overflow-y: auto;
@@ -116,14 +132,14 @@
             transition: background 0.2s;
         }
         .search-result-item:hover {
-            background: #f5f5f5;
+            background: var(--primary-light);
         }
         .patient-info {
             margin-top: 15px;
             padding: 15px;
-            background: #e8f4fc;
+            background: #e0f0f5;
             border-radius: 4px;
-            border: 1px solid #b3d9ff;
+            border: 1px solid var(--primary-light);
         }
         .patient-info.hidden {
             display: none;
@@ -160,19 +176,20 @@
             margin-top: 5px;
         }
         .info-box {
-            background: #e8f4fc;
+            background: #e0f0f5;
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--primary-medium);
         }
         .action-buttons {
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         .action-buttons .btn {
-            flex: 1;
+            flex: 1 1 auto;
         }
         .mode-switcher {
             display: flex;
@@ -180,12 +197,13 @@
             margin-bottom: 20px;
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
+            flex-wrap: wrap;
         }
         .mode-btn {
             padding: 10px 20px;
-            border: 2px solid #3498db;
+            border: 2px solid var(--primary-medium);
             background: white;
-            color: #3498db;
+            color: var(--primary-medium);
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
@@ -195,7 +213,7 @@
             background: #f0f7ff;
         }
         .mode-btn.active {
-            background: #3498db;
+            background: var(--primary-medium);
             color: white;
         }
         .mode-content {
@@ -207,6 +225,7 @@
     </style>
 </head>
 <body>
+    <!-- тело без изменений (как в исходном) -->
     <div class="container">
         <div class="header">
             <h1>Создание нового случая</h1>
@@ -330,12 +349,12 @@
     </div>
 
     <script>
+        // скрипт без изменений (как в исходном)
         let token = localStorage.getItem('auth_token');
         let searchTimeout = null;
         let currentUser = null;
-        let currentMode = 'existing'; // 'existing' или 'new'
+        let currentMode = 'existing';
 
-        // Проверяем аутентификацию
         if (!token) {
             window.location.href = '/';
         }
@@ -369,25 +388,20 @@
         }
 
         function setupForm() {
-            // Устанавливаем сегодняшнюю дату по умолчанию
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('admissionDate').value = today;
 
-            // Устанавливаем дату рождения 30 лет назад по умолчанию для нового пациента
             const thirtyYearsAgo = new Date();
             thirtyYearsAgo.setFullYear(thirtyYearsAgo.getFullYear() - 30);
             document.getElementById('birthDate').value = thirtyYearsAgo.toISOString().split('T')[0];
         }
 
         function setupEventListeners() {
-            // Поиск пациентов
             const patientSearch = document.getElementById('patientSearch');
             patientSearch.addEventListener('input', handlePatientSearch);
 
-            // Обработка отправки формы
             document.getElementById('caseForm').addEventListener('submit', handleFormSubmit);
 
-            // Валидация номера полиса
             const insuranceInput = document.getElementById('insuranceNumber');
             insuranceInput.addEventListener('input', function() {
                 this.value = this.value.replace(/\D/g, '').slice(0, 4);
@@ -396,16 +410,11 @@
 
         function switchMode(mode) {
             currentMode = mode;
-
-            // Обновляем кнопки
             document.getElementById('existingPatientModeBtn').classList.toggle('active', mode === 'existing');
             document.getElementById('newPatientModeBtn').classList.toggle('active', mode === 'new');
-
-            // Показываем/скрываем содержимое
             document.getElementById('existingPatientMode').classList.toggle('active', mode === 'existing');
             document.getElementById('newPatientMode').classList.toggle('active', mode === 'new');
 
-            // Очищаем выбор пациента при переключении режимов
             if (mode === 'new') {
                 clearPatientSelection();
                 hideSearchResults();
@@ -498,8 +507,6 @@
 
         function selectPatient(patientData) {
             document.getElementById('patientId').value = patientData.id;
-
-            // Отображаем информацию о пациенте
             document.getElementById('patientFullName').textContent = patientData.fullName;
 
             if (patientData.birthDate) {
@@ -526,16 +533,13 @@
         }
 
         function validateForm() {
-            // Проверяем данные в зависимости от режима
             if (currentMode === 'existing') {
-                // Проверяем, выбран ли существующий пациент
                 const patientId = document.getElementById('patientId').value;
                 if (!patientId) {
                     showMessage('Выберите пациента из списка или переключитесь на добавление нового пациента', 'error');
                     return false;
                 }
             } else {
-                // Проверяем данные нового пациента
                 const lastName = document.getElementById('lastName').value.trim();
                 const firstName = document.getElementById('firstName').value.trim();
                 const birthDate = document.getElementById('birthDate').value;
@@ -557,7 +561,6 @@
                 }
             }
 
-            // Проверяем данные случая
             const admissionDate = document.getElementById('admissionDate').value;
             if (!admissionDate) {
                 showMessage('Укажите дату поступления', 'error');
@@ -578,7 +581,6 @@
 
             try {
                 if (currentMode === 'new') {
-                    // Создаем нового пациента
                     const patientData = {
                         last_name: document.getElementById('lastName').value.trim(),
                         first_name: document.getElementById('firstName').value.trim(),
@@ -606,15 +608,13 @@
                     patientId = newPatient.id;
                     showMessage('Пациент успешно создан', 'success');
                 } else {
-                    // Используем существующего пациента
                     patientId = document.getElementById('patientId').value;
                 }
 
-                // Создаём случай со статусом "in_progress" (фиксированно)
                 const caseData = {
                     patient_id: parseInt(patientId),
                     admission_date: document.getElementById('admissionDate').value + 'T00:00:00',
-                    status: 'in_progress',  // всегда "В процессе"
+                    status: 'in_progress',
                     notes: document.getElementById('notes').value.trim() || null
                 };
 
@@ -632,7 +632,6 @@
                     const caseResult = await caseResponse.json();
                     showMessage('Случай успешно создан! Перенаправление...', 'success');
 
-                    // Через 2 секунды переходим к списку случаев
                     setTimeout(() => {
                         window.location.href = '/cases';
                     }, 2000);
@@ -661,7 +660,6 @@
                 </button>
             `;
 
-            // Удаляем старые сообщения
             while (container.firstChild) {
                 container.removeChild(container.firstChild);
             }
@@ -669,7 +667,6 @@
             container.appendChild(messageDiv);
             container.style.display = 'block';
 
-            // Автоматическое удаление через 5 секунд (кроме ошибок)
             if (type !== 'error') {
                 setTimeout(() => {
                     if (messageDiv.parentNode === container) {
@@ -679,7 +676,6 @@
             }
         }
 
-        // Закрываем результаты поиска при клике вне области
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.patient-search-container')) {
                 hideSearchResults();

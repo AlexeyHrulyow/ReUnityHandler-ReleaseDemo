@@ -5,34 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
-            background: #f4f4f4;
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
+            min-height: 100vh;
         }
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
         .header {
-            background: #2c3e50;
-            color: white;
+            background: rgba(13, 92, 99, 0.9);
+            color: var(--text-light);
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
+            backdrop-filter: blur(5px);
         }
         .patient-info {
-            background: #f8f9fa;
+            background: #ffffff;
             padding: 15px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--primary-medium);
+            border-radius: 5px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .case-status-message {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
             font-weight: bold;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .case-status-completed {
             background: #fff3cd;
@@ -48,11 +65,12 @@
         .status-card {
             flex: 1;
             min-width: 200px;
-            background: white;
-            border: 1px solid #ddd;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             padding: 15px;
             text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .status-card.completed {
             border-left: 4px solid #27ae60;
@@ -64,16 +82,17 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
-        /* Верхние поля */
         .header-fields {
-            background: white;
+            background: #ffffff;
             padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            scroll-margin-top: 160px;
         }
         .header-fields .form-group {
             flex: 1 1 200px;
@@ -83,17 +102,30 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: var(--text-dark);
         }
         .header-fields input, .header-fields select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             background: white;
         }
-        /* Поиск и навигация */
-        .search-section {
+        .nav-panel {
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            background: #ffffff;
+            border: 2px solid var(--primary-dark);
+            border-radius: 8px;
+            padding: 15px;
             margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .search-section {
             display: flex;
             gap: 10px;
             align-items: center;
@@ -101,18 +133,19 @@
             position: relative;
         }
         .search-section input {
-            flex: 2;
+            flex: 3;
             min-width: 300px;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid var(--primary-dark);
             border-radius: 4px;
             font-size: 16px;
+            background: white;
         }
         .search-section select {
             flex: 1;
             min-width: 250px;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid var(--primary-dark);
             border-radius: 4px;
             font-size: 16px;
             background: white;
@@ -122,7 +155,7 @@
             top: 100%;
             left: 0;
             background: white;
-            border: 1px solid #ccc;
+            border: 1px solid var(--primary-dark);
             border-radius: 4px;
             max-height: 300px;
             overflow-y: auto;
@@ -135,30 +168,30 @@
             padding: 10px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .search-results div:last-child {
-            border-bottom: none;
         }
         .search-results div:hover {
-            background: #f0f0f0;
+            background: var(--primary-light);
+            color: var(--text-dark);
         }
-        .search-results .section-item {
-            background: #f8f9fa;
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .nav-link {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
             font-weight: bold;
+            border: 1px solid var(--primary-dark);
+            transition: 0.2s;
+            cursor: pointer;
         }
-        .search-results .section-item::before {
-            content: "📂";
-            margin-right: 5px;
-        }
-        .search-results .row-item::before {
-            content: "🔹";
-            margin-right: 5px;
-        }
-        .search-results .selected {
-            background: #3498db;
+        .nav-link:hover {
+            background: var(--primary-dark);
             color: white;
         }
         .highlight-row {
@@ -169,35 +202,39 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: white;
-            table-layout: fixed;
+            background: #ffffff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .document-table th,
         .document-table td {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             padding: 10px;
             vertical-align: top;
         }
         .document-table th {
-            background: #2c3e50;
+            background: var(--primary-dark);
             color: white;
             font-weight: bold;
             text-align: center;
             position: sticky;
             top: 0;
+            z-index: 10;
         }
         .document-table tr:nth-child(even) {
-            background: #f9f9f9;
+            background: #f0f8ff;
         }
         .document-table tr:hover {
-            background: #f1f1f1;
+            background: var(--primary-light);
+            color: var(--text-dark);
         }
         .row-label {
             font-weight: bold;
-            background: #eef2f5;
+            background: #e6f2f5;
         }
         .section-header td {
-            background: #d9e1e8;
+            background: #c0e0e3;
             font-weight: bold;
             text-align: center;
             font-size: 1.1em;
@@ -205,15 +242,15 @@
         .cell-input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 14px;
         }
         .cell-input:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 5px rgba(52,152,219,0.5);
+            border-color: var(--primary-medium);
+            box-shadow: 0 0 5px rgba(68,161,160,0.5);
         }
         .btn {
             padding: 10px 20px;
@@ -223,65 +260,52 @@
             font-size: 14px;
             margin: 5px;
             display: inline-block;
+            text-decoration: none;
         }
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn:hover {
-            opacity: 0.9;
-        }
+        .btn-primary { background: var(--primary-medium); color: white; }
+        .btn-success { background: var(--primary-deep); color: white; }
+        .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn:hover { opacity: 0.9; }
         .alert {
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
         .loading {
             text-align: center;
             padding: 40px;
             color: #6c757d;
+            background: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         h2, h3 {
             margin-top: 30px;
-            color: #2c3e50;
+            color: var(--text-dark);
+            background: rgba(255,255,255,0.7);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            scroll-margin-top: 160px;
         }
         .goals-block {
-            background: white;
+            background: #ffffff;
             padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            scroll-margin-top: 160px;
         }
         .goals-block .form-group {
             flex: 1 1 300px;
@@ -290,22 +314,30 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: var(--text-dark);
         }
         .goals-block input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
         }
         #documentActions {
             margin: 20px 0;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .table-dates-row {
-            background: #f0f0f0;
+            background: #d9eef0;
             font-weight: bold;
         }
         .table-dates-row input {
             font-weight: normal;
+        }
+        #procedures-table {
+            scroll-margin-top: 160px;
         }
     </style>
 </head>
@@ -366,6 +398,23 @@
             <span id="saveStatus" style="margin-left: 20px; color: #666;"></span>
         </div>
 
+        <!-- Плавающая панель навигации и поиска -->
+        <div class="nav-panel" id="navPanel">
+            <div class="search-section">
+                <input type="text" id="searchInput" placeholder="Поиск по названию (например, функции сознания, Мануальная терапия, Краткосрочная цель)" autocomplete="off">
+                <div id="searchResults" class="search-results"></div>
+                <select id="sectionSelect">
+                    <option value="">— Перейти к разделу таблицы —</option>
+                    <!-- будут заполнены из данных -->
+                </select>
+            </div>
+            <div class="nav-links">
+                <span class="nav-link" onclick="scrollToElement('header-fields')">📋 Верхние поля</span>
+                <span class="nav-link" onclick="scrollToElement('goals-block')">🎯 Цель реабилитации</span>
+                <span class="nav-link" onclick="scrollToElement('procedures-table')">💊 Назначенные процедуры</span>
+            </div>
+        </div>
+
         <!-- Поля верхней части -->
         <div class="header-fields" id="header-fields" style="display: none;">
             <div class="form-group">
@@ -392,16 +441,6 @@
             </div>
         </div>
 
-        <!-- Панель поиска и навигации -->
-        <div class="search-section">
-            <input type="text" id="searchInput" placeholder="Поиск по номеру или названию (например, b110, функции сознания)" autocomplete="off">
-            <div id="searchResults" class="search-results"></div>
-            <select id="sectionSelect">
-                <option value="">— Перейти к разделу —</option>
-                <!-- будут заполнены из данных -->
-            </select>
-        </div>
-
         <!-- Основная таблица МКФ -->
         <h2>Оценка функций по МКФ</h2>
         <table class="document-table" id="mainTable">
@@ -413,23 +452,23 @@
                     <th style="width: 15%;">Дата (выписка)</th>
                     <th style="width: 25%;">Примечание</th>
                 </tr>
-                <!-- Строка для ввода дат в шапке таблицы -->
-                <tr class="table-dates-row">
+            </thead>
+            <tbody id="mainTableBody">
+                <!-- Строка для ввода дат в шапке таблицы (первая строка тела) -->
+                <tr class="table-dates-row" id="table-dates-row">
                     <td><strong>Даты осмотров</strong></td>
                     <td><input type="date" id="tableDateAdmission" class="cell-input table-date-input" data-date-type="admission"></td>
                     <td><input type="date" id="tableDateIntermediate" class="cell-input table-date-input" data-date-type="intermediate"></td>
                     <td><input type="date" id="tableDateDischarge" class="cell-input table-date-input" data-date-type="discharge"></td>
                     <td></td>
                 </tr>
-            </thead>
-            <tbody id="mainTableBody">
-                <!-- будут заполнены динамически -->
+                <!-- Далее будут строки из данных -->
             </tbody>
         </table>
 
         <!-- Целевой блок -->
-        <h2>Целевой блок</h2>
-        <div class="goals-block">
+        <h2>Цель реабилитации на данном этапе</h2>
+        <div class="goals-block" id="goals-block">
             <div class="form-group">
                 <label for="shortTermGoal">Краткосрочная:</label>
                 <input type="text" id="shortTermGoal" class="cell-input goal-input" data-goal="short_term" placeholder="Введите краткосрочную цель">
@@ -442,7 +481,7 @@
 
         <!-- Таблица процедур -->
         <h2>Назначенные процедуры</h2>
-        <table class="document-table" id="proceduresTable">
+        <table class="document-table" id="procedures-table">
             <thead>
                 <tr>
                     <th>Наименование процедур</th>
@@ -540,15 +579,97 @@
             return `${year}-${month}-${day}`;
         }
 
-        // ---- Функции поиска и навигации ----
+        // ---- Функции навигации по ссылкам ----
+        function scrollToElement(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // ---- Функции поиска и навигации (расширенные) ----
         function buildSearchIndex() {
-            if (!documentData || !documentData.main_table) return [];
-            return documentData.main_table.map(row => ({
-                id: row.id,
-                label: row.label,
-                text: `${row.id} — ${row.label}`.toLowerCase(),
-                isSection: row.is_section || false
-            }));
+            const index = [];
+
+            // 1. Заголовки разделов (h2)
+            const headings = [
+                { id: 'mainTable', label: 'Оценка функций по МКФ', type: 'heading' },
+                { id: 'goals-block', label: 'Цель реабилитации на данном этапе', type: 'heading' },
+                { id: 'procedures-table', label: 'Назначенные процедуры', type: 'heading' }
+            ];
+            headings.forEach(item => {
+                index.push({
+                    id: item.id,
+                    label: item.label,
+                    text: item.label.toLowerCase(),
+                    type: 'heading',
+                    target: () => scrollToElement(item.id)
+                });
+            });
+
+            // 2. Основная таблица (main_table)
+            if (documentData && documentData.main_table) {
+                documentData.main_table.forEach(row => {
+                    index.push({
+                        id: row.id,
+                        label: row.label,
+                        text: row.label.toLowerCase(),
+                        type: 'row',
+                        isSection: row.is_section || false,
+                        target: () => {
+                            scrollToRow(row.id);
+                            // Выделение произойдёт внутри scrollToRow
+                        }
+                    });
+                });
+            }
+
+            // 3. Поля верхней части
+            const headerLabels = [
+                { id: 'diagnosisMKB', label: 'Диагноз по МКБ' },
+                { id: 'rehabPotential', label: 'Реабилитационный потенциал' },
+                { id: 'rehabPrognosis', label: 'Реабилитационный прогноз' }
+            ];
+            headerLabels.forEach(item => {
+                index.push({
+                    id: item.id,
+                    label: item.label,
+                    text: item.label.toLowerCase(),
+                    type: 'header',
+                    target: () => scrollToElement('header-fields')
+                });
+            });
+
+            // 4. Таблица процедур
+            if (documentData && documentData.procedures_table) {
+                documentData.procedures_table.forEach(row => {
+                    index.push({
+                        id: row.id,
+                        label: row.label,
+                        text: row.label.toLowerCase(),
+                        type: 'procedure',
+                        target: () => scrollToElement('procedures-table')
+                    });
+                });
+            }
+
+            // 5. Цели
+            index.push({
+                id: 'shortTermGoal',
+                label: 'Краткосрочная цель реабилитации',
+                text: 'краткосрочная цель реабилитации',
+                type: 'goal',
+                target: () => scrollToElement('goals-block')
+            });
+            index.push({
+                id: 'longTermGoal',
+                label: 'Долгосрочная цель реабилитации',
+                text: 'долгосрочная цель реабилитации',
+                type: 'goal',
+                target: () => scrollToElement('goals-block')
+            });
+
+            return index;
         }
 
         function showSearchResults(query) {
@@ -559,10 +680,10 @@
                 return;
             }
             const matches = index.filter(item => item.text.includes(q));
-            // Сортируем: сначала разделы, потом обычные строки
-            const sections = matches.filter(m => m.isSection);
-            const rows = matches.filter(m => !m.isSection);
-            const limited = [...sections, ...rows].slice(0, 10);
+            // Сортируем: сначала разделы, потом остальные
+            const sections = matches.filter(m => m.type === 'row' && m.isSection);
+            const others = matches.filter(m => !(m.type === 'row' && m.isSection));
+            const limited = [...sections, ...others].slice(0, 10);
 
             searchResults.innerHTML = '';
             if (limited.length === 0) {
@@ -572,13 +693,22 @@
 
             limited.forEach(match => {
                 const div = document.createElement('div');
-                div.className = match.isSection ? 'section-item' : 'row-item';
-                div.textContent = `${match.id} — ${match.label}`;
-                div.dataset.id = match.id;
+                if (match.type === 'row') {
+                    div.className = match.isSection ? 'section-item' : 'row-item';
+                } else if (match.type === 'header') {
+                    div.className = 'header-item';
+                } else if (match.type === 'procedure') {
+                    div.className = 'procedure-item';
+                } else if (match.type === 'goal') {
+                    div.className = 'goal-item';
+                } else if (match.type === 'heading') {
+                    div.className = 'heading-item';
+                }
+                div.textContent = match.label;
                 div.addEventListener('click', () => {
-                    scrollToRow(match.id);
+                    match.target();
                     searchResults.style.display = 'none';
-                    searchInput.value = match.id; // оставляем ID
+                    searchInput.value = match.label;
                 });
                 searchResults.appendChild(div);
             });
@@ -586,7 +716,6 @@
         }
 
         function scrollToRow(rowId) {
-            // Ищем элемент с атрибутом data-row-id, равным rowId
             const target = document.querySelector(`[data-row-id="${rowId}"]`);
             if (!target) {
                 console.warn('Строка с ID', rowId, 'не найдена');
@@ -780,12 +909,16 @@
         // ---- Отрисовка таблиц ----
         function renderMainTable(rows) {
             const tbody = document.getElementById('mainTableBody');
+            // Очищаем, но оставляем строку с датами (она уже есть в HTML)
+            const dateRow = document.getElementById('table-dates-row');
             tbody.innerHTML = '';
+            tbody.appendChild(dateRow); // добавляем обратно строку с датами
+
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 if (row.is_section) {
                     tr.classList.add('section-header');
-                    tr.setAttribute('data-row-id', row.id); // добавляем атрибут для навигации
+                    tr.setAttribute('data-row-id', row.id);
                     tr.innerHTML = `
                         <td colspan="5" style="text-align: center;">${escapeHtml(row.label)}</td>
                     `;
@@ -953,29 +1086,45 @@
             }
         }
 
-        // ---- Сохранение изменений ----
-        function collectMainTableData() {
-            const rows = {};
-            document.querySelectorAll('.main-table-input').forEach(input => {
-                const rowId = input.dataset.rowId;
-                const col = parseInt(input.dataset.col);
-                if (!rows[rowId]) rows[rowId] = ["", "", "", ""];
-                rows[rowId][col] = input.value;
-            });
-            return rows;
+        // ---- Сбор всех данных в один объект ----
+        function collectFullDocumentData() {
+            return {
+                diagnosis_mkb: document.getElementById('diagnosisMKB').value,
+                rehab_potential: document.getElementById('rehabPotential').value,
+                rehab_prognosis: document.getElementById('rehabPrognosis').value,
+                table_dates: {
+                    admission: document.getElementById('tableDateAdmission').value,
+                    intermediate: document.getElementById('tableDateIntermediate').value,
+                    discharge: document.getElementById('tableDateDischarge').value
+                },
+                main_table: (() => {
+                    const rows = {};
+                    document.querySelectorAll('.main-table-input').forEach(input => {
+                        const rowId = input.dataset.rowId;
+                        const col = parseInt(input.dataset.col);
+                        if (!rows[rowId]) rows[rowId] = ["", "", "", ""];
+                        rows[rowId][col] = input.value;
+                    });
+                    return rows;
+                })(),
+                procedures_table: (() => {
+                    const rows = {};
+                    document.querySelectorAll('.procedure-input').forEach(input => {
+                        const rowId = input.dataset.rowId;
+                        const col = parseInt(input.dataset.col);
+                        if (!rows[rowId]) rows[rowId] = ["", ""];
+                        rows[rowId][col] = input.value;
+                    });
+                    return rows;
+                })(),
+                goals: {
+                    short_term: document.getElementById('shortTermGoal').value,
+                    long_term: document.getElementById('longTermGoal').value
+                }
+            };
         }
 
-        function collectProcedureTableData() {
-            const rows = {};
-            document.querySelectorAll('.procedure-input').forEach(input => {
-                const rowId = input.dataset.rowId;
-                const col = parseInt(input.dataset.col);
-                if (!rows[rowId]) rows[rowId] = ["", ""];
-                rows[rowId][col] = input.value;
-            });
-            return rows;
-        }
-
+        // ---- Сохранение всех изменений одним запросом ----
         async function saveAllChanges() {
             if (unsavedChanges.size === 0) {
                 showAlert('Нет изменений для сохранения', 'info');
@@ -983,113 +1132,32 @@
             }
 
             showLoading(true);
-            let success = true;
 
-            const headerData = {
-                diagnosis_mkb: document.getElementById('diagnosisMKB').value,
-                rehab_potential: document.getElementById('rehabPotential').value,
-                rehab_prognosis: document.getElementById('rehabPrognosis').value
-            };
+            const fullData = collectFullDocumentData();
+
             try {
-                const response = await fetch(`/api/v1/document-table/${documentId}/header-fields`, {
+                const response = await fetch(`/api/v1/document-table/${documentId}/full-content`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(headerData)
+                    body: JSON.stringify(fullData)
                 });
-                if (!response.ok) success = false;
-            } catch (err) {
-                console.error(err);
-                success = false;
-            }
 
-            const tableDatesData = {
-                admission: document.getElementById('tableDateAdmission').value,
-                intermediate: document.getElementById('tableDateIntermediate').value,
-                discharge: document.getElementById('tableDateDischarge').value
-            };
-            try {
-                const response = await fetch(`/api/v1/document-table/${documentId}/table-dates`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(tableDatesData)
-                });
-                if (!response.ok) success = false;
-            } catch (err) {
-                console.error(err);
-                success = false;
-            }
-
-            const mainRows = collectMainTableData();
-            for (const [rowId, values] of Object.entries(mainRows)) {
-                try {
-                    const response = await fetch(`/api/v1/document-table/${documentId}/main-table-row`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ row_id: rowId, values: values })
-                    });
-                    if (!response.ok) {
-                        console.error('Ошибка сохранения строки', rowId);
-                        success = false;
-                    }
-                } catch (err) {
-                    console.error(err);
-                    success = false;
+                if (response.ok) {
+                    unsavedChanges.clear();
+                    updateSaveStatus();
+                    showAlert('Все изменения сохранены', 'success');
+                } else {
+                    const error = await response.json();
+                    showAlert('Ошибка сохранения: ' + (error.detail || 'Неизвестная ошибка'), 'danger');
                 }
-            }
-
-            const procRows = collectProcedureTableData();
-            for (const [rowId, values] of Object.entries(procRows)) {
-                try {
-                    const response = await fetch(`/api/v1/document-table/${documentId}/procedure-row`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ row_id: rowId, values: values })
-                    });
-                    if (!response.ok) success = false;
-                } catch (err) {
-                    console.error(err);
-                    success = false;
-                }
-            }
-
-            const goalsData = {
-                short_term: document.getElementById('shortTermGoal').value,
-                long_term: document.getElementById('longTermGoal').value
-            };
-            try {
-                const response = await fetch(`/api/v1/document-table/${documentId}/goals`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(goalsData)
-                });
-                if (!response.ok) success = false;
             } catch (err) {
                 console.error(err);
-                success = false;
-            }
-
-            showLoading(false);
-            if (success) {
-                unsavedChanges.clear();
-                updateSaveStatus();
-                showAlert('Все изменения сохранены', 'success');
-            } else {
-                showAlert('Некоторые изменения не сохранились. Проверьте консоль.', 'danger');
+                showAlert('Ошибка сети при сохранении', 'danger');
+            } finally {
+                showLoading(false);
             }
         }
 
@@ -1181,27 +1249,10 @@
         }
 
         function exportToWebmis() {
-            const data = {
-                document_id: documentId,
-                case_id: caseId,
-                header_fields: {
-                    diagnosis_mkb: document.getElementById('diagnosisMKB').value,
-                    rehab_potential: document.getElementById('rehabPotential').value,
-                    rehab_prognosis: document.getElementById('rehabPrognosis').value
-                },
-                table_dates: {
-                    admission: document.getElementById('tableDateAdmission').value,
-                    intermediate: document.getElementById('tableDateIntermediate').value,
-                    discharge: document.getElementById('tableDateDischarge').value
-                },
-                main_table: collectMainTableData(),
-                procedures_table: collectProcedureTableData(),
-                goals: {
-                    short_term: document.getElementById('shortTermGoal').value,
-                    long_term: document.getElementById('longTermGoal').value
-                },
-                exported_at: new Date().toISOString()
-            };
+            const data = collectFullDocumentData();
+            data.document_id = documentId;
+            data.case_id = caseId;
+            data.exported_at = new Date().toISOString();
 
             const patientName = document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_') || 'patient';
             const now = new Date();

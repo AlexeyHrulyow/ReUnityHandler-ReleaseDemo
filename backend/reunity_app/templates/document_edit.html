@@ -5,27 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
+        :root {
+            --bg-light: #fffffa;
+            --primary-dark: #0d5c63;
+            --primary-medium: #44a1a0;
+            --primary-light: #78cdd7;
+            --primary-deep: #247b7b;
+            --text-dark: #2c3e50;
+            --text-light: #ffffff;
+            --border-color: #b0d4d9;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
+            background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
+            min-height: 100vh;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
         .header {
-            background: #2c3e50;
+            background: rgba(13, 92, 99, 0.9);
             color: white;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
+            backdrop-filter: blur(5px);
         }
         .patient-info {
-            background: #f8f9fa;
+            background: #ffffff;
             padding: 15px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--primary-medium);
             margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .sections-container {
             display: grid;
@@ -34,10 +50,11 @@
             margin-bottom: 30px;
         }
         .section-card {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             padding: 15px;
-            background: white;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .section-card.completed {
             border-left: 4px solid #27ae60;
@@ -74,16 +91,16 @@
             margin-bottom: 10px;
         }
         .btn-primary {
-            background: #3498db;
+            background: var(--primary-medium);
             color: white;
         }
         .btn-success {
-            background: #27ae60;
+            background: var(--primary-deep);
             color: white;
         }
         .btn-secondary {
-            background: #95a5a6;
-            color: white;
+            background: var(--primary-light);
+            color: var(--text-dark);
         }
         .btn-danger {
             background: #e74c3c;
@@ -94,11 +111,12 @@
         }
         .section-form {
             display: none;
-            background: white;
-            border: 1px solid #ddd;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             padding: 20px;
             border-radius: 5px;
             margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .form-group {
             margin-bottom: 15px;
@@ -112,7 +130,7 @@
             width: 100%;
             min-height: 200px;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-family: monospace;
             font-size: 14px;
@@ -140,6 +158,7 @@
     </style>
 </head>
 <body>
+    <!-- тело без изменений (как в исходном) -->
     <div class="container">
         <div class="header">
             <h1>Редактирование документа</h1>
@@ -196,12 +215,12 @@
     </div>
 
     <script>
+        // скрипт без изменений
         let currentDocumentId = null;
         let currentUser = null;
         let doctorsList = [];
         let currentEditingSectionId = null;
 
-        // Получаем ID документа из URL
         const urlParams = new URLSearchParams(window.location.search);
         currentDocumentId = urlParams.get('id');
 
@@ -210,7 +229,6 @@
             window.location.href = '/cases';
         }
 
-        // Проверяем аутентификацию
         const token = localStorage.getItem('auth_token');
         if (!token) {
             window.location.href = '/';
@@ -275,7 +293,6 @@
                     const document = await response.json();
                     displayDocumentInfo(document);
 
-                    // Показываем кнопки в зависимости от роли
                     if (currentUser.role === 'admin' || currentUser.role === 'head') {
                         document.getElementById('signDocumentBtn').style.display = 'inline-block';
                         if (document.signed_at) {
@@ -521,7 +538,6 @@
 
             container.appendChild(alertDiv);
 
-            // Автоматическое удаление через 5 секунд
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
@@ -529,7 +545,6 @@
             }, 5000);
         }
 
-        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
             await loadDoctors();
