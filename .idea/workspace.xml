@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.2&#10;- разработка дизайна сайта">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.3&#10;- пофиксил таблицы">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -410,7 +408,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771504182190</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Версия 0.3.3&#10;- пофиксил таблицы">
+      <option name="closed" value="true" />
+      <created>1771504717520</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1771504717520</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -453,6 +459,7 @@
     <MESSAGE value="Версия 0.3.0&#10;- внедрена новая версия документа" />
     <MESSAGE value="Версия 0.3.1&#10;- реализован поиск по документу" />
     <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.2&#10;- разработка дизайна сайта" />
+    <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.3&#10;- пофиксил таблицы" />
   </component>
 </project>

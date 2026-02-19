@@ -169,9 +169,40 @@
             cursor: pointer;
             border-bottom: 1px solid #eee;
         }
+        .search-results div:last-child {
+            border-bottom: none;
+        }
         .search-results div:hover {
             background: var(--primary-light);
             color: var(--text-dark);
+        }
+        .search-results .section-item {
+            background: #f0f8ff;
+            font-weight: bold;
+        }
+        .search-results .section-item::before {
+            content: "📂 ";
+            margin-right: 5px;
+        }
+        .search-results .row-item::before {
+            content: "🔹 ";
+            margin-right: 5px;
+        }
+        .search-results .header-item::before {
+            content: "📋 ";
+            margin-right: 5px;
+        }
+        .search-results .procedure-item::before {
+            content: "💊 ";
+            margin-right: 5px;
+        }
+        .search-results .goal-item::before {
+            content: "🎯 ";
+            margin-right: 5px;
+        }
+        .search-results .heading-item::before {
+            content: "📌 ";
+            margin-right: 5px;
         }
         .nav-links {
             display: flex;
@@ -222,11 +253,8 @@
             top: 0;
             z-index: 10;
         }
-        .document-table tr:nth-child(even) {
-            background: #f0f8ff;
-        }
         .document-table tr:hover {
-            background: var(--primary-light);
+            background: #f0f8ff;
             color: var(--text-dark);
         }
         .row-label {
