@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.3&#10;- пофиксил таблицы">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.4&#10;- работа над мелкими багами">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
@@ -44,42 +44,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.check_doctors.executor": "Run",
-    "Python.check_document_id.executor": "Run",
-    "Python.check_documents.executor": "Run",
-    "Python.check_password.executor": "Run",
-    "Python.check_tables.executor": "Run",
-    "Python.clean_database.executor": "Run",
-    "Python.create_initial_data.executor": "Run",
-    "Python.create_tables.executor": "Run",
-    "Python.debug_api.executor": "Run",
-    "Python.debug_save.executor": "Run",
-    "Python.diagnose_db.executor": "Run",
-    "Python.lab2.executor": "Run",
-    "Python.pyparser.executor": "Run",
-    "Python.run.executor": "Run",
-    "Python.test_api_direct.executor": "Run",
-    "Python.test_auth.executor": "Run",
-    "Python.test_auth_fix.executor": "Run",
-    "Python.test_create_case.executor": "Run",
-    "Python.test_db.executor": "Run",
-    "Python.test_login.executor": "Run",
-    "Python.test_pythin312.executor": "Run",
-    "Python.update_database (1).executor": "Run",
-    "Python.update_database.executor": "Run",
-    "Python.update_password.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/reab/PycharmProjects/ReUnityHandler",
-    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.check_doctors.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_document_id.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_documents.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_password.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_tables.executor&quot;: &quot;Run&quot;,
+    &quot;Python.clean_database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_initial_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_tables.executor&quot;: &quot;Run&quot;,
+    &quot;Python.debug_api.executor&quot;: &quot;Run&quot;,
+    &quot;Python.debug_save.executor&quot;: &quot;Run&quot;,
+    &quot;Python.diagnose_db.executor&quot;: &quot;Run&quot;,
+    &quot;Python.lab2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.pyparser.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_api_direct.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_auth.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_auth_fix.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_create_case.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_login.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_pythin312.executor&quot;: &quot;Run&quot;,
+    &quot;Python.update_database (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.update_database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.update_password.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/reab/PycharmProjects/ReUnityHandler&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler" />
@@ -96,7 +96,7 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.run">
+  <component name="RunManager" selected="Python.pyparser">
     <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -209,8 +209,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.run" />
         <item itemvalue="Python.pyparser" />
+        <item itemvalue="Python.run" />
         <item itemvalue="Python.debug_save" />
         <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
@@ -416,7 +416,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771504717520</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Версия 0.3.4&#10;- работа над мелкими багами">
+      <option name="closed" value="true" />
+      <created>1771510580411</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1771510580411</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -460,6 +468,7 @@
     <MESSAGE value="Версия 0.3.1&#10;- реализован поиск по документу" />
     <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
     <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.3&#10;- пофиксил таблицы" />
+    <MESSAGE value="Версия 0.3.4&#10;- работа над мелкими багами" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.4&#10;- работа над мелкими багами" />
   </component>
 </project>
