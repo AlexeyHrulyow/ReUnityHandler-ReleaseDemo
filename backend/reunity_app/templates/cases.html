@@ -481,6 +481,18 @@
                             </div>
                             <div class="status-label">Врач ФРМ</div>
                         </div>
+                        <div>
+                            <div class="status-icon ${caseItem.psychologist_completed ? 'status-done' : 'status-pending'}">
+                                ${caseItem.psychologist_completed ? '✓' : '✗'}
+                            </div>
+                            <div class="status-label">Психолог</div>
+                        </div>
+                        <div>
+                            <div class="status-icon ${caseItem.cardiologist_completed ? 'status-done' : 'status-pending'}">
+                                ${caseItem.cardiologist_completed ? '✓' : '✗'}
+                            </div>
+                            <div class="status-label">Кардиолог</div>
+                        </div>
                     </div>
                 `;
 

@@ -19,14 +19,12 @@ async def create_case(
         current_user: Doctor = Depends(get_current_active_user)
 ):
     """Создание нового случая"""
-    # Проверяем существование пациента
     result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
     patient = result.scalar_one_or_none()
 
     if not patient:
         raise HTTPException(status_code=404, detail="Пациент не найден")
 
-    # Создаем случай
     db_case = CaseModel(
         patient_id=case.patient_id,
         creator_id=current_user.id,
@@ -39,7 +37,6 @@ async def create_case(
     await db.commit()
     await db.refresh(db_case)
 
-    # Создаем связанный документ
     db_document = Document(
         case_id=db_case.id,
         content={}
@@ -48,7 +45,6 @@ async def create_case(
     await db.commit()
     await db.refresh(db_document)
 
-    # Инициализируем структуру документа
     db_document.initialize_content()
     await db.commit()
 
@@ -75,7 +71,6 @@ async def list_cases(
         search: Optional[str] = Query(None, description="Поиск по ФИО пациента"),
         date_from: Optional[date] = Query(None, description="Фильтр по дате с"),
         date_to: Optional[date] = Query(None, description="Фильтр по дате по"),
-        # ИЗМЕНЕНО: добавлен параметр creator_id для фильтрации по создателю
         creator_id: Optional[int] = Query(None, description="Фильтр по создателю случая"),
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
@@ -83,7 +78,6 @@ async def list_cases(
     """Получение списка случаев с фильтрацией"""
     query = select(CaseModel).join(Patient)
 
-    # Применяем фильтры
     if status:
         query = query.where(CaseModel.status == status)
 
@@ -100,14 +94,12 @@ async def list_cases(
             )
         )
 
-    # Фильтр по дате создания случая
     if date_from:
         query = query.where(func.date(CaseModel.created_at) >= date_from)
 
     if date_to:
         query = query.where(func.date(CaseModel.created_at) <= date_to)
 
-    # ИЗМЕНЕНО: фильтр по creator_id
     if creator_id:
         query = query.where(CaseModel.creator_id == creator_id)
 
@@ -116,34 +108,32 @@ async def list_cases(
     result = await db.execute(query)
     cases = result.scalars().all()
 
-    # Формируем ответ с дополнительной информацией
     cases_with_details = []
     for case in cases:
-        # Получаем информацию о пациенте
         patient_result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
         patient = patient_result.scalar_one_or_none()
 
-        # Получаем информацию о создателе
         creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
         creator = creator_result.scalar_one_or_none()
 
-        # Получаем информацию о документе
         document_result = await db.execute(
             select(Document).where(Document.case_id == case.id)
         )
         document = document_result.scalar_one_or_none()
 
-        # Получаем информацию о разделах документа
         neurologist_completed = False
         therapist_completed = False
         head_completed = False
+        psychologist_completed = False
+        cardiologist_completed = False
 
         if document:
             neurologist_completed = document.neurologist_completed
             therapist_completed = document.therapist_completed
             head_completed = document.head_completed
+            psychologist_completed = document.psychologist_completed
+            cardiologist_completed = document.cardiologist_completed
 
-        # Создаем объект схемы
         case_data = CaseSchema(
             id=case.id,
             patient_id=case.patient_id,
@@ -157,7 +147,6 @@ async def list_cases(
             sent_to_webmis_at=case.sent_to_webmis_at
         )
 
-        # Преобразуем в CaseWithPatient
         case_with_patient = CaseWithPatient(
             **case_data.dict(),
             patient_name=patient.full_name if patient else "Неизвестно",
@@ -166,7 +155,9 @@ async def list_cases(
             creator_name=creator.full_name if creator else "Неизвестно",
             neurologist_completed=neurologist_completed,
             therapist_completed=therapist_completed,
-            head_completed=head_completed
+            head_completed=head_completed,
+            psychologist_completed=psychologist_completed,
+            cardiologist_completed=cardiologist_completed
         )
 
         cases_with_details.append(case_with_patient)
@@ -180,37 +171,36 @@ async def get_case(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Получение информации о конкретном случае"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Получаем документ для этого случая
     document_result = await db.execute(
         select(Document).where(Document.case_id == case.id)
     )
     document = document_result.scalar_one_or_none()
 
-    # Получаем дополнительную информацию
     patient_result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
     patient = patient_result.scalar_one_or_none()
 
     creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
     creator = creator_result.scalar_one_or_none()
 
-    # Получаем статусы заполнения из документа
     neurologist_completed = False
     therapist_completed = False
     head_completed = False
+    psychologist_completed = False
+    cardiologist_completed = False
 
     if document:
         neurologist_completed = document.neurologist_completed
         therapist_completed = document.therapist_completed
         head_completed = document.head_completed
+        psychologist_completed = document.psychologist_completed
+        cardiologist_completed = document.cardiologist_completed
 
-    # Создаем объект схемы
     case_data = CaseSchema(
         id=case.id,
         patient_id=case.patient_id,
@@ -232,7 +222,9 @@ async def get_case(
         creator_name=creator.full_name if creator else "Неизвестно",
         neurologist_completed=neurologist_completed,
         therapist_completed=therapist_completed,
-        head_completed=head_completed
+        head_completed=head_completed,
+        psychologist_completed=psychologist_completed,
+        cardiologist_completed=cardiologist_completed
     )
 
 
@@ -243,14 +235,12 @@ async def update_case(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление информации о случае"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Обновляем поля
     update_data = case_update.dict(exclude_unset=True)
     for field, value in update_data.items():
         setattr(case, field, value)
@@ -278,7 +268,6 @@ async def delete_case(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(require_role("admin", "head"))
 ):
-    """Удаление случая (только для админа и заведующего)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
@@ -304,7 +293,6 @@ async def complete_case(
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # ИЗМЕНЕНО: проверка прав – создатель или администратор
     if current_user.role != "admin" and case.creator_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -323,7 +311,7 @@ async def complete_case(
 async def uncomplete_case(
         case_id: int,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(get_current_active_user)   # ИЗМЕНЕНО: убран require_role
+        current_user: Doctor = Depends(get_current_active_user)
 ):
     """Отмена завершения случая (только для создателя или администратора)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
@@ -331,14 +319,12 @@ async def uncomplete_case(
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # ИЗМЕНЕНО: проверка прав – создатель или администратор
     if current_user.role != "admin" and case.creator_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Только создатель случая или администратор может отменить завершение"
         )
 
-    # Возвращаем статус в "in_progress"
     case.status = CaseStatus.IN_PROGRESS
     case.completed_at = None
     await db.commit()
@@ -351,14 +337,12 @@ async def send_case_to_webmis(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(require_role("admin", "head"))
 ):
-    """Отправка случая в ВебМИС (только для админа и заведующего)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Проверяем, что случай завершен
     if case.status != CaseStatus.COMPLETED:
         raise HTTPException(
             status_code=400,

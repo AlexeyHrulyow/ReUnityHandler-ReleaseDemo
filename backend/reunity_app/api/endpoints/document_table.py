@@ -19,7 +19,6 @@ router = APIRouter()
 
 
 async def get_document_or_404(document_id: int, db: AsyncSession) -> Document:
-    """Получение документа с проверкой существования"""
     result = await db.execute(select(Document).where(Document.id == document_id))
     document = result.scalar_one_or_none()
     if not document:
@@ -33,29 +32,24 @@ async def get_document_structure(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Получение полной структуры документа с правами доступа"""
     print(f"📋 Запрос структуры документа {document_id} от пользователя {current_user.username}")
 
     document = await get_document_or_404(document_id, db)
 
-    # Если структура документа ещё старая (нет новых полей), инициализируем новой
     if not document.content or "goals" not in document.content:
         print("⚠️ Документ имеет старую структуру, инициализируем новой")
         document.initialize_content()
         await db.commit()
         await db.refresh(document)
 
-    # Получаем данные из content
     content = document.content
 
-    # header_fields (clinical_diagnosis_mkb удалено)
     header_fields = HeaderFields(
         diagnosis_mkb=content.get("diagnosis_mkb", ""),
         rehab_potential=content.get("rehab_potential", ""),
         rehab_prognosis=content.get("rehab_prognosis", "")
     )
 
-    # table_dates
     table_dates_data = content.get("table_dates", {"admission": "", "intermediate": "", "discharge": ""})
     table_dates = TableDates(
         admission=table_dates_data.get("admission", ""),
@@ -63,7 +57,6 @@ async def get_document_structure(
         discharge=table_dates_data.get("discharge", "")
     )
 
-    # Преобразуем строки основной таблицы в список MainTableRow
     main_table_rows = []
     for row in content.get("main_table", {}).get("rows", []):
         main_table_rows.append(
@@ -75,7 +68,6 @@ async def get_document_structure(
             )
         )
 
-    # Преобразуем строки таблицы процедур
     procedure_rows = []
     for row in content.get("procedures_table", {}).get("rows", []):
         procedure_rows.append(
@@ -86,23 +78,24 @@ async def get_document_structure(
             )
         )
 
-    # Целевой блок
     goals_data = content.get("goals", {"short_term": "", "long_term": ""})
     goals = Goals(
         short_term=goals_data.get("short_term", ""),
         long_term=goals_data.get("long_term", "")
     )
 
-    # Права доступа
     permissions = {
         "can_edit_all": current_user.role == DoctorRole.ADMIN,
         "current_user_role": current_user.role.value
     }
 
+    # ИЗМЕНЕНО: добавлены статусы для новых ролей
     completion_status = {
         "neurologist": document.neurologist_completed,
         "therapist": document.therapist_completed,
-        "head": document.head_completed
+        "head": document.head_completed,
+        "psychologist": document.psychologist_completed,
+        "cardiologist": document.cardiologist_completed
     }
 
     return DocumentStructureResponse(
@@ -123,7 +116,6 @@ async def update_header_fields(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление полей верхней части документа"""
     print(f"📥 Обновление полей верхней части")
 
     document = await get_document_or_404(document_id, db)
@@ -131,7 +123,6 @@ async def update_header_fields(
     if document.signed_at:
         raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
 
-    # Обновляем только переданные поля
     if fields_update.diagnosis_mkb is not None:
         document.content["diagnosis_mkb"] = fields_update.diagnosis_mkb
     if fields_update.rehab_potential is not None:
@@ -143,12 +134,17 @@ async def update_header_fields(
     flag_modified(document, "content")
 
     now = datetime.utcnow()
+    # ИЗМЕНЕНО: добавлены новые роли
     if current_user.role == DoctorRole.NEUROLOGIST:
         document.neurologist_filled_at = now
     elif current_user.role == DoctorRole.THERAPIST:
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -162,7 +158,6 @@ async def update_table_dates(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление дат в шапке таблицы"""
     print(f"📥 Обновление дат таблицы")
 
     document = await get_document_or_404(document_id, db)
@@ -190,6 +185,10 @@ async def update_table_dates(
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -203,7 +202,6 @@ async def update_main_table_row(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление строки основной таблицы МКФ (только для обычных строк, не заголовков)"""
     print(f"📥 Обновление строки основной таблицы: {row_update.row_id}, значения: {row_update.values}")
 
     document = await get_document_or_404(document_id, db)
@@ -211,7 +209,6 @@ async def update_main_table_row(
     if document.signed_at:
         raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
 
-    # Проверяем, что строка не является заголовком раздела
     for row in document.content.get("main_table", {}).get("rows", []):
         if row["id"] == row_update.row_id and row.get("is_section", False):
             raise HTTPException(status_code=400, detail="Нельзя редактировать заголовок раздела")
@@ -225,6 +222,10 @@ async def update_main_table_row(
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
     await db.refresh(document)
@@ -243,7 +244,6 @@ async def update_procedure_row(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление строки таблицы процедур"""
     print(f"📥 Обновление строки процедур: {row_update.row_id}, значения: {row_update.values}")
 
     document = await get_document_or_404(document_id, db)
@@ -260,6 +260,10 @@ async def update_procedure_row(
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -277,7 +281,6 @@ async def update_goals(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Обновление целевого блока (краткосрочная и долгосрочная цели)"""
     print(f"📥 Обновление целей: краткосрочная={goals_update.short_term}, долгосрочная={goals_update.long_term}")
 
     document = await get_document_or_404(document_id, db)
@@ -294,20 +297,24 @@ async def update_goals(
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
 
     return {"message": "Цели обновлены"}
 
-# Схема для приёма полного обновления документа
+
 class FullDocumentUpdate(BaseModel):
     diagnosis_mkb: str
     rehab_potential: str
     rehab_prognosis: str
-    table_dates: Dict[str, str]  # ожидается {admission, intermediate, discharge}
-    main_table: Dict[str, List[str]]  # {row_id: [val1,val2,val3,val4]}
-    procedures_table: Dict[str, List[str]]  # {row_id: [val1,val2]}
-    goals: Dict[str, str]  # {short_term, long_term}
+    table_dates: Dict[str, str]
+    main_table: Dict[str, List[str]]
+    procedures_table: Dict[str, List[str]]
+    goals: Dict[str, str]
 
 
 @router.put("/{document_id}/full-content")
@@ -317,43 +324,35 @@ async def update_document_full(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Полное обновление документа одной пачкой (оптимизированное сохранение)"""
     document = await get_document_or_404(document_id, db)
 
     if document.signed_at:
         raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
 
-    # Обновляем верхние поля
     document.content["diagnosis_mkb"] = update_data.diagnosis_mkb
     document.content["rehab_potential"] = update_data.rehab_potential
     document.content["rehab_prognosis"] = update_data.rehab_prognosis
 
-    # Обновляем даты в шапке
     if "table_dates" not in document.content:
         document.content["table_dates"] = {}
     document.content["table_dates"]["admission"] = update_data.table_dates.get("admission", "")
     document.content["table_dates"]["intermediate"] = update_data.table_dates.get("intermediate", "")
     document.content["table_dates"]["discharge"] = update_data.table_dates.get("discharge", "")
 
-    # Обновляем основную таблицу (только обычные строки, заголовки пропускаем)
     for row_id, values in update_data.main_table.items():
-        # Проверяем, что это не заголовок (заголовки не должны присылаться, но на всякий случай)
         for row in document.content.get("main_table", {}).get("rows", []):
             if row["id"] == row_id and row.get("is_section", False):
-                continue  # пропускаем заголовки
+                continue
         document.update_main_table_row(row_id, values)
 
-    # Обновляем таблицу процедур
     for row_id, values in update_data.procedures_table.items():
         document.update_procedure_row(row_id, values)
 
-    # Обновляем цели
     document.update_goals(
         short_term=update_data.goals.get("short_term", ""),
         long_term=update_data.goals.get("long_term", "")
     )
 
-    # Отмечаем время заполнения в зависимости от роли
     now = datetime.utcnow()
     if current_user.role == DoctorRole.NEUROLOGIST:
         document.neurologist_filled_at = now
@@ -361,12 +360,16 @@ async def update_document_full(
         document.therapist_filled_at = now
     elif current_user.role == DoctorRole.HEAD:
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_filled_at = now
 
     await db.commit()
 
     return {"message": "Документ успешно обновлён"}
 
-# Оставшиеся эндпоинты для совместимости (можно оставить, если используются)
+
 @router.post("/{document_id}/complete-section")
 async def complete_section(
         document_id: int,
@@ -377,6 +380,7 @@ async def complete_section(
     document = await get_document_or_404(document_id, db)
     now = datetime.utcnow()
 
+    # ИЗМЕНЕНО: добавлены новые роли
     if current_user.role == DoctorRole.NEUROLOGIST:
         document.neurologist_completed = True
         document.neurologist_filled_at = now
@@ -386,6 +390,12 @@ async def complete_section(
     elif current_user.role == DoctorRole.HEAD:
         document.head_completed = True
         document.head_filled_at = now
+    elif current_user.role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_completed = True
+        document.psychologist_filled_at = now
+    elif current_user.role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_completed = True
+        document.cardiologist_filled_at = now
     else:
         raise HTTPException(
             status_code=400,
@@ -412,6 +422,7 @@ async def uncomplete_my_section(
         raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
 
     role = current_user.role
+    # ИЗМЕНЕНО: добавлены новые роли
     if role == DoctorRole.NEUROLOGIST:
         document.neurologist_completed = False
         document.neurologist_filled_at = None
@@ -421,10 +432,16 @@ async def uncomplete_my_section(
     elif role == DoctorRole.HEAD:
         document.head_completed = False
         document.head_filled_at = None
+    elif role == DoctorRole.PSYCHOLOGIST:
+        document.psychologist_completed = False
+        document.psychologist_filled_at = None
+    elif role == DoctorRole.CARDIOLOGIST:
+        document.cardiologist_completed = False
+        document.cardiologist_filled_at = None
     else:
         raise HTTPException(
             status_code=403,
-            detail="Только невролог, терапевт или заведующий могут отменить свой раздел"
+            detail="Только врач может отменить свой раздел"
         )
 
     await db.commit()
@@ -439,7 +456,8 @@ async def uncomplete_section_by_admin(
         current_user: Doctor = Depends(require_role("admin", "head"))
 ):
     """Отмена завершения раздела указанной роли (только для админа/зав.)"""
-    if target_role not in ["neurologist", "therapist", "head"]:
+    allowed_roles = ["neurologist", "therapist", "head", "psychologist", "cardiologist"]  # ИЗМЕНЕНО
+    if target_role not in allowed_roles:
         raise HTTPException(status_code=400, detail="Недопустимая целевая роль")
 
     document = await get_document_or_404(document_id, db)
@@ -456,6 +474,12 @@ async def uncomplete_section_by_admin(
     elif target_role == "head":
         document.head_completed = False
         document.head_filled_at = None
+    elif target_role == "psychologist":
+        document.psychologist_completed = False
+        document.psychologist_filled_at = None
+    elif target_role == "cardiologist":
+        document.cardiologist_completed = False
+        document.cardiologist_filled_at = None
 
     await db.commit()
     return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
@@ -470,6 +494,7 @@ async def get_completion_status(
     """Получение статуса заполнения документа"""
     document = await get_document_or_404(document_id, db)
 
+    # ИЗМЕНЕНО: добавлены новые роли
     return {
         "neurologist": {
             "completed": document.neurologist_completed,
@@ -483,9 +508,19 @@ async def get_completion_status(
             "completed": document.head_completed,
             "filled_at": document.head_filled_at.isoformat() if document.head_filled_at else None
         },
+        "psychologist": {
+            "completed": document.psychologist_completed,
+            "filled_at": document.psychologist_filled_at.isoformat() if document.psychologist_filled_at else None
+        },
+        "cardiologist": {
+            "completed": document.cardiologist_completed,
+            "filled_at": document.cardiologist_filled_at.isoformat() if document.cardiologist_filled_at else None
+        },
         "all_completed": (
-                document.neurologist_completed and
-                document.therapist_completed and
-                document.head_completed
+            document.neurologist_completed and
+            document.therapist_completed and
+            document.head_completed and
+            document.psychologist_completed and
+            document.cardiologist_completed
         )
     }

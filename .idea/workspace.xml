@@ -4,16 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.0&#10;- экспорт нужного документа реализован">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.1&#10;- добавлены новые роли врачей&#10;- добавлена возможность редактировать пароль&#10;- внесены изменения в права ролей">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/doctors.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/doctors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -448,7 +446,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771918701418</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Версия 0.4.1&#10;- добавлены новые роли врачей&#10;- добавлена возможность редактировать пароль&#10;- внесены изменения в права ролей">
+      <option name="closed" value="true" />
+      <created>1771921834493</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1771921834493</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -470,7 +476,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.0.1&#10;- созданы базы данных&#10;- не настроены библиотеки" />
     <MESSAGE value="Версия 0.0.2&#10;- версия python изменена на более стабильную: 3.14 -&gt; 3.12&#10;- настроены библиотеки&#10;- таблицы добавляются корректно" />
     <MESSAGE value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
     <MESSAGE value="Версия 0.0.4&#10;- добавление пациентов, начало реализации" />
@@ -495,6 +500,7 @@
     <MESSAGE value="Версия 0.3.4&#10;- работа над мелкими багами" />
     <MESSAGE value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
     <MESSAGE value="Версия 0.4.0&#10;- экспорт нужного документа реализован" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.4.0&#10;- экспорт нужного документа реализован" />
+    <MESSAGE value="Версия 0.4.1&#10;- добавлены новые роли врачей&#10;- добавлена возможность редактировать пароль&#10;- внесены изменения в права ролей" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.4.1&#10;- добавлены новые роли врачей&#10;- добавлена возможность редактировать пароль&#10;- внесены изменения в права ролей" />
   </component>
 </project>

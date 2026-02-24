@@ -44,3 +44,5 @@ class CaseWithPatient(Case):
     neurologist_completed: bool = False
     therapist_completed: bool = False
     head_completed: bool = False
+    psychologist_completed: bool = False
+    cardiologist_completed: bool = False

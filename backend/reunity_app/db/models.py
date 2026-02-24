@@ -14,7 +14,6 @@ class DoctorRole(str, enum.Enum):
     NEUROLOGIST = "neurologist"
     HEAD = "head"
     ADMIN = "admin"
-    # ИЗМЕНЕНО: добавлены новые роли
     PSYCHOLOGIST = "psychologist"
     CARDIOLOGIST = "cardiologist"
 
@@ -69,7 +68,6 @@ HEAD_ROWS = [
 
 
 class Patient(Base):
-    """Модель пациента"""
     __tablename__ = "patients"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -80,12 +78,10 @@ class Patient(Base):
     insurance_number = Column(String(20))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Связи
     cases = relationship("Case", back_populates="patient", cascade="all, delete-orphan")
 
     @validates('last_name', 'first_name')
     def validate_name(self, key, value):
-        """Валидация ФИО"""
         if not value or not value.strip():
             raise ValueError(f"{key} не может быть пустым")
         return value.strip()
@@ -95,7 +91,6 @@ class Patient(Base):
 
     @property
     def full_name(self):
-        """Полное имя пациента"""
         parts = [self.last_name, self.first_name]
         if self.middle_name:
             parts.append(self.middle_name)
@@ -103,7 +98,6 @@ class Patient(Base):
 
 
 class Doctor(Base):
-    """Модель врача"""
     __tablename__ = "doctors"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -116,7 +110,6 @@ class Doctor(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Связи
     created_cases = relationship("Case", back_populates="creator")
     document_sections = relationship("DocumentSection", back_populates="doctor")
     signed_documents = relationship("Document", back_populates="signer")
@@ -126,7 +119,6 @@ class Doctor(Base):
 
     @property
     def full_name(self):
-        """Полное имя врача"""
         parts = [self.last_name, self.first_name]
         if self.middle_name:
             parts.append(self.middle_name)
@@ -134,7 +126,6 @@ class Doctor(Base):
 
 
 class DocumentTemplate(Base):
-    """Шаблон документа"""
     __tablename__ = "document_templates"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -147,7 +138,6 @@ class DocumentTemplate(Base):
 
 
 class Case(Base):
-    """Случай (приём пациента)"""
     __tablename__ = "cases"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -161,7 +151,6 @@ class Case(Base):
     completed_at = Column(DateTime(timezone=True))
     sent_to_webmis_at = Column(DateTime(timezone=True))
 
-    # Связи
     patient = relationship("Patient", back_populates="cases")
     creator = relationship("Doctor", back_populates="created_cases")
     document = relationship("Document", back_populates="case", uselist=False, cascade="all, delete-orphan")
@@ -171,7 +160,6 @@ class Case(Base):
 
 
 class Document(Base):
-    """Документ (заключение)"""
     __tablename__ = "documents"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -179,24 +167,28 @@ class Document(Base):
     template_id = Column(Integer, ForeignKey("document_templates.id"))
     signer_id = Column(Integer, ForeignKey("doctors.id"))
 
-    # Структура документа в виде JSON-таблицы
     content = Column(JSON, default={}, nullable=False)
 
     # Статусы заполнения врачами
     neurologist_completed = Column(Boolean, default=False)
     therapist_completed = Column(Boolean, default=False)
     head_completed = Column(Boolean, default=False)
+    # добавлены поля для психолога и кардиолога
+    psychologist_completed = Column(Boolean, default=False)
+    cardiologist_completed = Column(Boolean, default=False)
 
     # Даты заполнения
     neurologist_filled_at = Column(DateTime(timezone=True))
     therapist_filled_at = Column(DateTime(timezone=True))
     head_filled_at = Column(DateTime(timezone=True))
+    # добавлены поля дат
+    psychologist_filled_at = Column(DateTime(timezone=True))
+    cardiologist_filled_at = Column(DateTime(timezone=True))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     signed_at = Column(DateTime(timezone=True))
 
-    # Связи
     case = relationship("Case", back_populates="document")
     template = relationship("DocumentTemplate")
     signer = relationship("Doctor", back_populates="signed_documents")
@@ -206,7 +198,6 @@ class Document(Base):
         return f"<Document #{self.id}>"
 
     def initialize_content(self):
-        """Инициализация структуры документа для нового случая"""
         # Полный список строк из реального документа, включая заголовки разделов
         ALL_ROWS = [
             # --- Глобальные умственные функции ---
@@ -388,11 +379,9 @@ class Document(Base):
         ]
 
         self.content = {
-            # Поля из верхней части документа (clinical_diagnosis_mkb удалено)
             "diagnosis_mkb": "",
             "rehab_potential": "",
             "rehab_prognosis": "",
-            # Даты в шапке таблицы
             "table_dates": {
                 "admission": "",
                 "intermediate": "",
@@ -409,7 +398,6 @@ class Document(Base):
                     for row in ALL_ROWS
                 ]
             },
-            # Целевой блок с двумя полями
             "goals": {
                 "short_term": "",
                 "long_term": ""
@@ -427,12 +415,10 @@ class Document(Base):
         }
 
     def update_main_table_row(self, row_id: str, values: List[str]):
-        """Обновление строки основной таблицы"""
         if "main_table" not in self.content:
             self.content["main_table"] = {"rows": []}
         for row in self.content["main_table"]["rows"]:
             if row["id"] == row_id:
-                # Не обновляем строки-заголовки (у них нет values)
                 if row.get("is_section", False):
                     return
                 if len(values) == 4:
@@ -443,7 +429,6 @@ class Document(Base):
                         current[i] = values[i]
                 flag_modified(self, "content")
                 return
-        # Если строка не найдена и это не заголовок, добавим (на всякий случай)
         if not any(row.get("is_section", False) for row in self.content["main_table"]["rows"] if row["id"] == row_id):
             self.content["main_table"]["rows"].append({
                 "id": row_id,
@@ -454,7 +439,6 @@ class Document(Base):
             flag_modified(self, "content")
 
     def update_procedure_row(self, row_id: str, values: List[str]):
-        """Обновление строки таблицы процедур"""
         if "procedures_table" not in self.content:
             self.content["procedures_table"] = {"rows": []}
         for row in self.content["procedures_table"]["rows"]:
@@ -475,13 +459,11 @@ class Document(Base):
         flag_modified(self, "content")
 
     def update_header_field(self, field_name: str, value: str):
-        """Обновление поля из верхней части документа (без clinical_diagnosis_mkb)"""
         if field_name in ["diagnosis_mkb", "rehab_potential", "rehab_prognosis"]:
             self.content[field_name] = value
             flag_modified(self, "content")
 
     def update_table_dates(self, admission: str = None, intermediate: str = None, discharge: str = None):
-        """Обновление дат в шапке таблицы"""
         if "table_dates" not in self.content:
             self.content["table_dates"] = {"admission": "", "intermediate": "", "discharge": ""}
         if admission is not None:
@@ -493,7 +475,6 @@ class Document(Base):
         flag_modified(self, "content")
 
     def update_goals(self, short_term: str = None, long_term: str = None):
-        """Обновление целевого блока"""
         if "goals" not in self.content:
             self.content["goals"] = {"short_term": "", "long_term": ""}
         if short_term is not None:
@@ -502,9 +483,7 @@ class Document(Base):
             self.content["goals"]["long_term"] = long_term
         flag_modified(self, "content")
 
-    # Для обратной совместимости со старыми эндпоинтами
     def update_row(self, row_name: DocumentRow, values: List[str]):
-        """Обновление строки документа (старый формат)"""
         if row_name.value in self.content:
             if len(values) == 3:
                 self.content[row_name.value] = values
@@ -517,7 +496,6 @@ class Document(Base):
         flag_modified(self, "content")
 
     def update_row_string(self, row_name: str, values: List[str]):
-        """Обновление строки документа по строковому имени (старый формат)"""
         if row_name in self.content:
             current_row = self.content.get(row_name, ["", "", ""])
             if len(values) >= 2:
@@ -527,7 +505,6 @@ class Document(Base):
         flag_modified(self, "content")
 
     def calculate_total_score(self):
-        """Расчет итогового балла (для старого формата)"""
         total_before = 0
         total_after = 0
         for row in DocumentRow:
@@ -535,9 +512,9 @@ class Document(Base):
                 continue
             row_data = self.content.get(row.value, ["", "", ""])
             try:
-                if row_data[1]:  # "До лечения"
+                if row_data[1]:
                     total_before += int(row_data[1])
-                if row_data[2]:  # "После лечения"
+                if row_data[2]:
                     total_after += int(row_data[2])
             except ValueError:
                 continue
@@ -545,7 +522,6 @@ class Document(Base):
 
 
 class DocumentSection(Base):
-    """Раздел документа, заполненный конкретным врачом"""
     __tablename__ = "document_sections"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -559,7 +535,6 @@ class DocumentSection(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Связи
     document = relationship("Document", back_populates="sections")
     doctor = relationship("Doctor", back_populates="document_sections")
 
@@ -568,7 +543,6 @@ class DocumentSection(Base):
 
 
 class WebmisFieldMapping(Base):
-    """Маппинг полей нашего документа на поля в ВебМИС"""
     __tablename__ = "webmis_field_mapping"
 
     id = Column(Integer, primary_key=True, index=True)

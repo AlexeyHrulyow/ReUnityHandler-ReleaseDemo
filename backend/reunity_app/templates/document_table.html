@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
-        /* стили без изменений (полностью сохранены) */
         :root {
             --bg-light: #fffffa;
             --primary-dark: #0d5c63;
@@ -413,6 +412,18 @@
                 <h4>Врач ФРМ</h4>
                 <p id="headText">Не заполнено</p>
                 <p id="headTime"></p>
+            </div>
+            <div class="status-card" id="psychologistStatus">
+                <div class="status-icon">🧠</div>
+                <h4>Психолог</h4>
+                <p id="psychologistText">Не заполнено</p>
+                <p id="psychologistTime"></p>
+            </div>
+            <div class="status-card" id="cardiologistStatus">
+                <div class="status-icon">❤️</div>
+                <h4>Кардиолог</h4>
+                <p id="cardiologistText">Не заполнено</p>
+                <p id="cardiologistTime"></p>
             </div>
         </div>
 
@@ -1013,6 +1024,8 @@
             const neuro = document.getElementById('neurologistStatus');
             const therapist = document.getElementById('therapistStatus');
             const head = document.getElementById('headStatus');
+            const psych = document.getElementById('psychologistStatus');
+            const cardio = document.getElementById('cardiologistStatus');
 
             if (completionStatus.neurologist) {
                 neuro.classList.add('completed');
@@ -1035,6 +1048,20 @@
                 head.classList.remove('completed');
                 document.getElementById('headText').textContent = 'Не заполнено';
             }
+            if (completionStatus.psychologist) {
+                psych.classList.add('completed');
+                document.getElementById('psychologistText').textContent = 'Заполнено';
+            } else {
+                psych.classList.remove('completed');
+                document.getElementById('psychologistText').textContent = 'Не заполнено';
+            }
+            if (completionStatus.cardiologist) {
+                cardio.classList.add('completed');
+                document.getElementById('cardiologistText').textContent = 'Заполнено';
+            } else {
+                cardio.classList.remove('completed');
+                document.getElementById('cardiologistText').textContent = 'Не заполнено';
+            }
         }
 
         function updateSectionButtons() {
@@ -1048,6 +1075,8 @@
             if (userRole === 'neurologist') isCompleted = completionStatus.neurologist;
             else if (userRole === 'therapist') isCompleted = completionStatus.therapist;
             else if (userRole === 'head') isCompleted = completionStatus.head;
+            else if (userRole === 'psychologist') isCompleted = completionStatus.psychologist;
+            else if (userRole === 'cardiologist') isCompleted = completionStatus.cardiologist;
             else if (userRole === 'admin') {
                 completeBtn.style.display = 'none';
                 uncompleteBtn.style.display = 'none';
@@ -1063,7 +1092,6 @@
             }
         }
 
-        // ИЗМЕНЕНО: функция updateCaseStatusUI полностью переработана для новых прав
         function updateCaseStatusUI() {
             const caseMessageDiv = document.getElementById('caseStatusMessage');
             const actionsDiv = document.getElementById('documentActions');
@@ -1085,7 +1113,6 @@
                 caseMessageDiv.className = 'case-status-message case-status-completed';
                 caseMessageDiv.style.display = 'block';
 
-                // Права на отмену завершения и экспорт: только администратор или создатель
                 if (isAdmin || isCreator) {
                     completeSectionBtn.style.display = 'none';
                     uncompleteSectionBtn.style.display = 'none';
@@ -1110,11 +1137,9 @@
                 uncompleteCaseBtn.style.display = 'none';
                 exportBtn.style.display = 'none';
 
-                // Показываем кнопку завершения раздела (логика из updateSectionButtons)
                 updateSectionButtons();
 
-                // ИЗМЕНЕНО: проверяем, можно ли завершить случай (все разделы заполнены и права)
-                const allCompleted = completionStatus.neurologist && completionStatus.therapist && completionStatus.head;
+                const allCompleted = completionStatus.neurologist && completionStatus.therapist && completionStatus.head && completionStatus.psychologist && completionStatus.cardiologist;
                 const canComplete = allCompleted && (isAdmin || isCreator);
                 if (canComplete) {
                     signDocumentBtn.style.display = 'inline-block';
@@ -1287,26 +1312,21 @@
         }
 
         const WEBMIS_MAPPING = {
-            // Поля шапки
             header: {
                 diagnosis_mkb: 'singleLineTextInput4',
                 rehab_potential: 'singleLineTextInput1',
                 rehab_prognosis: 'singleLineTextInput2'
             },
-            // Даты в таблице
             dates: {
                 admission: 'calendar2',
                 intermediate: 'calendar56',
                 discharge: 'calendar57'
             },
-            // Дата документа (используем текущую)
             documentDate: 'calendar1',
-            // Цели
             goals: {
                 short_term: 'singleLineTextInput23',
                 long_term: 'singleLineTextInput25'
             },
-            // Основная таблица МКФ (код домена -> массив id [admission, intermediate, discharge, note])
             domain: {
                 b110:  ['singleLineTextInput56', 'singleLineTextInput109', 'singleLineTextInput122', 'singleLineTextInput5'],
                 b114:  ['singleLineTextInput123', 'singleLineTextInput124', 'singleLineTextInput125', 'singleLineTextInput6'],
@@ -1425,7 +1445,6 @@
                 d499:  ['singleLineTextInput507', 'singleLineTextInput508', 'singleLineTextInput509', 'singleLineTextInput167'],
                 d5701: ['singleLineTextInput510', 'singleLineTextInput511', 'singleLineTextInput512', 'singleLineTextInput168']
             },
-            // Таблица процедур (id процедуры -> объект с полями count и note)
             procedure: {
                 manual_therapy:           { count: 'singleLineTextInput59', note: 'singleLineTextInput58' },
                 massage:                  { count: 'singleLineTextInput60', note: 'singleLineTextInput94' },
@@ -1444,35 +1463,29 @@
         };
 
         function exportToWebmis() {
-            const data = collectFullDocumentData(); // получаем текущие данные из DOM
+            const data = collectFullDocumentData();
             const webmisData = {};
 
-            // 1. Дата документа (текущая)
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const year = today.getFullYear();
             webmisData[WEBMIS_MAPPING.documentDate] = `${day}.${month}.${year}`;
 
-            // 2. Поля шапки
             webmisData[WEBMIS_MAPPING.header.diagnosis_mkb] = data.diagnosis_mkb || '';
             webmisData[WEBMIS_MAPPING.header.rehab_potential] = data.rehab_potential || '';
             webmisData[WEBMIS_MAPPING.header.rehab_prognosis] = data.rehab_prognosis || '';
 
-            // 3. Даты таблицы
             webmisData[WEBMIS_MAPPING.dates.admission] = data.table_dates.admission || '';
             webmisData[WEBMIS_MAPPING.dates.intermediate] = data.table_dates.intermediate || '';
             webmisData[WEBMIS_MAPPING.dates.discharge] = data.table_dates.discharge || '';
 
-            // 4. Цели
             webmisData[WEBMIS_MAPPING.goals.short_term] = data.goals.short_term || '';
             webmisData[WEBMIS_MAPPING.goals.long_term] = data.goals.long_term || '';
 
-            // 5. Основная таблица МКФ
             for (const [rowId, values] of Object.entries(data.main_table)) {
                 const ids = WEBMIS_MAPPING.domain[rowId];
                 if (ids && Array.isArray(ids) && ids.length === 4) {
-                    // values – массив из 4 элементов: [admission, intermediate, discharge, note]
                     for (let i = 0; i < 4; i++) {
                         if (values[i] !== undefined) {
                             webmisData[ids[i]] = values[i];
@@ -1481,17 +1494,14 @@
                 }
             }
 
-            // 6. Таблица процедур
             for (const [rowId, values] of Object.entries(data.procedures_table)) {
                 const proc = WEBMIS_MAPPING.procedure[rowId];
                 if (proc) {
-                    // values – массив из 2 элементов: [count, note]
                     if (values[0] !== undefined) webmisData[proc.count] = values[0];
                     if (values[1] !== undefined) webmisData[proc.note] = values[1];
                 }
             }
 
-            // Сохраняем в файл
             const fileName = `${document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_')}_${day}${month}${year}_${String(today.getHours()).padStart(2,'0')}${String(today.getMinutes()).padStart(2,'0')}.json`;
             const blob = new Blob([JSON.stringify(webmisData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1502,7 +1512,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // ---- Инициализация ----
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
             await loadDocumentStructure();

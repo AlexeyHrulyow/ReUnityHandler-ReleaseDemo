@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator
 from typing import List, Dict, Any, Optional
 from enum import Enum
 
-# Для обратной совместимости (можно оставить, если где-то используются)
+
 class DocumentRowEnum(str, Enum):
     HEADER = "header"
     PAIN_SYNDROME = "pain_syndrome"
@@ -18,12 +18,11 @@ class DocumentRowEnum(str, Enum):
     TOTAL_SCORE = "total_score"
 
 
-# Новая схема для строки основной таблицы с поддержкой заголовков разделов
 class MainTableRow(BaseModel):
     id: str
     label: str
     is_section: bool = False
-    values: Optional[List[str]] = None  # Для заголовков sections values = None или пустой список
+    values: Optional[List[str]] = None
 
     @validator('values', always=True)
     def validate_values(cls, v, values):
@@ -33,7 +32,6 @@ class MainTableRow(BaseModel):
         return v if v is not None else []
 
 
-# Схема для обновления строки основной таблицы (только для обычных строк)
 class MainTableRowUpdate(BaseModel):
     row_id: str
     values: List[str]
@@ -45,11 +43,10 @@ class MainTableRowUpdate(BaseModel):
         return v
 
 
-# Схема для строки таблицы процедур
 class ProcedureRow(BaseModel):
     id: str
     label: str
-    values: List[str]  # 2 элемента: [количество, примечание]
+    values: List[str]
 
     @validator('values')
     def validate_values(cls, v):
@@ -58,7 +55,6 @@ class ProcedureRow(BaseModel):
         return v
 
 
-# Схема для обновления строки таблицы процедур
 class ProcedureRowUpdate(BaseModel):
     row_id: str
     values: List[str]
@@ -70,7 +66,6 @@ class ProcedureRowUpdate(BaseModel):
         return v
 
 
-# Целевой блок (два поля)
 class Goals(BaseModel):
     short_term: str
     long_term: str
@@ -81,7 +76,6 @@ class GoalsUpdate(BaseModel):
     long_term: Optional[str] = None
 
 
-# Поля верхней части документа (clinical_diagnosis_mkb удалено)
 class HeaderFields(BaseModel):
     diagnosis_mkb: str
     rehab_potential: str
@@ -94,7 +88,6 @@ class HeaderFieldsUpdate(BaseModel):
     rehab_prognosis: Optional[str] = None
 
 
-# Даты в шапке таблицы
 class TableDates(BaseModel):
     admission: str
     intermediate: str
@@ -107,7 +100,6 @@ class TableDatesUpdate(BaseModel):
     discharge: Optional[str] = None
 
 
-# Полная структура документа для ответа (other_fields удалено)
 class DocumentStructureResponse(BaseModel):
     header_fields: HeaderFields
     table_dates: TableDates
@@ -115,10 +107,9 @@ class DocumentStructureResponse(BaseModel):
     procedures_table: List[ProcedureRow]
     goals: Goals
     permissions: Dict[str, Any]
-    completion_status: Dict[str, bool]
+    completion_status: Dict[str, bool]  # теперь содержит ключи: neurologist, therapist, head, psychologist, cardiologist
 
 
-# Для совместимости со старыми эндпоинтами, если они ещё используются
 class DoctorRows(BaseModel):
     neurologist_rows: List[DocumentRowEnum]
     therapist_rows: List[DocumentRowEnum]
