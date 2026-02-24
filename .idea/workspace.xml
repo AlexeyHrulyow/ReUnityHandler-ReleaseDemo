@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.4&#10;- работа над мелкими багами">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.5&#10;- исправлены шортакты в документе">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/browser-extension/content.js" beforeDir="false" afterPath="$PROJECT_DIR$/browser-extension/content.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/browser-extension/popup.js" beforeDir="false" afterPath="$PROJECT_DIR$/browser-extension/popup.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -424,7 +426,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771510580411</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Версия 0.3.5&#10;- исправлены шортакты в документе">
+      <option name="closed" value="true" />
+      <created>1771912892431</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1771912892431</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -469,6 +479,7 @@
     <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
     <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
     <MESSAGE value="Версия 0.3.4&#10;- работа над мелкими багами" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.4&#10;- работа над мелкими багами" />
+    <MESSAGE value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
   </component>
 </project>

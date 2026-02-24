@@ -1276,19 +1276,214 @@
             }
         }
 
+        const WEBMIS_MAPPING = {
+            // Поля шапки
+            header: {
+                diagnosis_mkb: 'singleLineTextInput4',
+                rehab_potential: 'singleLineTextInput1',
+                rehab_prognosis: 'singleLineTextInput2'
+            },
+            // Даты в таблице
+            dates: {
+                admission: 'calendar2',
+                intermediate: 'calendar56',
+                discharge: 'calendar57'
+            },
+            // Дата документа (используем текущую)
+            documentDate: 'calendar1',
+            // Цели
+            goals: {
+                short_term: 'singleLineTextInput23',
+                long_term: 'singleLineTextInput25'
+            },
+            // Основная таблица МКФ (код домена -> массив id [admission, intermediate, discharge, note])
+            domain: {
+                b110:  ['singleLineTextInput56', 'singleLineTextInput109', 'singleLineTextInput122', 'singleLineTextInput5'],
+                b114:  ['singleLineTextInput123', 'singleLineTextInput124', 'singleLineTextInput125', 'singleLineTextInput6'],
+                b117:  ['singleLineTextInput126', 'singleLineTextInput127', 'singleLineTextInput128', 'singleLineTextInput7'],
+                b134:  ['singleLineTextInput129', 'singleLineTextInput130', 'singleLineTextInput131', 'singleLineTextInput8'],
+                b1343: ['singleLineTextInput141', 'singleLineTextInput162', 'singleLineTextInput169', 'singleLineTextInput9'],
+                b139:  ['singleLineTextInput170', 'singleLineTextInput171', 'singleLineTextInput172', 'singleLineTextInput10'],
+                b140:  ['singleLineTextInput173', 'singleLineTextInput174', 'singleLineTextInput175', 'singleLineTextInput11'],
+                b144:  ['singleLineTextInput176', 'singleLineTextInput177', 'singleLineTextInput178', 'singleLineTextInput206'],
+                b147:  ['singleLineTextInput179', 'singleLineTextInput180', 'singleLineTextInput181', 'singleLineTextInput20'],
+                b152:  ['singleLineTextInput182', 'singleLineTextInput183', 'singleLineTextInput184', 'singleLineTextInput12'],
+                b156:  ['singleLineTextInput185', 'singleLineTextInput186', 'singleLineTextInput187', 'singleLineTextInput13'],
+                b160:  ['singleLineTextInput188', 'singleLineTextInput189', 'singleLineTextInput190', 'singleLineTextInput14'],
+                b164:  ['singleLineTextInput191', 'singleLineTextInput192', 'singleLineTextInput193', 'singleLineTextInput15'],
+                b167:  ['singleLineTextInput194', 'singleLineTextInput195', 'singleLineTextInput196', 'singleLineTextInput16'],
+                b172:  ['singleLineTextInput197', 'singleLineTextInput198', 'singleLineTextInput199', 'singleLineTextInput17'],
+                b180:  ['singleLineTextInput200', 'singleLineTextInput201', 'singleLineTextInput202', 'singleLineTextInput21'],
+                b176:  ['singleLineTextInput203', 'singleLineTextInput204', 'singleLineTextInput205', 'singleLineTextInput18'],
+                b199:  ['singleLineTextInput207', 'singleLineTextInput208', 'singleLineTextInput209', 'singleLineTextInput22'],
+                b210:  ['singleLineTextInput210', 'singleLineTextInput211', 'singleLineTextInput212', 'singleLineTextInput24'],
+                b230:  ['singleLineTextInput213', 'singleLineTextInput214', 'singleLineTextInput215', 'singleLineTextInput26'],
+                b240:  ['singleLineTextInput216', 'singleLineTextInput217', 'singleLineTextInput218', 'singleLineTextInput27'],
+                b255:  ['singleLineTextInput219', 'singleLineTextInput220', 'singleLineTextInput221', 'singleLineTextInput28'],
+                b265:  ['singleLineTextInput222', 'singleLineTextInput223', 'singleLineTextInput224', 'singleLineTextInput29'],
+                b270:  ['singleLineTextInput225', 'singleLineTextInput226', 'singleLineTextInput227', 'singleLineTextInput30'],
+                b280:  ['singleLineTextInput228', 'singleLineTextInput229', 'singleLineTextInput230', 'singleLineTextInput33'],
+                b289:  ['singleLineTextInput231', 'singleLineTextInput232', 'singleLineTextInput233', 'singleLineTextInput34'],
+                b2801: ['singleLineTextInput234', 'singleLineTextInput235', 'singleLineTextInput236', 'singleLineTextInput35'],
+                b28013:['singleLineTextInput237', 'singleLineTextInput238', 'singleLineTextInput239', 'singleLineTextInput36'],
+                b28014:['singleLineTextInput240', 'singleLineTextInput241', 'singleLineTextInput242', 'singleLineTextInput37'],
+                b28010:['singleLineTextInput243', 'singleLineTextInput244', 'singleLineTextInput245', 'singleLineTextInput38'],
+                b28011:['singleLineTextInput246', 'singleLineTextInput247', 'singleLineTextInput248', 'singleLineTextInput39'],
+                b28015:['singleLineTextInput249', 'singleLineTextInput250', 'singleLineTextInput251', 'singleLineTextInput40'],
+                b28016:['singleLineTextInput19', 'singleLineTextInput253', 'singleLineTextInput254', 'singleLineTextInput41'],
+                b410:  ['singleLineTextInput252', 'singleLineTextInput265', 'singleLineTextInput256', 'singleLineTextInput43'],
+                b4101: ['singleLineTextInput257', 'singleLineTextInput266', 'singleLineTextInput267', 'singleLineTextInput44'],
+                b4102: ['singleLineTextInput258', 'singleLineTextInput268', 'singleLineTextInput269', 'singleLineTextInput45'],
+                b4103: ['singleLineTextInput259', 'singleLineTextInput270', 'singleLineTextInput271', 'singleLineTextInput46'],
+                b415:  ['singleLineTextInput260', 'singleLineTextInput272', 'singleLineTextInput273', 'singleLineTextInput47'],
+                b4150: ['singleLineTextInput261', 'singleLineTextInput274', 'singleLineTextInput275', 'singleLineTextInput48'],
+                b4152: ['singleLineTextInput262', 'singleLineTextInput276', 'singleLineTextInput277', 'singleLineTextInput49'],
+                b420:  ['singleLineTextInput263', 'singleLineTextInput278', 'singleLineTextInput279', 'singleLineTextInput50'],
+                b4200: ['singleLineTextInput264', 'singleLineTextInput280', 'singleLineTextInput281', 'singleLineTextInput51'],
+                b4202: ['singleLineTextInput282', 'singleLineTextInput283', 'singleLineTextInput284', 'singleLineTextInput255'],
+                b4550: ['singleLineTextInput285', 'singleLineTextInput286', 'singleLineTextInput287', 'singleLineTextInput53'],
+                b4552: ['singleLineTextInput288', 'singleLineTextInput290', 'singleLineTextInput291', 'singleLineTextInput54'],
+                b460:  ['singleLineTextInput289', 'singleLineTextInput292', 'singleLineTextInput293', 'singleLineTextInput55'],
+                b525:  ['singleLineTextInput294', 'singleLineTextInput295', 'singleLineTextInput296', 'singleLineTextInput57'],
+                b530:  ['singleLineTextInput297', 'singleLineTextInput298', 'singleLineTextInput299', 'singleLineTextInput61'],
+                b5401: ['singleLineTextInput300', 'singleLineTextInput301', 'singleLineTextInput302', 'singleLineTextInput62'],
+                b6200: ['singleLineTextInput306', 'singleLineTextInput307', 'singleLineTextInput308', 'singleLineTextInput72'],
+                b710:  ['singleLineTextInput309', 'singleLineTextInput310', 'singleLineTextInput311', 'singleLineTextInput74'],
+                b7100: ['singleLineTextInput314', 'singleLineTextInput312', 'singleLineTextInput313', 'singleLineTextInput75'],
+                b7101: ['singleLineTextInput315', 'singleLineTextInput320', 'singleLineTextInput321', 'singleLineTextInput76'],
+                b715:  ['singleLineTextInput316', 'singleLineTextInput322', 'singleLineTextInput323', 'singleLineTextInput77'],
+                b720:  ['singleLineTextInput317', 'singleLineTextInput324', 'singleLineTextInput325', 'singleLineTextInput78'],
+                b729:  ['singleLineTextInput318', 'singleLineTextInput326', 'singleLineTextInput327', 'singleLineTextInput79'],
+                b730:  ['singleLineTextInput319', 'singleLineTextInput328', 'singleLineTextInput329', 'singleLineTextInput81'],
+                b735:  ['singleLineTextInput330', 'singleLineTextInput331', 'singleLineTextInput332', 'singleLineTextInput82'],
+                b7302: ['singleLineTextInput333', 'singleLineTextInput334', 'singleLineTextInput335', 'singleLineTextInput83'],
+                b740:  ['singleLineTextInput336', 'singleLineTextInput338', 'singleLineTextInput339', 'singleLineTextInput84'],
+                b749:  ['singleLineTextInput337', 'singleLineTextInput340', 'singleLineTextInput341', 'singleLineTextInput85'],
+                b750:  ['singleLineTextInput342', 'singleLineTextInput343', 'singleLineTextInput344', 'singleLineTextInput87'],
+                b755:  ['singleLineTextInput345', 'singleLineTextInput346', 'singleLineTextInput347', 'singleLineTextInput88'],
+                b760:  ['singleLineTextInput348', 'singleLineTextInput349', 'singleLineTextInput350', 'singleLineTextInput89'],
+                b770:  ['singleLineTextInput351', 'singleLineTextInput352', 'singleLineTextInput353', 'singleLineTextInput90'],
+                b789:  ['singleLineTextInput354', 'singleLineTextInput355', 'singleLineTextInput356', 'singleLineTextInput91'],
+                s110:  ['singleLineTextInput363', 'singleLineTextInput364', 'singleLineTextInput365', 'singleLineTextInput95'],
+                s120:  ['singleLineTextInput366', 'singleLineTextInput367', 'singleLineTextInput368', 'singleLineTextInput101'],
+                s130:  ['singleLineTextInput369', 'singleLineTextInput370', 'singleLineTextInput371', 'singleLineTextInput96'],
+                s140:  ['singleLineTextInput372', 'singleLineTextInput373', 'singleLineTextInput374', 'singleLineTextInput97'],
+                s150:  ['singleLineTextInput375', 'singleLineTextInput376', 'singleLineTextInput377', 'singleLineTextInput98'],
+                s198:  ['singleLineTextInput378', 'singleLineTextInput379', 'singleLineTextInput380', 'singleLineTextInput99'],
+                s199:  ['singleLineTextInput381', 'singleLineTextInput382', 'singleLineTextInput383', 'singleLineTextInput100'],
+                s4100: ['singleLineTextInput384', 'singleLineTextInput385', 'singleLineTextInput386', 'singleLineTextInput113'],
+                s41000:['singleLineTextInput387', 'singleLineTextInput388', 'singleLineTextInput389', 'singleLineTextInput114'],
+                s41001:['singleLineTextInput390', 'singleLineTextInput391', 'singleLineTextInput392', 'singleLineTextInput115'],
+                s4101: ['singleLineTextInput393', 'singleLineTextInput394', 'singleLineTextInput395', 'singleLineTextInput116'],
+                s4102: ['singleLineTextInput396', 'singleLineTextInput397', 'singleLineTextInput398', 'singleLineTextInput117'],
+                s610:  ['singleLineTextInput399', 'singleLineTextInput402', 'singleLineTextInput404', 'singleLineTextInput119'],
+                s620:  ['singleLineTextInput400', 'singleLineTextInput403', 'singleLineTextInput405', 'singleLineTextInput120'],
+                s630:  ['singleLineTextInput401', 'singleLineTextInput406', 'singleLineTextInput407', 'singleLineTextInput121'],
+                s710:  ['singleLineTextInput408', 'singleLineTextInput417', 'singleLineTextInput418', 'singleLineTextInput132'],
+                s720:  ['singleLineTextInput409', 'singleLineTextInput419', 'singleLineTextInput420', 'singleLineTextInput133'],
+                s7200: ['singleLineTextInput410', 'singleLineTextInput421', 'singleLineTextInput422', 'singleLineTextInput134'],
+                s730:  ['singleLineTextInput411', 'singleLineTextInput423', 'singleLineTextInput424', 'singleLineTextInput135'],
+                s7300: ['singleLineTextInput412', 'singleLineTextInput425', 'singleLineTextInput426', 'singleLineTextInput136'],
+                s73002:['singleLineTextInput413', 'singleLineTextInput427', 'singleLineTextInput428', 'singleLineTextInput137'],
+                s7301: ['singleLineTextInput414', 'singleLineTextInput429', 'singleLineTextInput430', 'singleLineTextInput138'],
+                s7302: ['singleLineTextInput415', 'singleLineTextInput431', 'singleLineTextInput432', 'singleLineTextInput139'],
+                s740:  ['singleLineTextInput416', 'singleLineTextInput433', 'singleLineTextInput434', 'singleLineTextInput140'],
+                s750:  ['singleLineTextInput435', 'singleLineTextInput445', 'singleLineTextInput446', 'singleLineTextInput142'],
+                s7500: ['singleLineTextInput436', 'singleLineTextInput447', 'singleLineTextInput448', 'singleLineTextInput143'],
+                s75001:['singleLineTextInput437', 'singleLineTextInput449', 'singleLineTextInput450', 'singleLineTextInput144'],
+                s75011:['singleLineTextInput438', 'singleLineTextInput451', 'singleLineTextInput452', 'singleLineTextInput145'],
+                s5001: ['singleLineTextInput439', 'singleLineTextInput453', 'singleLineTextInput454', 'singleLineTextInput146'],
+                s7502: ['singleLineTextInput440', 'singleLineTextInput455', 'singleLineTextInput456', 'singleLineTextInput147'],
+                s760:  ['singleLineTextInput441', 'singleLineTextInput457', 'singleLineTextInput458', 'singleLineTextInput148'],
+                s7600: ['singleLineTextInput442', 'singleLineTextInput459', 'singleLineTextInput460', 'singleLineTextInput149'],
+                s76002:['singleLineTextInput443', 'singleLineTextInput461', 'singleLineTextInput462', 'singleLineTextInput150'],
+                s770:  ['singleLineTextInput444', 'singleLineTextInput463', 'singleLineTextInput464', 'singleLineTextInput151'],
+                s798:  ['singleLineTextInput465', 'singleLineTextInput466', 'singleLineTextInput467', 'singleLineTextInput152'],
+                d330:  ['singleLineTextInput468', 'singleLineTextInput470', 'singleLineTextInput471', 'singleLineTextInput154'],
+                d350:  ['singleLineTextInput469', 'singleLineTextInput472', 'singleLineTextInput473', 'singleLineTextInput155'],
+                d415:  ['singleLineTextInput474', 'singleLineTextInput475', 'singleLineTextInput476', 'singleLineTextInput156'],
+                d420:  ['singleLineTextInput477', 'singleLineTextInput478', 'singleLineTextInput479', 'singleLineTextInput157'],
+                d429:  ['singleLineTextInput480', 'singleLineTextInput481', 'singleLineTextInput482', 'singleLineTextInput158'],
+                d430:  ['singleLineTextInput483', 'singleLineTextInput484', 'singleLineTextInput485', 'singleLineTextInput159'],
+                d435:  ['singleLineTextInput486', 'singleLineTextInput487', 'singleLineTextInput488', 'singleLineTextInput160'],
+                d440:  ['singleLineTextInput489', 'singleLineTextInput490', 'singleLineTextInput491', 'singleLineTextInput161'],
+                d445:  ['singleLineTextInput492', 'singleLineTextInput493', 'singleLineTextInput494', 'singleLineTextInput153'],
+                d449:  ['singleLineTextInput495', 'singleLineTextInput496', 'singleLineTextInput497', 'singleLineTextInput163'],
+                d450:  ['singleLineTextInput498', 'singleLineTextInput499', 'singleLineTextInput500', 'singleLineTextInput164'],
+                d465:  ['singleLineTextInput501', 'singleLineTextInput502', 'singleLineTextInput503', 'singleLineTextInput165'],
+                d469:  ['singleLineTextInput504', 'singleLineTextInput505', 'singleLineTextInput506', 'singleLineTextInput166'],
+                d499:  ['singleLineTextInput507', 'singleLineTextInput508', 'singleLineTextInput509', 'singleLineTextInput167'],
+                d5701: ['singleLineTextInput510', 'singleLineTextInput511', 'singleLineTextInput512', 'singleLineTextInput168']
+            },
+            // Таблица процедур (id процедуры -> объект с полями count и note)
+            procedure: {
+                manual_therapy:           { count: 'singleLineTextInput59', note: 'singleLineTextInput58' },
+                massage:                  { count: 'singleLineTextInput60', note: 'singleLineTextInput94' },
+                acupuncture:              { count: 'singleLineTextInput63', note: 'singleLineTextInput102' },
+                mri:                      { count: 'singleLineTextInput64', note: 'singleLineTextInput103' },
+                mechanotherapy:           { count: 'singleLineTextInput65', note: 'singleLineTextInput104' },
+                exercise_therapy:         { count: 'singleLineTextInput66', note: 'singleLineTextInput105' },
+                laser_therapy:            { count: 'singleLineTextInput67', note: 'singleLineTextInput106' },
+                electrophoresis:           { count: 'singleLineTextInput68', note: 'singleLineTextInput107' },
+                electrostimulation:       { count: 'singleLineTextInput69', note: 'singleLineTextInput108' },
+                magnetotherapy:           { count: 'singleLineTextInput70', note: 'singleLineTextInput110' },
+                electrosleep:             { count: 'singleLineTextInput71', note: 'singleLineTextInput111' },
+                psychological_counseling: { count: 'singleLineTextInput73', note: 'singleLineTextInput112' },
+                biofeedback:              { count: 'singleLineTextInput80', note: 'singleLineTextInput118' }
+            }
+        };
+
         function exportToWebmis() {
-            const data = collectFullDocumentData();
-            data.document_id = documentId;
-            data.case_id = caseId;
-            data.exported_at = new Date().toISOString();
+            const data = collectFullDocumentData(); // получаем текущие данные из DOM
+            const webmisData = {};
 
-            const patientName = document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_') || 'patient';
-            const now = new Date();
-            const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
-            const timeStr = now.toTimeString().slice(0,5).replace(':', '');
-            const fileName = `${patientName}_${dateStr}_${timeStr}.json`;
+            // 1. Дата документа (текущая)
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            webmisData[WEBMIS_MAPPING.documentDate] = `${day}.${month}.${year}`;
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            // 2. Поля шапки
+            webmisData[WEBMIS_MAPPING.header.diagnosis_mkb] = data.diagnosis_mkb || '';
+            webmisData[WEBMIS_MAPPING.header.rehab_potential] = data.rehab_potential || '';
+            webmisData[WEBMIS_MAPPING.header.rehab_prognosis] = data.rehab_prognosis || '';
+
+            // 3. Даты таблицы
+            webmisData[WEBMIS_MAPPING.dates.admission] = data.table_dates.admission || '';
+            webmisData[WEBMIS_MAPPING.dates.intermediate] = data.table_dates.intermediate || '';
+            webmisData[WEBMIS_MAPPING.dates.discharge] = data.table_dates.discharge || '';
+
+            // 4. Цели
+            webmisData[WEBMIS_MAPPING.goals.short_term] = data.goals.short_term || '';
+            webmisData[WEBMIS_MAPPING.goals.long_term] = data.goals.long_term || '';
+
+            // 5. Основная таблица МКФ
+            for (const [rowId, values] of Object.entries(data.main_table)) {
+                const ids = WEBMIS_MAPPING.domain[rowId];
+                if (ids && Array.isArray(ids) && ids.length === 4) {
+                    // values – массив из 4 элементов: [admission, intermediate, discharge, note]
+                    for (let i = 0; i < 4; i++) {
+                        if (values[i] !== undefined) {
+                            webmisData[ids[i]] = values[i];
+                        }
+                    }
+                }
+            }
+
+            // 6. Таблица процедур
+            for (const [rowId, values] of Object.entries(data.procedures_table)) {
+                const proc = WEBMIS_MAPPING.procedure[rowId];
+                if (proc) {
+                    // values – массив из 2 элементов: [count, note]
+                    if (values[0] !== undefined) webmisData[proc.count] = values[0];
+                    if (values[1] !== undefined) webmisData[proc.note] = values[1];
+                }
+            }
+
+            // Сохраняем в файл
+            const fileName = `${document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_')}_${day}${month}${year}_${String(today.getHours()).padStart(2,'0')}${String(today.getMinutes()).padStart(2,'0')}.json`;
+            const blob = new Blob([JSON.stringify(webmisData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1296,6 +1491,13 @@
             a.click();
             URL.revokeObjectURL(url);
         }
+
+        // ---- Инициализация (остаётся без изменений) ----
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadDocumentStructure();
+            // ... остальной код
+        });
 
         // ---- Инициализация ----
         document.addEventListener('DOMContentLoaded', async () => {

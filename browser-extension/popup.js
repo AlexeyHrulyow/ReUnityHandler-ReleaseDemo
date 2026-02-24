@@ -7,8 +7,16 @@ document.getElementById('importBtn').addEventListener('click', () => {
   const file = fileInput.files[0];
   const reader = new FileReader();
   reader.onload = (e) => {
+    let rawText = e.target.result;
+    console.log('Raw content (first 200 chars):', rawText.substring(0, 200));
+
+    // Удаляем BOM (Byte Order Mark), если он есть
+    if (rawText.charCodeAt(0) === 0xFEFF) {
+      rawText = rawText.substring(1);
+    }
+
     try {
-      const json = JSON.parse(e.target.result);
+      const json = JSON.parse(rawText);
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         console.log('Активная вкладка:', tabs[0].url);
         chrome.tabs.sendMessage(tabs[0].id, { type: 'IMPORT_DATA', data: json }, (response) => {
@@ -23,7 +31,8 @@ document.getElementById('importBtn').addEventListener('click', () => {
         });
       });
     } catch (err) {
-      showStatus('Неверный формат JSON', 'error');
+      console.error('Ошибка парсинга JSON:', err);
+      showStatus('Неверный формат JSON: ' + err.message, 'error');
     }
   };
   reader.readAsText(file);
