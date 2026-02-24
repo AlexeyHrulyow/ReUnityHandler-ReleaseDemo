@@ -6,7 +6,7 @@ from sqlalchemy import select
 from reunity_app.core.security import get_current_active_user, require_role, get_password_hash
 from reunity_app.db.session import get_db
 from reunity_app.db.models import Doctor as DoctorModel, DoctorRole
-from reunity_app.schemas.doctor import DoctorCreate, DoctorUpdate, Doctor as DoctorSchema
+from reunity_app.schemas.doctor import DoctorCreate, DoctorUpdate, Doctor as DoctorSchema, SetPasswordRequest   # ИЗМЕНЕНО: импорт SetPasswordRequest
 
 router = APIRouter()
 
@@ -233,3 +233,24 @@ async def deactivate_doctor(
     await db.commit()
 
     return {"message": "Врач деактивирован"}
+
+
+# ИЗМЕНЕНО: новый эндпоинт для смены пароля врача администратором
+@router.post("/{doctor_id}/set-password")
+async def set_doctor_password(
+        doctor_id: int,
+        password_data: SetPasswordRequest,
+        db: AsyncSession = Depends(get_db),
+        current_user: DoctorModel = Depends(require_role("admin"))
+):
+    """Установка нового пароля для врача (только для админа)"""
+    result = await db.execute(select(DoctorModel).where(DoctorModel.id == doctor_id))
+    doctor = result.scalar_one_or_none()
+
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Врач не найден")
+
+    doctor.hashed_password = get_password_hash(password_data.new_password)
+    await db.commit()
+
+    return {"message": "Пароль успешно изменен"}

@@ -89,6 +89,7 @@
         .btn-danger { background: #e74c3c; color: white; }
         .btn-warning { background: #f39c12; color: white; }
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
+        .btn-sm { padding: 4px 8px; font-size: 12px; }   /* ИЗМЕНЕНО: добавлен класс для маленьких кнопок */
         .form-group {
             margin-bottom: 15px;
         }
@@ -143,7 +144,6 @@
     </style>
 </head>
 <body>
-    <!-- тело без изменений (как в исходном файле) -->
     <div class="container">
         <div class="header">
             <h1>Управление врачами</h1>
@@ -211,8 +211,10 @@
                     <select id="role" required>
                         <option value="therapist">Терапевт</option>
                         <option value="neurologist">Невролог</option>
-                        <option value="head">Заведующий</option>
+                        <option value="head">Врач ФРМ</option>
                         <option value="admin">Администратор</option>
+                        <option value="psychologist">Психолог</option>
+                        <option value="cardiologist">Кардиолог</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -227,8 +229,30 @@
         </div>
     </div>
 
+    <!-- ИЗМЕНЕНО: модальное окно для смены пароля -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePasswordModal()">&times;</span>
+            <h3>Смена пароля врача</h3>
+            <form id="passwordForm">
+                <input type="hidden" id="passwordDoctorId">
+                <div class="form-group">
+                    <label for="newPassword">Новый пароль *</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Подтверждение *</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сменить пароль</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // скрипт без изменений (как в исходном)
         let token = localStorage.getItem('auth_token');
         if (!token) {
             window.location.href = '/';
@@ -293,14 +317,17 @@
                 const roleNames = {
                     'therapist': 'Терапевт',
                     'neurologist': 'Невролог',
-                    'head': 'Заведующий',
-                    'admin': 'Администратор'
+                    'head': 'Врач ФРМ',
+                    'admin': 'Администратор',
+                    'psychologist': 'Психолог',        // ИЗМЕНЕНО
+                    'cardiologist': 'Кардиолог'        // ИЗМЕНЕНО
                 };
                 const roleName = roleNames[doc.role] || doc.role;
                 const activeText = doc.is_active ? 'Да' : 'Нет';
                 const created = new Date(doc.created_at).toLocaleDateString('ru-RU');
 
                 const row = tbody.insertRow();
+                // ИЗМЕНЕНО: добавлена кнопка смены пароля
                 row.innerHTML = `
                     <td>${doc.id}</td>
                     <td>${doc.last_name} ${doc.first_name} ${doc.middle_name || ''}</td>
@@ -310,6 +337,7 @@
                     <td>${created}</td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editDoctor(${doc.id})">✏️</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openPasswordModal(${doc.id}, '${doc.full_name}')">🔑 Сменить пароль</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id})" ${doc.id === currentUser.id ? 'disabled' : ''}>🗑️</button>
                         ${doc.is_active ?
                             `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false)">🔒 Деактивировать</button>` :
@@ -452,6 +480,58 @@
             }
         }
 
+        // ИЗМЕНЕНО: функции для смены пароля
+        function openPasswordModal(doctorId, doctorName) {
+            document.getElementById('passwordDoctorId').value = doctorId;
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('passwordModal').style.display = 'block';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const doctorId = document.getElementById('passwordDoctorId').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirm) {
+                showAlert('Пароли не совпадают', 'danger');
+                return;
+            }
+
+            if (newPassword.length < 4) {
+                showAlert('Пароль должен быть не менее 4 символов', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/doctors/${doctorId}/set-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ new_password: newPassword })
+                });
+
+                if (response.ok) {
+                    showAlert('Пароль успешно изменён', 'success');
+                    closePasswordModal();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка смены пароля', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        });
+
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alertDiv = document.createElement('div');
@@ -460,6 +540,18 @@
             container.appendChild(alertDiv);
             setTimeout(() => alertDiv.remove(), 3000);
         }
+
+        // Закрытие модалок при клике вне
+        window.onclick = function(event) {
+            const modal = document.getElementById('doctorModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+            const pwdModal = document.getElementById('passwordModal');
+            if (event.target === pwdModal) {
+                closePasswordModal();
+            }
+        };
     </script>
 </body>
 </html>

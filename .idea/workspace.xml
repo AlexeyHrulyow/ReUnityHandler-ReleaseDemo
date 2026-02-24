@@ -4,11 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.3.5&#10;- исправлены шортакты в документе">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.0&#10;- экспорт нужного документа реализован">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/doctors.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/doctors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/doctor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_edit.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/browser-extension/content.js" beforeDir="false" afterPath="$PROJECT_DIR$/browser-extension/content.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/browser-extension/popup.js" beforeDir="false" afterPath="$PROJECT_DIR$/browser-extension/popup.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +104,7 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.pyparser">
+  <component name="RunManager" selected="Python.run">
     <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -211,8 +217,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.pyparser" />
         <item itemvalue="Python.run" />
+        <item itemvalue="Python.pyparser" />
         <item itemvalue="Python.debug_save" />
         <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
@@ -434,7 +440,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771912892431</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Версия 0.4.0&#10;- экспорт нужного документа реализован">
+      <option name="closed" value="true" />
+      <created>1771918701418</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1771918701418</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -480,6 +494,7 @@
     <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
     <MESSAGE value="Версия 0.3.4&#10;- работа над мелкими багами" />
     <MESSAGE value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
+    <MESSAGE value="Версия 0.4.0&#10;- экспорт нужного документа реализован" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.4.0&#10;- экспорт нужного документа реализован" />
   </component>
 </project>

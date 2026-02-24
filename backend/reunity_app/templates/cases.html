@@ -66,6 +66,21 @@
             border-radius: 4px;
             background: white;
         }
+        /* ИЗМЕНЕНО: стиль для чекбокса */
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+        .filter-checkbox input {
+            width: auto;
+            margin: 0;
+        }
+        .filter-checkbox label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
         .filter-actions {
             display: flex;
             gap: 10px;
@@ -214,6 +229,11 @@
                 <label for="dateFilter">Дата создания:</label>
                 <input type="date" id="dateFilter">
             </div>
+            <!-- ИЗМЕНЕНО: чекбокс "Только мои случаи" -->
+            <div class="filter-checkbox">
+                <input type="checkbox" id="myCasesFilter" onchange="applyFilters()">
+                <label for="myCasesFilter">Только мои случаи</label>
+            </div>
             <div class="filter-actions">
                 <button class="btn btn-primary" onclick="applyFilters()">🔍 Применить</button>
                 <button class="btn btn-secondary" onclick="clearFilters()">🗑️ Сбросить</button>
@@ -253,7 +273,7 @@
     </div>
 
     <script>
-        // скрипт без изменений (как в исходном)
+        // скрипт без изменений, кроме добавления myCases в фильтры
         let token = null;
         let currentUser = null;
         let currentPage = 0;
@@ -262,7 +282,8 @@
         let currentFilters = {
             search: '',
             status: '',
-            date: ''
+            date: '',
+            myCases: false   // ИЗМЕНЕНО
         };
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -336,6 +357,11 @@
 
                 if (currentFilters.date) {
                     url += `&date_from=${currentFilters.date}&date_to=${currentFilters.date}`;
+                }
+
+                // ИЗМЕНЕНО: добавляем creator_id если включен фильтр
+                if (currentFilters.myCases && currentUser) {
+                    url += `&creator_id=${currentUser.id}`;
                 }
 
                 const response = await fetch(url, {
@@ -453,7 +479,7 @@
                             <div class="status-icon ${caseItem.head_completed ? 'status-done' : 'status-pending'}">
                                 ${caseItem.head_completed ? '✓' : '✗'}
                             </div>
-                            <div class="status-label">Заведующий</div>
+                            <div class="status-label">Врач ФРМ</div>
                         </div>
                     </div>
                 `;
@@ -498,6 +524,8 @@
             currentFilters.search = document.getElementById('searchInput').value.trim();
             currentFilters.status = document.getElementById('statusFilter').value;
             currentFilters.date = document.getElementById('dateFilter').value;
+            // ИЗМЕНЕНО: считываем чекбокс
+            currentFilters.myCases = document.getElementById('myCasesFilter').checked;
             currentPage = 0;
             loadCases();
         }
@@ -506,7 +534,8 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
             document.getElementById('dateFilter').value = '';
-            currentFilters = { search: '', status: '', date: '' };
+            document.getElementById('myCasesFilter').checked = false;   // ИЗМЕНЕНО
+            currentFilters = { search: '', status: '', date: '', myCases: false };
             currentPage = 0;
             loadCases();
         }

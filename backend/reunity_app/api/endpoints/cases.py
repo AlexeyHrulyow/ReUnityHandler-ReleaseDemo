@@ -75,6 +75,8 @@ async def list_cases(
         search: Optional[str] = Query(None, description="Поиск по ФИО пациента"),
         date_from: Optional[date] = Query(None, description="Фильтр по дате с"),
         date_to: Optional[date] = Query(None, description="Фильтр по дате по"),
+        # ИЗМЕНЕНО: добавлен параметр creator_id для фильтрации по создателю
+        creator_id: Optional[int] = Query(None, description="Фильтр по создателю случая"),
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
@@ -104,6 +106,10 @@ async def list_cases(
 
     if date_to:
         query = query.where(func.date(CaseModel.created_at) <= date_to)
+
+    # ИЗМЕНЕНО: фильтр по creator_id
+    if creator_id:
+        query = query.where(CaseModel.creator_id == creator_id)
 
     query = query.offset(skip).limit(limit).order_by(CaseModel.created_at.desc())
 
@@ -291,12 +297,19 @@ async def complete_case(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Завершение случая"""
+    """Завершение случая (только для создателя или администратора)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
+
+    # ИЗМЕНЕНО: проверка прав – создатель или администратор
+    if current_user.role != "admin" and case.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только создатель случая или администратор может завершить случай"
+        )
 
     case.status = CaseStatus.COMPLETED
     case.completed_at = datetime.utcnow()
@@ -310,19 +323,27 @@ async def complete_case(
 async def uncomplete_case(
         case_id: int,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(require_role("admin", "head"))
+        current_user: Doctor = Depends(get_current_active_user)   # ИЗМЕНЕНО: убран require_role
 ):
-    """Отмена завершения случая (только для админа и заведующего)"""
+    """Отмена завершения случая (только для создателя или администратора)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Возвращаем статус в "in_progress" (можно выбрать другое значение по умолчанию)
+    # ИЗМЕНЕНО: проверка прав – создатель или администратор
+    if current_user.role != "admin" and case.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только создатель случая или администратор может отменить завершение"
+        )
+
+    # Возвращаем статус в "in_progress"
     case.status = CaseStatus.IN_PROGRESS
     case.completed_at = None
     await db.commit()
     return {"message": "Завершение случая отменено"}
+
 
 @router.post("/{case_id}/send-to-webmis")
 async def send_case_to_webmis(

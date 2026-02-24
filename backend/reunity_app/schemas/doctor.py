@@ -31,3 +31,8 @@ class Doctor(DoctorBase):
 
     class Config:
         from_attributes = True
+
+
+# ИЗМЕНЕНО: добавлена схема для запроса смены пароля администратором
+class SetPasswordRequest(BaseModel):
+    new_password: str

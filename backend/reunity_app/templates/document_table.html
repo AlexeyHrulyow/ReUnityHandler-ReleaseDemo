@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
+        /* стили без изменений (полностью сохранены) */
         :root {
             --bg-light: #fffffa;
             --primary-dark: #0d5c63;
@@ -409,7 +410,7 @@
             </div>
             <div class="status-card" id="headStatus">
                 <div class="status-icon">👨‍⚕️</div>
-                <h4>Заведующий</h4>
+                <h4>Врач ФРМ</h4>
                 <p id="headText">Не заполнено</p>
                 <p id="headTime"></p>
             </div>
@@ -646,7 +647,6 @@
                         isSection: row.is_section || false,
                         target: () => {
                             scrollToRow(row.id);
-                            // Выделение произойдёт внутри scrollToRow
                         }
                     });
                 });
@@ -1063,6 +1063,7 @@
             }
         }
 
+        // ИЗМЕНЕНО: функция updateCaseStatusUI полностью переработана для новых прав
         function updateCaseStatusUI() {
             const caseMessageDiv = document.getElementById('caseStatusMessage');
             const actionsDiv = document.getElementById('documentActions');
@@ -1076,7 +1077,7 @@
             if (!caseStatus) return;
 
             const isCaseCompleted = (caseStatus === 'completed');
-            const isAdminOrHead = (currentUser.role === 'admin' || currentUser.role === 'head');
+            const isAdmin = (currentUser.role === 'admin');
             const isCreator = (currentUser.id === caseCreatorId);
 
             if (isCaseCompleted) {
@@ -1084,7 +1085,8 @@
                 caseMessageDiv.className = 'case-status-message case-status-completed';
                 caseMessageDiv.style.display = 'block';
 
-                if (isAdminOrHead || isCreator) {
+                // Права на отмену завершения и экспорт: только администратор или создатель
+                if (isAdmin || isCreator) {
                     completeSectionBtn.style.display = 'none';
                     uncompleteSectionBtn.style.display = 'none';
                     saveAllBtn.style.display = 'none';
@@ -1093,9 +1095,7 @@
                     exportBtn.style.display = 'inline-block';
                 } else {
                     completeSectionBtn.style.display = 'none';
-                    uncompleteSectionBtn.style.display = 'inline-block';
-                    uncompleteSectionBtn.disabled = true;
-                    uncompleteSectionBtn.title = 'Недоступно, так как случай завершён';
+                    uncompleteSectionBtn.style.display = 'none';
                     saveAllBtn.style.display = 'none';
                     signDocumentBtn.style.display = 'none';
                     uncompleteCaseBtn.style.display = 'none';
@@ -1107,10 +1107,20 @@
                 uncompleteSectionBtn.disabled = false;
                 uncompleteSectionBtn.title = '';
                 saveAllBtn.style.display = 'inline-block';
-                signDocumentBtn.style.display = 'none';
                 uncompleteCaseBtn.style.display = 'none';
                 exportBtn.style.display = 'none';
+
+                // Показываем кнопку завершения раздела (логика из updateSectionButtons)
                 updateSectionButtons();
+
+                // ИЗМЕНЕНО: проверяем, можно ли завершить случай (все разделы заполнены и права)
+                const allCompleted = completionStatus.neurologist && completionStatus.therapist && completionStatus.head;
+                const canComplete = allCompleted && (isAdmin || isCreator);
+                if (canComplete) {
+                    signDocumentBtn.style.display = 'inline-block';
+                } else {
+                    signDocumentBtn.style.display = 'none';
+                }
             }
         }
 
@@ -1491,13 +1501,6 @@
             a.click();
             URL.revokeObjectURL(url);
         }
-
-        // ---- Инициализация (остаётся без изменений) ----
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadCurrentUser();
-            await loadDocumentStructure();
-            // ... остальной код
-        });
 
         // ---- Инициализация ----
         document.addEventListener('DOMContentLoaded', async () => {

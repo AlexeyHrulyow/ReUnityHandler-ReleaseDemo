@@ -383,7 +383,7 @@
 
         function addNewSection() {
             if (currentUser.role !== 'admin' && currentUser.role !== 'head') {
-                showAlert('Только администратор или заведующий может добавлять разделы', 'warning');
+                showAlert('Только администратор может добавлять разделы', 'warning');
                 return;
             }
 

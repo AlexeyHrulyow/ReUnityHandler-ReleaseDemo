@@ -14,6 +14,9 @@ class DoctorRole(str, enum.Enum):
     NEUROLOGIST = "neurologist"
     HEAD = "head"
     ADMIN = "admin"
+    # ИЗМЕНЕНО: добавлены новые роли
+    PSYCHOLOGIST = "psychologist"
+    CARDIOLOGIST = "cardiologist"
 
 
 class CaseStatus(str, enum.Enum):
