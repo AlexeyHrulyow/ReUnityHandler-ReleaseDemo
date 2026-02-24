@@ -153,6 +153,7 @@ async def list_cases(
             patient_insurance=patient.insurance_number if patient else None,
             patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
             creator_name=creator.full_name if creator else "Неизвестно",
+            creator_role=creator.role.value if creator else None,  # ИЗМЕНЕНО: добавлена роль создателя
             neurologist_completed=neurologist_completed,
             therapist_completed=therapist_completed,
             head_completed=head_completed,
@@ -266,13 +267,24 @@ async def update_case(
 async def delete_case(
         case_id: int,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(require_role("admin", "head"))
+        current_user: Doctor = Depends(get_current_active_user)
 ):
+    """
+    Удаление случая.
+    Доступно администратору или создателю случая.
+    """
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
 
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
+
+    # Проверка прав: администратор или создатель случая
+    if current_user.role != "admin" and case.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только администратор или создатель случая может удалить случай"
+        )
 
     await db.delete(case)
     await db.commit()

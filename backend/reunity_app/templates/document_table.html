@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
+        /* Стили без изменений (такие же, как в предыдущей версии) */
         :root {
             --bg-light: #fffffa;
             --primary-dark: #0d5c63;
@@ -280,6 +281,12 @@
             border-color: var(--primary-medium);
             box-shadow: 0 0 5px rgba(68,161,160,0.5);
         }
+        .cell-input:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
         .btn {
             padding: 10px 20px;
             border: none;
@@ -296,6 +303,10 @@
         .btn-warning { background: #f39c12; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn:hover { opacity: 0.9; }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .alert {
             padding: 15px;
             border-radius: 4px;
@@ -842,8 +853,8 @@
                     fillGoals(documentData.goals);
 
                     buildSectionSelect();
-
                     updateSectionButtons();
+                    applyDisabledState(); // ИЗМЕНЕНО: применяем состояние disabled
                     showLoading(false);
                 } else {
                     throw new Error('Ошибка загрузки структуры');
@@ -890,6 +901,13 @@
                     caseCreatorId = caseData.creator_id;
                     console.log('📌 Статус случая:', caseStatus, 'creator:', caseCreatorId);
                     updateCaseStatusUI();
+                } else if (response.status === 401) {
+                    // Токен истёк
+                    localStorage.removeItem('auth_token');
+                    showAlert('Сессия истекла. Перенаправление на страницу входа...', 'warning');
+                    setTimeout(() => window.location.href = '/', 2000);
+                } else {
+                    console.error('Ошибка загрузки статуса случая:', response.status);
                 }
             } catch (error) {
                 console.error('Ошибка загрузки статуса случая:', error);
@@ -953,6 +971,8 @@
             tbody.innerHTML = '';
             tbody.appendChild(dateRow); // добавляем обратно строку с датами
 
+            const canEditValue = canEdit(); // ИЗМЕНЕНО: определяем доступность редактирования
+
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 if (row.is_section) {
@@ -964,10 +984,10 @@
                 } else {
                     tr.innerHTML = `
                         <td class="row-label" data-row-id="${row.id}">${escapeHtml(row.label)}</td>
-                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
-                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
-                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="2" value="${escapeHtml(row.values[2] || '')}"></td>
-                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="3" value="${escapeHtml(row.values[3] || '')}"></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="2" value="${escapeHtml(row.values[2] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                        <td><input type="text" class="cell-input main-table-input" data-row-id="${row.id}" data-col="3" value="${escapeHtml(row.values[3] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
                     `;
                 }
                 tbody.appendChild(tr);
@@ -985,12 +1005,15 @@
         function renderProceduresTable(rows) {
             const tbody = document.getElementById('proceduresTableBody');
             tbody.innerHTML = '';
+
+            const canEditValue = canEdit(); // ИЗМЕНЕНО
+
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="row-label">${escapeHtml(row.label)}</td>
-                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}"></td>
-                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}"></td>
+                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="0" value="${escapeHtml(row.values[0] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                    <td><input type="text" class="cell-input procedure-input" data-row-id="${row.id}" data-col="1" value="${escapeHtml(row.values[1] || '')}" ${!canEditValue ? 'disabled' : ''}></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1069,7 +1092,7 @@
             const uncompleteBtn = document.getElementById('uncompleteSectionBtn');
             const userRole = currentUser?.role;
 
-            if (!completionStatus) return;
+            if (!completionStatus || !caseStatus) return;
 
             let isCompleted = false;
             if (userRole === 'neurologist') isCompleted = completionStatus.neurologist;
@@ -1077,21 +1100,61 @@
             else if (userRole === 'head') isCompleted = completionStatus.head;
             else if (userRole === 'psychologist') isCompleted = completionStatus.psychologist;
             else if (userRole === 'cardiologist') isCompleted = completionStatus.cardiologist;
-            else if (userRole === 'admin') {
+            else {
+                // Администратор не имеет своего раздела
                 completeBtn.style.display = 'none';
                 uncompleteBtn.style.display = 'none';
                 return;
             }
 
-            if (isCompleted) {
-                completeBtn.style.display = 'none';
-                uncompleteBtn.style.display = 'inline-block';
+            // Показываем кнопки только если случай не завершён
+            if (caseStatus !== 'completed' && caseStatus !== 'sent') {
+                if (isCompleted) {
+                    completeBtn.style.display = 'none';
+                    uncompleteBtn.style.display = 'inline-block';
+                } else {
+                    completeBtn.style.display = 'inline-block';
+                    uncompleteBtn.style.display = 'none';
+                }
             } else {
-                completeBtn.style.display = 'inline-block';
+                // Если случай завершён, скрываем обе кнопки
+                completeBtn.style.display = 'none';
                 uncompleteBtn.style.display = 'none';
             }
         }
 
+        // ИЗМЕНЕНО: функция определения возможности редактирования
+        function canEdit() {
+            if (!caseStatus || !completionStatus || !currentUser) return false;
+            const isCaseCompleted = (caseStatus === 'completed' || caseStatus === 'sent');
+            if (isCaseCompleted) return false;
+
+            const isAdmin = (currentUser.role === 'admin');
+            if (isAdmin) return true;
+
+            // Определяем, завершён ли раздел текущего врача
+            let isMySectionCompleted = false;
+            const role = currentUser.role;
+            if (role === 'neurologist') isMySectionCompleted = completionStatus.neurologist;
+            else if (role === 'therapist') isMySectionCompleted = completionStatus.therapist;
+            else if (role === 'head') isMySectionCompleted = completionStatus.head;
+            else if (role === 'psychologist') isMySectionCompleted = completionStatus.psychologist;
+            else if (role === 'cardiologist') isMySectionCompleted = completionStatus.cardiologist;
+            else return false; // неопределённая роль
+
+            // Разрешено редактировать, если мой раздел ещё не завершён
+            return !isMySectionCompleted;
+        }
+
+        // ИЗМЕНЕНО: функция применения disabled ко всем полям
+        function applyDisabledState() {
+            const canEditValue = canEdit();
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.disabled = !canEditValue;
+            });
+        }
+
+        // ИСПРАВЛЕНА ЛОГИКА ОТОБРАЖЕНИЯ КНОПОК
         function updateCaseStatusUI() {
             const caseMessageDiv = document.getElementById('caseStatusMessage');
             const actionsDiv = document.getElementById('documentActions');
@@ -1104,7 +1167,7 @@
 
             if (!caseStatus) return;
 
-            const isCaseCompleted = (caseStatus === 'completed');
+            const isCaseCompleted = (caseStatus === 'completed' || caseStatus === 'sent');
             const isAdmin = (currentUser.role === 'admin');
             const isCreator = (currentUser.id === caseCreatorId);
 
@@ -1113,40 +1176,46 @@
                 caseMessageDiv.className = 'case-status-message case-status-completed';
                 caseMessageDiv.style.display = 'block';
 
-                if (isAdmin || isCreator) {
-                    completeSectionBtn.style.display = 'none';
-                    uncompleteSectionBtn.style.display = 'none';
-                    saveAllBtn.style.display = 'none';
-                    signDocumentBtn.style.display = 'none';
-                    uncompleteCaseBtn.style.display = 'inline-block';
-                    exportBtn.style.display = 'inline-block';
-                } else {
-                    completeSectionBtn.style.display = 'none';
-                    uncompleteSectionBtn.style.display = 'none';
-                    saveAllBtn.style.display = 'none';
-                    signDocumentBtn.style.display = 'none';
-                    uncompleteCaseBtn.style.display = 'none';
-                    exportBtn.style.display = 'none';
-                }
+                // Кнопки для завершённого случая
+                completeSectionBtn.style.display = 'none';
+                uncompleteSectionBtn.style.display = 'none';
+                saveAllBtn.style.display = 'none';
+                signDocumentBtn.style.display = 'none';
+                exportBtn.style.display = isAdmin || isCreator ? 'inline-block' : 'none';
+                uncompleteCaseBtn.style.display = isAdmin || isCreator ? 'inline-block' : 'none';
             } else {
                 caseMessageDiv.style.display = 'none';
                 actionsDiv.style.display = 'block';
-                uncompleteSectionBtn.disabled = false;
-                uncompleteSectionBtn.title = '';
                 saveAllBtn.style.display = 'inline-block';
-                uncompleteCaseBtn.style.display = 'none';
-                exportBtn.style.display = 'none';
 
+                // Обновляем кнопки разделов
                 updateSectionButtons();
 
-                const allCompleted = completionStatus.neurologist && completionStatus.therapist && completionStatus.head && completionStatus.psychologist && completionStatus.cardiologist;
-                const canComplete = allCompleted && (isAdmin || isCreator);
+                // Кнопка завершения случая: доступна создателю (если его раздел завершён) или администратору
+                let creatorSectionCompleted = false;
+                const userRole = currentUser?.role;
+                if (isCreator) {
+                    if (userRole === 'neurologist') creatorSectionCompleted = completionStatus.neurologist;
+                    else if (userRole === 'therapist') creatorSectionCompleted = completionStatus.therapist;
+                    else if (userRole === 'head') creatorSectionCompleted = completionStatus.head;
+                    else if (userRole === 'psychologist') creatorSectionCompleted = completionStatus.psychologist;
+                    else if (userRole === 'cardiologist') creatorSectionCompleted = completionStatus.cardiologist;
+                }
+
+                const canComplete = (isAdmin || (isCreator && creatorSectionCompleted));
                 if (canComplete) {
                     signDocumentBtn.style.display = 'inline-block';
                 } else {
                     signDocumentBtn.style.display = 'none';
                 }
+
+                // Кнопка отмены завершения случая в незавершённом случае не нужна
+                uncompleteCaseBtn.style.display = 'none';
+                exportBtn.style.display = 'none';
             }
+
+            // ИЗМЕНЕНО: обновляем состояние disabled полей
+            applyDisabledState();
         }
 
         // ---- Сбор всех данных в один объект ----
@@ -1226,6 +1295,10 @@
 
         // ---- Завершение / отмена разделов ----
         async function completeMySection() {
+            if (!caseStatus || caseStatus === 'completed' || caseStatus === 'sent') {
+                showAlert('Нельзя завершить раздел в завершённом случае', 'warning');
+                return;
+            }
             await saveAllChanges();
             if (!confirm('Вы уверены, что завершили заполнение вашего раздела?')) return;
 
@@ -1247,6 +1320,10 @@
         }
 
         async function uncompleteMySection() {
+            if (!caseStatus || caseStatus === 'completed' || caseStatus === 'sent') {
+                showAlert('Нельзя отменить завершение раздела в завершённом случае', 'warning');
+                return;
+            }
             if (!confirm('Вы уверены, что хотите отменить завершение раздела?')) return;
 
             try {

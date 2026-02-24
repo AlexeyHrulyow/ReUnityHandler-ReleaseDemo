@@ -19,7 +19,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            line-height: 1.6;
+            line-height: 1.5;
             background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             min-height: 100vh;
         }
@@ -31,18 +31,18 @@
         .header {
             background: rgba(13, 92, 99, 0.9);
             color: var(--text-light);
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 5px;
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
         .filters {
             background: #ffffff;
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 5px;
             margin-bottom: 20px;
             display: flex;
-            gap: 15px;
+            gap: 30px;
             flex-wrap: wrap;
             align-items: flex-end;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -56,7 +56,7 @@
             margin-bottom: 5px;
             font-weight: bold;
             color: var(--text-dark);
-            font-size: 0.9em;
+            font-size: 14px;
         }
         .filter-group input,
         .filter-group select {
@@ -65,8 +65,8 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             background: white;
+            font-size: 14px;
         }
-        /* ИЗМЕНЕНО: стиль для чекбокса */
         .filter-checkbox {
             display: flex;
             align-items: center;
@@ -80,6 +80,7 @@
         .filter-checkbox label {
             margin-bottom: 0;
             font-weight: normal;
+            font-size: 14px;
         }
         .filter-actions {
             display: flex;
@@ -90,7 +91,7 @@
         }
         .filter-actions .btn {
             padding: 8px 16px;
-            white-space: nowrap;
+            font-size: 14px;
         }
         .table-wrapper {
             overflow-x: auto;
@@ -104,13 +105,25 @@
             width: 100%;
             border-collapse: collapse;
             min-width: 1000px;
+            font-size: 15px;
         }
         th, td {
             border: 1px solid var(--border-color);
-            padding: 12px;
+            padding: 8px 6px;
             text-align: left;
-            white-space: nowrap;
+            vertical-align: top;
         }
+        /* Настройки ширины колонок */
+        th:first-child, td:first-child { width: 50px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 160px; } /* Пациент */
+        th:nth-child(3), td:nth-child(3) { width: 100px; }     /* Дата поступления */
+        th:nth-child(4), td:nth-child(4) { width: 120px; }     /* Создатель */
+        th:nth-child(5), td:nth-child(5) { width: 100px; }     /* Статус */
+        th:nth-child(6), td:nth-child(6) { width: 250px; }     /* Статус врачей (увеличено для двух столбцов) */
+        th:nth-child(7), td:nth-child(7) { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* Примечания */
+        th:nth-child(8), td:nth-child(8) { width: 90px; }      /* Создан */
+        th:nth-child(9), td:nth-child(9) { width: 120px; }     /* Действия */
+
         th {
             background-color: var(--primary-dark);
             color: white;
@@ -123,7 +136,7 @@
             display: inline-block;
             padding: 4px 8px;
             border-radius: 3px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
         }
@@ -134,22 +147,39 @@
         .status-sent { background: #cce5ff; color: #004085; }
 
         .btn {
-            padding: 6px 12px;
+            padding: 6px 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            font-size: 13px;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             transition: opacity 0.2s;
+            white-space: nowrap;
+            width: 100%;
+            box-sizing: border-box;
         }
         .btn:hover { opacity: 0.9; }
         .btn-primary { background: var(--primary-medium); color: white; }
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
         .btn-success { background: var(--primary-deep); color: white; }
         .btn-danger { background: #e74c3c; color: white; }
+
+        .actions .btn {
+            width: auto;
+            display: inline-flex;
+        }
+
+        /* Вертикальное расположение кнопок в ячейке */
+        td .btn {
+            display: block;
+            margin-bottom: 4px;
+        }
+        td .btn:last-child {
+            margin-bottom: 0;
+        }
 
         .actions {
             margin-bottom: 20px;
@@ -171,24 +201,37 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
-        .doctor-status {
+
+        /* Сетка для статусов врачей в два столбца */
+        .doctor-status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
+            align-items: center;
+        }
+        .doctor-status-item {
             display: flex;
-            gap: 5px;
-            margin-top: 5px;
+            align-items: center;
+            gap: 6px;
         }
         .status-icon {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .status-done { background: #27ae60; color: white; }
         .status-pending { background: #e74c3c; color: white; }
-        .status-label { font-size: 10px; margin-top: 2px; text-align: center; }
+        .role-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
         .no-cases {
             text-align: center;
             padding: 40px;
@@ -214,13 +257,13 @@
         <div class="filters">
             <div class="filter-group">
                 <label for="searchInput">Поиск по пациенту:</label>
-                <input type="text" id="searchInput" placeholder="Фамилия, имя или отчество..."
+                <input type="text" id="searchInput" placeholder="Фамилия, имя..."
                        onkeypress="if(event.key === 'Enter') applyFilters()">
             </div>
             <div class="filter-group">
                 <label for="statusFilter">Статус:</label>
                 <select id="statusFilter" onchange="applyFilters()">
-                    <option value="">Все статусы</option>
+                    <option value="">Все</option>
                     <option value="in_progress">В процессе</option>
                     <option value="completed">Завершён</option>
                 </select>
@@ -229,10 +272,9 @@
                 <label for="dateFilter">Дата создания:</label>
                 <input type="date" id="dateFilter">
             </div>
-            <!-- ИЗМЕНЕНО: чекбокс "Только мои случаи" -->
             <div class="filter-checkbox">
                 <input type="checkbox" id="myCasesFilter" onchange="applyFilters()">
-                <label for="myCasesFilter">Только мои случаи</label>
+                <label for="myCasesFilter">Только мои</label>
             </div>
             <div class="filter-actions">
                 <button class="btn btn-primary" onclick="applyFilters()">🔍 Применить</button>
@@ -247,23 +289,25 @@
         <div id="errorContainer" style="display: none;"></div>
 
         <div id="casesTable" style="display: none;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Пациент</th>
-                        <th>Дата поступления</th>
-                        <th>Создатель</th>
-                        <th>Статус</th>
-                        <th>Статус врачей</th>
-                        <th>Примечания</th>
-                        <th>Создан</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="casesTableBody">
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Пациент</th>
+                            <th>Дата пост.</th>
+                            <th>Создатель</th>
+                            <th>Статус</th>
+                            <th>Статус врачей</th>
+                            <th>Примечания</th>
+                            <th>Создан</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="casesTableBody">
+                    </tbody>
+                </table>
+            </div>
             <div style="margin-top: 20px; text-align: center;">
                 <button class="btn btn-secondary" onclick="loadMore()" id="loadMoreBtn" style="display: none;">
                     Загрузить еще
@@ -273,7 +317,6 @@
     </div>
 
     <script>
-        // скрипт без изменений, кроме добавления myCases в фильтры
         let token = null;
         let currentUser = null;
         let currentPage = 0;
@@ -283,7 +326,7 @@
             search: '',
             status: '',
             date: '',
-            myCases: false   // ИЗМЕНЕНО
+            myCases: false
         };
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -359,7 +402,6 @@
                     url += `&date_from=${currentFilters.date}&date_to=${currentFilters.date}`;
                 }
 
-                // ИЗМЕНЕНО: добавляем creator_id если включен фильтр
                 if (currentFilters.myCases && currentUser) {
                     url += `&creator_id=${currentUser.id}`;
                 }
@@ -417,7 +459,7 @@
                         </td>
                     </tr>
                 `;
-                casesTable.style.display = 'table';
+                casesTable.style.display = 'block';
                 return;
             }
 
@@ -461,56 +503,58 @@
                         statusText = caseItem.status || 'Неизвестно';
                 }
 
+                // Статусы врачей в два столбца (grid)
                 const doctorStatusHTML = `
-                    <div class="doctor-status">
-                        <div>
-                            <div class="status-icon ${caseItem.neurologist_completed ? 'status-done' : 'status-pending'}">
-                                ${caseItem.neurologist_completed ? '✓' : '✗'}
-                            </div>
-                            <div class="status-label">Невролог</div>
+                    <div class="doctor-status-grid">
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.neurologist_completed ? 'status-done' : 'status-pending'}">${caseItem.neurologist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Невролог</span>
                         </div>
-                        <div>
-                            <div class="status-icon ${caseItem.therapist_completed ? 'status-done' : 'status-pending'}">
-                                ${caseItem.therapist_completed ? '✓' : '✗'}
-                            </div>
-                            <div class="status-label">Терапевт</div>
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.therapist_completed ? 'status-done' : 'status-pending'}">${caseItem.therapist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Терапевт</span>
                         </div>
-                        <div>
-                            <div class="status-icon ${caseItem.head_completed ? 'status-done' : 'status-pending'}">
-                                ${caseItem.head_completed ? '✓' : '✗'}
-                            </div>
-                            <div class="status-label">Врач ФРМ</div>
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.head_completed ? 'status-done' : 'status-pending'}">${caseItem.head_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Врач ФРМ</span>
                         </div>
-                        <div>
-                            <div class="status-icon ${caseItem.psychologist_completed ? 'status-done' : 'status-pending'}">
-                                ${caseItem.psychologist_completed ? '✓' : '✗'}
-                            </div>
-                            <div class="status-label">Психолог</div>
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.psychologist_completed ? 'status-done' : 'status-pending'}">${caseItem.psychologist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Психолог</span>
                         </div>
-                        <div>
-                            <div class="status-icon ${caseItem.cardiologist_completed ? 'status-done' : 'status-pending'}">
-                                ${caseItem.cardiologist_completed ? '✓' : '✗'}
-                            </div>
-                            <div class="status-label">Кардиолог</div>
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.cardiologist_completed ? 'status-done' : 'status-pending'}">${caseItem.cardiologist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Кардиолог</span>
                         </div>
                     </div>
                 `;
 
+                // Определяем, завершён ли раздел создателя
+                let creatorSectionCompleted = false;
+                if (caseItem.creator_role === 'neurologist') creatorSectionCompleted = caseItem.neurologist_completed;
+                else if (caseItem.creator_role === 'therapist') creatorSectionCompleted = caseItem.therapist_completed;
+                else if (caseItem.creator_role === 'head') creatorSectionCompleted = caseItem.head_completed;
+                else if (caseItem.creator_role === 'psychologist') creatorSectionCompleted = caseItem.psychologist_completed;
+                else if (caseItem.creator_role === 'cardiologist') creatorSectionCompleted = caseItem.cardiologist_completed;
+                else if (caseItem.creator_role === 'admin') creatorSectionCompleted = true;
+
+                // Собираем действия
                 let actions = '';
 
-                actions += `<button class="btn btn-primary" onclick="viewDocument(${caseItem.id})" title="Редактировать документ">
-                                📝 Документ
-                            </button>`;
+                // Кнопка "Документ"
+                actions += `<button class="btn btn-primary" onclick="viewDocument(${caseItem.id})" title="Редактировать документ">📝 Документ</button>`;
 
-                if (currentUser.role === 'admin' || currentUser.role === 'head') {
-                    actions += `<button class="btn btn-success" onclick="completeCase(${caseItem.id})"
-                                ${caseItem.status === 'completed' || caseItem.status === 'sent' ? 'disabled style="opacity:0.5"' : ''}
-                                title="Завершить случай">
-                                ✅ Завершить
-                            </button>`;
+                // Кнопка "Завершить случай"
+                const canComplete = (caseItem.status !== 'completed' && caseItem.status !== 'sent') &&
+                                    (currentUser.role === 'admin' ||
+                                     (currentUser.id === caseItem.creator_id && creatorSectionCompleted));
+                if (canComplete) {
+                    actions += `<button class="btn btn-success" onclick="completeCase(${caseItem.id})" title="Завершить случай">✅ Завершить</button>`;
                 }
 
-                if (currentUser.role === 'admin' || currentUser.role === 'head') {
+                // Кнопка "Удалить"
+                const canDelete = (currentUser.role === 'admin' || currentUser.id === caseItem.creator_id);
+                if (canDelete) {
                     actions += `<button class="btn btn-danger" onclick="deleteCase(${caseItem.id})" title="Удалить случай">🗑️ Удалить</button>`;
                 }
 
@@ -521,7 +565,7 @@
                     <td>${caseItem.creator_name || 'Неизвестно'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${doctorStatusHTML}</td>
-                    <td>${notes}</td>
+                    <td title="${caseItem.notes || ''}">${notes}</td>
                     <td>${createdDate}</td>
                     <td>${actions}</td>
                 `;
@@ -529,14 +573,13 @@
                 tableBody.appendChild(row);
             });
 
-            casesTable.style.display = 'table';
+            casesTable.style.display = 'block';
         }
 
         function applyFilters() {
             currentFilters.search = document.getElementById('searchInput').value.trim();
             currentFilters.status = document.getElementById('statusFilter').value;
             currentFilters.date = document.getElementById('dateFilter').value;
-            // ИЗМЕНЕНО: считываем чекбокс
             currentFilters.myCases = document.getElementById('myCasesFilter').checked;
             currentPage = 0;
             loadCases();
@@ -546,7 +589,7 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = '';
             document.getElementById('dateFilter').value = '';
-            document.getElementById('myCasesFilter').checked = false;   // ИЗМЕНЕНО
+            document.getElementById('myCasesFilter').checked = false;
             currentFilters = { search: '', status: '', date: '', myCases: false };
             currentPage = 0;
             loadCases();

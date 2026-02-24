@@ -41,6 +41,7 @@ class CaseWithPatient(Case):
     patient_insurance: Optional[str] = None
     patient_birth_date: Optional[date] = None
     creator_name: Optional[str] = None
+    creator_role: Optional[str] = None
     neurologist_completed: bool = False
     therapist_completed: bool = False
     head_completed: bool = False
