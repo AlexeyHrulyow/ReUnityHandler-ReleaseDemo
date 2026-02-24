@@ -243,7 +243,6 @@
     </div>
 
     <script>
-        // скрипт без изменений
         let token = localStorage.getItem('auth_token');
         if (!token) {
             window.location.href = '/';
@@ -264,6 +263,14 @@
                 });
                 if (response.ok) {
                     currentUser = await response.json();
+
+                    // ========== ИЗМЕНЕНИЕ: скрываем кнопку "Врачи", если пользователь не администратор ==========
+                    const doctorsBtn = document.querySelector('.admin-nav .btn[onclick*="/admin/doctors"]');
+                    if (doctorsBtn && currentUser.role !== 'admin') {
+                        doctorsBtn.style.display = 'none';
+                    }
+                    // =====================================================================================
+
                 } else {
                     throw new Error('Ошибка загрузки пользователя');
                 }

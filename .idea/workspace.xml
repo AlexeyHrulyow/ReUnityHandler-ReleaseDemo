@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.2&#10;- новые роли врачей корректно отображаются">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/cases.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/case.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
-    </list>
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -459,7 +453,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771923688496</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал">
+      <option name="closed" value="true" />
+      <created>1771935541690</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1771935541690</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -481,7 +483,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.0.3&#10;- добавлено отображение таблицы случаев и пациентов&#10;- улучшен начальный интерфейс" />
     <MESSAGE value="Версия 0.0.4&#10;- добавление пациентов, начало реализации" />
     <MESSAGE value="Версия 0.0.5&#10;- улучшено добавление пациентов&#10;- новые фильтры для поиска" />
     <MESSAGE value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
@@ -506,6 +507,7 @@
     <MESSAGE value="Версия 0.4.0&#10;- экспорт нужного документа реализован" />
     <MESSAGE value="Версия 0.4.1&#10;- добавлены новые роли врачей&#10;- добавлена возможность редактировать пароль&#10;- внесены изменения в права ролей" />
     <MESSAGE value="Версия 0.4.2&#10;- новые роли врачей корректно отображаются" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.4.2&#10;- новые роли врачей корректно отображаются" />
+    <MESSAGE value="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
   </component>
 </project>
