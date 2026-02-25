@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.3&#10;- env добавлен в gitignore">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.4&#10;- idea добавлен в gitignore">
+      <change beforePath="$PROJECT_DIR$/backend/start_reunity.bat" beforeDir="false" afterPath="$PROJECT_DIR$/backend/start_reunity.bat" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -495,7 +495,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772014634475</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Версия 1.0.4&#10;- idea добавлен в gitignore">
+      <option name="closed" value="true" />
+      <created>1772014747310</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1772014747310</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -517,7 +525,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.1.2&#10;- начал открываться документ" />
     <MESSAGE value="Версия 0.1.4&#10;- некорректное сохранение данных" />
     <MESSAGE value="Версия 0.1.5&#10;- сохранение данных в докуменет реализовано&#10;- есть мелкие баги" />
     <MESSAGE value="Версия 0.1.6&#10;- мелкие исправления интерфейса" />
@@ -542,6 +549,7 @@
     <MESSAGE value="Версия 1.0.1&#10;- рабочий сайт в локальной сети" />
     <MESSAGE value="Версия 1.0.2&#10;- alembic настроен" />
     <MESSAGE value="Версия 1.0.3&#10;- env добавлен в gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.3&#10;- env добавлен в gitignore" />
+    <MESSAGE value="Версия 1.0.4&#10;- idea добавлен в gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.4&#10;- idea добавлен в gitignore" />
   </component>
 </project>

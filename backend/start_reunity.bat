@@ -1,3 +1,4 @@
 @echo off
+timeout /t 15 /nobreak >nul
 cd /d C:\ReUnityHandler\backend
-python run.py
+C:\Users\rebcen\AppData\Local\Programs\Python\Python312\python.exe run.py
