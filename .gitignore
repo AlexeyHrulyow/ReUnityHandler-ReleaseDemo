@@ -4,6 +4,3 @@ pyparser_config.json
 structure.txt
 choosen_code.txt
 code.txt
-.env
-.idea
-/backend/logs/

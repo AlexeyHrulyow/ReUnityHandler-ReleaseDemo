@@ -32,12 +32,12 @@ async def get_document_structure(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📋 Запрос структуры документа {document_id} от пользователя {current_user.username}")
+    print(f"Запрос структуры документа {document_id} от пользователя {current_user.username}")
 
     document = await get_document_or_404(document_id, db)
 
     if not document.content or "goals" not in document.content:
-        print("⚠️ Документ имеет старую структуру, инициализируем новой")
+        print("Документ имеет старую структуру, инициализируем новой")
         document.initialize_content()
         await db.commit()
         await db.refresh(document)
@@ -116,7 +116,7 @@ async def update_header_fields(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📥 Обновление полей верхней части")
+    print(f"Обновление полей верхней части")
 
     document = await get_document_or_404(document_id, db)
 
@@ -158,7 +158,7 @@ async def update_table_dates(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📥 Обновление дат таблицы")
+    print(f"Обновление дат таблицы")
 
     document = await get_document_or_404(document_id, db)
 
@@ -202,7 +202,7 @@ async def update_main_table_row(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📥 Обновление строки основной таблицы: {row_update.row_id}, значения: {row_update.values}")
+    print(f"Обновление строки основной таблицы: {row_update.row_id}, значения: {row_update.values}")
 
     document = await get_document_or_404(document_id, db)
 
@@ -244,7 +244,7 @@ async def update_procedure_row(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📥 Обновление строки процедур: {row_update.row_id}, значения: {row_update.values}")
+    print(f"Обновление строки процедур: {row_update.row_id}, значения: {row_update.values}")
 
     document = await get_document_or_404(document_id, db)
 
@@ -281,7 +281,7 @@ async def update_goals(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    print(f"📥 Обновление целей: краткосрочная={goals_update.short_term}, долгосрочная={goals_update.long_term}")
+    print(f"Обновление целей: краткосрочная={goals_update.short_term}, долгосрочная={goals_update.long_term}")
 
     document = await get_document_or_404(document_id, db)
 

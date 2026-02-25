@@ -43,14 +43,6 @@ async def list_documents(
     if signed_only:
         query = query.where(Document.signed_at.is_not(None))
 
-    # Убрать фильтрацию по создателю - все врачи видят все документы
-    # Врачи видят только документы своих случаев
-    # if current_user.role not in ["admin", "head"]:
-    #     # Получаем ID случаев, созданных текущим врачом
-    #     subquery = select(Case.id).where(Case.creator_id == current_user.id)
-    #     query = query.where(Document.case_id.in_(subquery))
-    #     print(f"  Фильтр по создателю: текущий врач ID={current_user.id}")
-
     query = query.offset(skip).limit(limit).order_by(Document.created_at.desc())
 
     result = await db.execute(query)
@@ -151,7 +143,7 @@ async def get_document(
         current_user: Doctor = Depends(get_current_active_user)
 ):
     """Получение документа по ID"""
-    print(f"📋 Запрос документа {document_id} от пользователя {current_user.username}")
+    print(f"Запрос документа {document_id} от пользователя {current_user.username}")
 
     result = await db.execute(
         select(Document).where(Document.id == document_id)
@@ -161,7 +153,7 @@ async def get_document(
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    print(f"✅ Документ найден: case_id={document.case_id}")
+    print(f"Документ найден: case_id={document.case_id}")
 
     # Получаем информацию о случае
     case_result = await db.execute(
@@ -170,10 +162,10 @@ async def get_document(
     case = case_result.scalar_one_or_none()
 
     if not case:
-        print(f"⚠️ Случай {document.case_id} не найден")
+        print(f"Случай {document.case_id} не найден")
         raise HTTPException(status_code=404, detail="Связанный случай не найден")
 
-    print(f"✅ Случай найден: patient_id={case.patient_id}")
+    print(f"Случай найден: patient_id={case.patient_id}")
 
     # Получаем информацию о пациенте
     patient_result = await db.execute(
@@ -182,10 +174,10 @@ async def get_document(
     patient = patient_result.scalar_one_or_none()
 
     if not patient:
-        print(f"⚠️ Пациент {case.patient_id} не найден")
+        print(f"Пациент {case.patient_id} не найден")
         patient_info = None
     else:
-        print(f"✅ Пациент найден: {patient.full_name}, полис: {patient.insurance_number}")
+        print(f"Пациент найден: {patient.full_name}, полис: {patient.insurance_number}")
         patient_info = {
             "id": patient.id,
             "name": patient.full_name,
@@ -304,7 +296,7 @@ async def sign_document(
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    print(f"🔏 Попытка подписания документа {document_id}")
+    print(f"Попытка подписания документа {document_id}")
     print(
         f"   Статусы заполнения: Невролог={document.neurologist_completed}, Терапевт={document.therapist_completed}, Заведующий={document.head_completed}")
 
@@ -332,7 +324,7 @@ async def sign_document(
     document.signed_at = datetime.utcnow()
 
     await db.commit()
-    print(f"✅ Документ {document_id} подписан пользователем {current_user.username}")
+    print(f"Документ {document_id} подписан пользователем {current_user.username}")
 
     return {"message": "Документ подписан успешно"}
 
