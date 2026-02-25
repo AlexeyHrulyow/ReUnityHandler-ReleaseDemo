@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.0&#10;- релиз сайта&#10;- добавлен ip локалки&#10;- добавлены пара строк в документ">
-      <change afterPath="$PROJECT_DIR$/backend/start_reunity.bat" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.1&#10;- рабочий сайт в локальной сети">
+      <change afterPath="$PROJECT_DIR$/backend/alembic.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/alembic/README" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/alembic/env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/alembic/script.py.mako" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -473,7 +477,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772002390564</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Версия 1.0.1&#10;- рабочий сайт в локальной сети">
+      <option name="closed" value="true" />
+      <created>1772011633604</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1772011633604</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -495,7 +507,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.0.5&#10;- улучшено добавление пациентов&#10;- новые фильтры для поиска" />
     <MESSAGE value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
     <MESSAGE value="Версия 0.1.1&#10;- не работает создание документа" />
     <MESSAGE value="Версия 0.1.2&#10;- начал открываться документ" />
@@ -520,6 +531,7 @@
     <MESSAGE value="Версия 0.4.2&#10;- новые роли врачей корректно отображаются" />
     <MESSAGE value="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
     <MESSAGE value="Версия 1.0.0&#10;- релиз сайта&#10;- добавлен ip локалки&#10;- добавлены пара строк в документ" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.0&#10;- релиз сайта&#10;- добавлен ip локалки&#10;- добавлены пара строк в документ" />
+    <MESSAGE value="Версия 1.0.1&#10;- рабочий сайт в локальной сети" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.1&#10;- рабочий сайт в локальной сети" />
   </component>
 </project>
