@@ -7,3 +7,4 @@ code.txt
 .idea/
 *.iml
 .env
+/backend/logs/
