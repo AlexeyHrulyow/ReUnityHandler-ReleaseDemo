@@ -4,7 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/services/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/services/document_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/services/webmis_integration.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/check_doctors.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/check_document_id.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/check_documents.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/check_password.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/check_tables.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/clean_database.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/create_initial_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/create_tables.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/debug_api.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/debug_save.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/diagnose_db.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_api_direct.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_auth_fix.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_connection.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_create_case.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_db.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/test_login.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/update_database.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/test/update_password.py" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

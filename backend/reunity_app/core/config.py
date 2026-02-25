@@ -20,7 +20,12 @@ class Settings(BaseSettings):
     APP_NAME: str = "ReUnityHandler"  # Изменено на ReUnityHandler
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = True
-    CORS_ORIGINS: List[str] = ["http://localhost:8000", "http://127.0.0.1:8000"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://172.20.0.127:8000"
+        "http://192.168.137.100:8000"
+    ]
 
     # Интеграция с ВебМИС
     WEBMIS_BASE_URL: str = ""
