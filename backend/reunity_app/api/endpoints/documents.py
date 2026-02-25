@@ -28,7 +28,7 @@ async def list_documents(
 ):
     """Получение списка документов"""
 
-    print(f"🔍 Запрос документов: case_id={case_id}, user={current_user.username}, role={current_user.role}")
+    print(f"Запрос документов: case_id={case_id}, user={current_user.username}, role={current_user.role}")
 
     query = select(Document)
 
