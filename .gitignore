@@ -4,3 +4,6 @@ pyparser_config.json
 structure.txt
 choosen_code.txt
 code.txt
+.idea/
+*.iml
+.env
