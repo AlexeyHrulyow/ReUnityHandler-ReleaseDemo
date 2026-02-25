@@ -6,3 +6,4 @@ choosen_code.txt
 code.txt
 .env
 .idea
+/backend/logs/
