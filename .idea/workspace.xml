@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.1&#10;- рабочий сайт в локальной сети">
-      <change afterPath="$PROJECT_DIR$/backend/alembic.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/alembic/README" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/alembic/env.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/alembic/script.py.mako" afterDir="false" />
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.2&#10;- alembic настроен">
+      <change afterPath="$PROJECT_DIR$/backend/alembic/versions/666b92a789e4_initial_state.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -485,7 +481,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772011633604</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Версия 1.0.2&#10;- alembic настроен">
+      <option name="closed" value="true" />
+      <created>1772014434634</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1772014434634</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -507,7 +511,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.1.0&#10;- добавление пациентов и поиск по фильтрам реализованы" />
     <MESSAGE value="Версия 0.1.1&#10;- не работает создание документа" />
     <MESSAGE value="Версия 0.1.2&#10;- начал открываться документ" />
     <MESSAGE value="Версия 0.1.4&#10;- некорректное сохранение данных" />
@@ -532,6 +535,7 @@
     <MESSAGE value="Версия 0.4.3&#10;- права ролей полностью настроены&#10;- таблица управления случаями: улучшен визуал" />
     <MESSAGE value="Версия 1.0.0&#10;- релиз сайта&#10;- добавлен ip локалки&#10;- добавлены пара строк в документ" />
     <MESSAGE value="Версия 1.0.1&#10;- рабочий сайт в локальной сети" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.1&#10;- рабочий сайт в локальной сети" />
+    <MESSAGE value="Версия 1.0.2&#10;- alembic настроен" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.2&#10;- alembic настроен" />
   </component>
 </project>
