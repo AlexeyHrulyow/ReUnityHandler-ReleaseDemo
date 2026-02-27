@@ -35,6 +35,17 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
         .admin-nav {
             display: flex;
             gap: 10px;
@@ -89,7 +100,7 @@
         .btn-danger { background: #e74c3c; color: white; }
         .btn-warning { background: #f39c12; color: white; }
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
-        .btn-sm { padding: 4px 8px; font-size: 12px; }   /* ИЗМЕНЕНО: добавлен класс для маленьких кнопок */
+        .btn-sm { padding: 4px 8px; font-size: 12px; }
         .form-group {
             margin-bottom: 15px;
         }
@@ -145,6 +156,11 @@
 </head>
 <body>
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Управление врачами</h1>
             <div class="admin-nav">
@@ -209,12 +225,12 @@
                 <div class="form-group">
                     <label for="role">Роль *</label>
                     <select id="role" required>
-                        <option value="therapist">Терапевт</option>
-                        <option value="neurologist">Невролог</option>
-                        <option value="head">Врач ФРМ</option>
-                        <option value="admin">Администратор</option>
+                        <option value="reflexotherapist">Рефлексотерапевт</option>
+                        <option value="physiotherapist">Физиотерапевт</option>
+                        <option value="therapist_frm">Терапевт/Врач ФРМ</option>
+                        <option value="neurologist_frm">Невролог/Врач ФРМ</option>
                         <option value="psychologist">Психолог</option>
-                        <option value="cardiologist">Кардиолог</option>
+                        <option value="admin">Администратор</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -229,7 +245,7 @@
         </div>
     </div>
 
-    <!-- ИЗМЕНЕНО: модальное окно для смены пароля -->
+    <!-- Модальное окно для смены пароля -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closePasswordModal()">&times;</span>
@@ -261,6 +277,18 @@
         let currentUser = null;
         let doctors = [];
 
+        function getRoleName(role) {
+            const roles = {
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
+            };
+            return roles[role] || role;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
             await loadDoctors();
@@ -273,6 +301,8 @@
                 });
                 if (response.ok) {
                     currentUser = await response.json();
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('userRole').textContent = getRoleName(currentUser.role);
                     if (currentUser.role !== 'admin') {
                         showAlert('Доступ запрещён', 'danger');
                         setTimeout(() => window.location.href = '/dashboard', 2000);
@@ -284,6 +314,10 @@
                 console.error(error);
                 window.location.href = '/';
             }
+        }
+
+        function getActiveDoctorForRole(role, excludeId = null) {
+            return doctors.find(d => d.role === role && d.is_active && d.id !== excludeId);
         }
 
         async function loadDoctors() {
@@ -314,20 +348,11 @@
             tbody.innerHTML = '';
 
             doctors.forEach(doc => {
-                const roleNames = {
-                    'therapist': 'Терапевт',
-                    'neurologist': 'Невролог',
-                    'head': 'Врач ФРМ',
-                    'admin': 'Администратор',
-                    'psychologist': 'Психолог',        // ИЗМЕНЕНО
-                    'cardiologist': 'Кардиолог'        // ИЗМЕНЕНО
-                };
-                const roleName = roleNames[doc.role] || doc.role;
+                const roleName = getRoleName(doc.role);
                 const activeText = doc.is_active ? 'Да' : 'Нет';
                 const created = new Date(doc.created_at).toLocaleDateString('ru-RU');
 
                 const row = tbody.insertRow();
-                // ИЗМЕНЕНО: добавлена кнопка смены пароля
                 row.innerHTML = `
                     <td>${doc.id}</td>
                     <td>${doc.last_name} ${doc.first_name} ${doc.middle_name || ''}</td>
@@ -359,7 +384,7 @@
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             document.getElementById('password').required = true;
-            document.getElementById('role').value = 'therapist';
+            document.getElementById('role').value = 'reflexotherapist';
             document.getElementById('isActive').checked = true;
             document.getElementById('passwordGroup').style.display = 'block';
             document.getElementById('doctorModal').style.display = 'block';
@@ -407,6 +432,19 @@
                 if (!data.password) {
                     showAlert('Пароль обязателен при создании', 'danger');
                     return;
+                }
+            }
+
+            // Проверка на уникальность активного врача при создании или смене роли/активации
+            if (data.is_active) {
+                const currentDoctor = isEditing ? doctors.find(d => d.id === parseInt(id)) : null;
+                const activeDoctor = doctors.find(d => d.role === data.role && d.is_active && d.id !== (currentDoctor ? currentDoctor.id : null));
+                if (activeDoctor) {
+                    const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
+                    const roleName = getRoleName(activeDoctor.role);
+                    if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
+                        return;
+                    }
                 }
             }
 
@@ -460,6 +498,20 @@
         }
 
         async function toggleActive(id, activate) {
+            const doctor = doctors.find(d => d.id === id);
+            if (!doctor) return;
+
+            if (activate) {
+                const activeDoctor = doctors.find(d => d.role === doctor.role && d.is_active && d.id !== id);
+                if (activeDoctor) {
+                    const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
+                    const roleName = getRoleName(activeDoctor.role);
+                    if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
+                        return;
+                    }
+                }
+            }
+
             const action = activate ? 'activate' : 'deactivate';
             try {
                 const response = await fetch(`/api/v1/doctors/${id}/${action}`, {
@@ -480,7 +532,7 @@
             }
         }
 
-        // ИЗМЕНЕНО: функции для смены пароля
+        // Функции для смены пароля
         function openPasswordModal(doctorId, doctorName) {
             document.getElementById('passwordDoctorId').value = doctorId;
             document.getElementById('newPassword').value = '';

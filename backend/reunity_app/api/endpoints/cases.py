@@ -121,18 +121,19 @@ async def list_cases(
         )
         document = document_result.scalar_one_or_none()
 
-        neurologist_completed = False
-        therapist_completed = False
-        head_completed = False
+        # Новые статусы
+        reflexotherapist_completed = False
+        physiotherapist_completed = False
+        therapist_frm_completed = False
+        neurologist_frm_completed = False
         psychologist_completed = False
-        cardiologist_completed = False
 
         if document:
-            neurologist_completed = document.neurologist_completed
-            therapist_completed = document.therapist_completed
-            head_completed = document.head_completed
+            reflexotherapist_completed = document.reflexotherapist_completed
+            physiotherapist_completed = document.physiotherapist_completed
+            therapist_frm_completed = document.therapist_frm_completed
+            neurologist_frm_completed = document.neurologist_frm_completed
             psychologist_completed = document.psychologist_completed
-            cardiologist_completed = document.cardiologist_completed
 
         case_data = CaseSchema(
             id=case.id,
@@ -153,12 +154,12 @@ async def list_cases(
             patient_insurance=patient.insurance_number if patient else None,
             patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
             creator_name=creator.full_name if creator else "Неизвестно",
-            creator_role=creator.role.value if creator else None,  # ИЗМЕНЕНО: добавлена роль создателя
-            neurologist_completed=neurologist_completed,
-            therapist_completed=therapist_completed,
-            head_completed=head_completed,
-            psychologist_completed=psychologist_completed,
-            cardiologist_completed=cardiologist_completed
+            creator_role=creator.role.value if creator else None,
+            reflexotherapist_completed=reflexotherapist_completed,
+            physiotherapist_completed=physiotherapist_completed,
+            therapist_frm_completed=therapist_frm_completed,
+            neurologist_frm_completed=neurologist_frm_completed,
+            psychologist_completed=psychologist_completed
         )
 
         cases_with_details.append(case_with_patient)
@@ -189,18 +190,18 @@ async def get_case(
     creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
     creator = creator_result.scalar_one_or_none()
 
-    neurologist_completed = False
-    therapist_completed = False
-    head_completed = False
+    reflexotherapist_completed = False
+    physiotherapist_completed = False
+    therapist_frm_completed = False
+    neurologist_frm_completed = False
     psychologist_completed = False
-    cardiologist_completed = False
 
     if document:
-        neurologist_completed = document.neurologist_completed
-        therapist_completed = document.therapist_completed
-        head_completed = document.head_completed
+        reflexotherapist_completed = document.reflexotherapist_completed
+        physiotherapist_completed = document.physiotherapist_completed
+        therapist_frm_completed = document.therapist_frm_completed
+        neurologist_frm_completed = document.neurologist_frm_completed
         psychologist_completed = document.psychologist_completed
-        cardiologist_completed = document.cardiologist_completed
 
     case_data = CaseSchema(
         id=case.id,
@@ -221,11 +222,11 @@ async def get_case(
         patient_insurance=patient.insurance_number if patient else None,
         patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
         creator_name=creator.full_name if creator else "Неизвестно",
-        neurologist_completed=neurologist_completed,
-        therapist_completed=therapist_completed,
-        head_completed=head_completed,
-        psychologist_completed=psychologist_completed,
-        cardiologist_completed=cardiologist_completed
+        reflexotherapist_completed=reflexotherapist_completed,
+        physiotherapist_completed=physiotherapist_completed,
+        therapist_frm_completed=therapist_frm_completed,
+        neurologist_frm_completed=neurologist_frm_completed,
+        psychologist_completed=psychologist_completed
     )
 
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
-        /* Стили без изменений (такие же, как в предыдущей версии) */
+        /* Стили без изменений (см. исходный код) */
         :root {
             --bg-light: #fffffa;
             --primary-dark: #0d5c63;
@@ -35,6 +35,17 @@
             border-radius: 5px;
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
+        }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
         }
         .patient-info {
             background: #ffffff;
@@ -382,6 +393,11 @@
 </head>
 <body>
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Редактирование документа</h1>
             <div>
@@ -406,35 +422,35 @@
 
         <!-- Статус заполнения врачами -->
         <div id="doctorStatus" class="doctor-status" style="display: none;">
-            <div class="status-card" id="neurologistStatus">
-                <div class="status-icon">🧠</div>
-                <h4>Невролог</h4>
-                <p id="neurologistText">Не заполнено</p>
-                <p id="neurologistTime"></p>
+            <div class="status-card" id="reflexotherapistStatus">
+                <div class="status-icon">💆</div>
+                <h4>Рефлексотерапевт</h4>
+                <p id="reflexotherapistText">Не заполнено</p>
+                <p id="reflexotherapistName"></p>
             </div>
-            <div class="status-card" id="therapistStatus">
+            <div class="status-card" id="physiotherapistStatus">
+                <div class="status-icon">🏋️</div>
+                <h4>Физиотерапевт</h4>
+                <p id="physiotherapistText">Не заполнено</p>
+                <p id="physiotherapistName"></p>
+            </div>
+            <div class="status-card" id="therapistFrmStatus">
                 <div class="status-icon">🩺</div>
-                <h4>Терапевт</h4>
-                <p id="therapistText">Не заполнено</p>
-                <p id="therapistTime"></p>
+                <h4>Терапевт/Врач ФРМ</h4>
+                <p id="therapistFrmText">Не заполнено</p>
+                <p id="therapistFrmName"></p>
             </div>
-            <div class="status-card" id="headStatus">
-                <div class="status-icon">👨‍⚕️</div>
-                <h4>Врач ФРМ</h4>
-                <p id="headText">Не заполнено</p>
-                <p id="headTime"></p>
+            <div class="status-card" id="neurologistFrmStatus">
+                <div class="status-icon">🚶</div>
+                <h4>Невролог/Врач ФРМ</h4>
+                <p id="neurologistFrmText">Не заполнено</p>
+                <p id="neurologistFrmName"></p>
             </div>
             <div class="status-card" id="psychologistStatus">
                 <div class="status-icon">🧠</div>
                 <h4>Психолог</h4>
                 <p id="psychologistText">Не заполнено</p>
-                <p id="psychologistTime"></p>
-            </div>
-            <div class="status-card" id="cardiologistStatus">
-                <div class="status-icon">❤️</div>
-                <h4>Кардиолог</h4>
-                <p id="cardiologistText">Не заполнено</p>
-                <p id="cardiologistTime"></p>
+                <p id="psychologistName"></p>
             </div>
         </div>
 
@@ -565,6 +581,7 @@
         let caseId = null;
         let caseCreatorId = null;
         let caseStatus = null;
+        let doctorsList = []; // для получения фамилий активных врачей
 
         // Множество для отслеживания несохранённых изменений
         let unsavedChanges = new Set();
@@ -576,6 +593,18 @@
         const sectionSelect = document.getElementById('sectionSelect');
 
         // ---- Вспомогательные функции ----
+        function getRoleName(role) {
+            const roles = {
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
+            };
+            return roles[role] || role;
+        }
+
         function showLoading(show) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
@@ -820,6 +849,8 @@
                 });
                 if (response.ok) {
                     currentUser = await response.json();
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('userRole').textContent = getRoleName(currentUser.role);
                 } else {
                     throw new Error('Ошибка загрузки пользователя');
                 }
@@ -827,6 +858,37 @@
                 console.error(error);
                 window.location.href = '/';
             }
+        }
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/v1/doctors?active_only=true', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    doctorsList = await response.json();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки списка врачей:', error);
+            }
+        }
+
+        function getActiveDoctorName(role) {
+            const doctor = doctorsList.find(d => d.role === role && d.is_active);
+            return doctor ? `${doctor.last_name} ${doctor.first_name} ${doctor.middle_name || ''}`.trim() : null;
+        }
+
+        // Новая функция для форматирования имени (Фамилия И.О.)
+        function formatDoctorName(fullName) {
+            if (!fullName) return null;
+            const parts = fullName.split(' ');
+            const lastName = parts[0] || '';
+            const firstName = parts[1] || '';
+            const middleName = parts[2] || '';
+            let initials = '';
+            if (firstName) initials += firstName[0].toUpperCase() + '.';
+            if (middleName) initials += middleName[0].toUpperCase() + '.';
+            return `${lastName} ${initials}`.trim();
         }
 
         async function loadDocumentStructure() {
@@ -854,7 +916,7 @@
 
                     buildSectionSelect();
                     updateSectionButtons();
-                    applyDisabledState(); // ИЗМЕНЕНО: применяем состояние disabled
+                    applyDisabledState();
                     showLoading(false);
                 } else {
                     throw new Error('Ошибка загрузки структуры');
@@ -971,7 +1033,7 @@
             tbody.innerHTML = '';
             tbody.appendChild(dateRow); // добавляем обратно строку с датами
 
-            const canEditValue = canEdit(); // ИЗМЕНЕНО: определяем доступность редактирования
+            const canEditValue = canEdit();
 
             rows.forEach(row => {
                 const tr = document.createElement('tr');
@@ -1006,7 +1068,7 @@
             const tbody = document.getElementById('proceduresTableBody');
             tbody.innerHTML = '';
 
-            const canEditValue = canEdit(); // ИЗМЕНЕНО
+            const canEditValue = canEdit();
 
             rows.forEach(row => {
                 const tr = document.createElement('tr');
@@ -1044,32 +1106,40 @@
         }
 
         function displayDoctorStatus() {
-            const neuro = document.getElementById('neurologistStatus');
-            const therapist = document.getElementById('therapistStatus');
-            const head = document.getElementById('headStatus');
+            const reflex = document.getElementById('reflexotherapistStatus');
+            const physio = document.getElementById('physiotherapistStatus');
+            const therapist = document.getElementById('therapistFrmStatus');
+            const neuro = document.getElementById('neurologistFrmStatus');
             const psych = document.getElementById('psychologistStatus');
-            const cardio = document.getElementById('cardiologistStatus');
 
-            if (completionStatus.neurologist) {
-                neuro.classList.add('completed');
-                document.getElementById('neurologistText').textContent = 'Заполнено';
+            // Обновляем текст и классы
+            if (completionStatus.reflexotherapist) {
+                reflex.classList.add('completed');
+                document.getElementById('reflexotherapistText').textContent = 'Заполнено';
             } else {
-                neuro.classList.remove('completed');
-                document.getElementById('neurologistText').textContent = 'Не заполнено';
+                reflex.classList.remove('completed');
+                document.getElementById('reflexotherapistText').textContent = 'Не заполнено';
             }
-            if (completionStatus.therapist) {
+            if (completionStatus.physiotherapist) {
+                physio.classList.add('completed');
+                document.getElementById('physiotherapistText').textContent = 'Заполнено';
+            } else {
+                physio.classList.remove('completed');
+                document.getElementById('physiotherapistText').textContent = 'Не заполнено';
+            }
+            if (completionStatus.therapist_frm) {
                 therapist.classList.add('completed');
-                document.getElementById('therapistText').textContent = 'Заполнено';
+                document.getElementById('therapistFrmText').textContent = 'Заполнено';
             } else {
                 therapist.classList.remove('completed');
-                document.getElementById('therapistText').textContent = 'Не заполнено';
+                document.getElementById('therapistFrmText').textContent = 'Не заполнено';
             }
-            if (completionStatus.head) {
-                head.classList.add('completed');
-                document.getElementById('headText').textContent = 'Заполнено';
+            if (completionStatus.neurologist_frm) {
+                neuro.classList.add('completed');
+                document.getElementById('neurologistFrmText').textContent = 'Заполнено';
             } else {
-                head.classList.remove('completed');
-                document.getElementById('headText').textContent = 'Не заполнено';
+                neuro.classList.remove('completed');
+                document.getElementById('neurologistFrmText').textContent = 'Не заполнено';
             }
             if (completionStatus.psychologist) {
                 psych.classList.add('completed');
@@ -1078,13 +1148,22 @@
                 psych.classList.remove('completed');
                 document.getElementById('psychologistText').textContent = 'Не заполнено';
             }
-            if (completionStatus.cardiologist) {
-                cardio.classList.add('completed');
-                document.getElementById('cardiologistText').textContent = 'Заполнено';
-            } else {
-                cardio.classList.remove('completed');
-                document.getElementById('cardiologistText').textContent = 'Не заполнено';
-            }
+
+            // Показываем фамилию и инициалы активного врача для каждой роли (или "не назначен")
+            const reflexName = getActiveDoctorName('reflexotherapist');
+            document.getElementById('reflexotherapistName').textContent = reflexName ? formatDoctorName(reflexName) : 'не назначен';
+
+            const physioName = getActiveDoctorName('physiotherapist');
+            document.getElementById('physiotherapistName').textContent = physioName ? formatDoctorName(physioName) : 'не назначен';
+
+            const therapistName = getActiveDoctorName('therapist_frm');
+            document.getElementById('therapistFrmName').textContent = therapistName ? formatDoctorName(therapistName) : 'не назначен';
+
+            const neuroName = getActiveDoctorName('neurologist_frm');
+            document.getElementById('neurologistFrmName').textContent = neuroName ? formatDoctorName(neuroName) : 'не назначен';
+
+            const psychName = getActiveDoctorName('psychologist');
+            document.getElementById('psychologistName').textContent = psychName ? formatDoctorName(psychName) : 'не назначен';
         }
 
         function updateSectionButtons() {
@@ -1095,19 +1174,17 @@
             if (!completionStatus || !caseStatus) return;
 
             let isCompleted = false;
-            if (userRole === 'neurologist') isCompleted = completionStatus.neurologist;
-            else if (userRole === 'therapist') isCompleted = completionStatus.therapist;
-            else if (userRole === 'head') isCompleted = completionStatus.head;
+            if (userRole === 'reflexotherapist') isCompleted = completionStatus.reflexotherapist;
+            else if (userRole === 'physiotherapist') isCompleted = completionStatus.physiotherapist;
+            else if (userRole === 'therapist_frm') isCompleted = completionStatus.therapist_frm;
+            else if (userRole === 'neurologist_frm') isCompleted = completionStatus.neurologist_frm;
             else if (userRole === 'psychologist') isCompleted = completionStatus.psychologist;
-            else if (userRole === 'cardiologist') isCompleted = completionStatus.cardiologist;
             else {
-                // Администратор не имеет своего раздела
                 completeBtn.style.display = 'none';
                 uncompleteBtn.style.display = 'none';
                 return;
             }
 
-            // Показываем кнопки только если случай не завершён
             if (caseStatus !== 'completed' && caseStatus !== 'sent') {
                 if (isCompleted) {
                     completeBtn.style.display = 'none';
@@ -1117,13 +1194,11 @@
                     uncompleteBtn.style.display = 'none';
                 }
             } else {
-                // Если случай завершён, скрываем обе кнопки
                 completeBtn.style.display = 'none';
                 uncompleteBtn.style.display = 'none';
             }
         }
 
-        // ИЗМЕНЕНО: функция определения возможности редактирования
         function canEdit() {
             if (!caseStatus || !completionStatus || !currentUser) return false;
             const isCaseCompleted = (caseStatus === 'completed' || caseStatus === 'sent');
@@ -1132,21 +1207,18 @@
             const isAdmin = (currentUser.role === 'admin');
             if (isAdmin) return true;
 
-            // Определяем, завершён ли раздел текущего врача
             let isMySectionCompleted = false;
             const role = currentUser.role;
-            if (role === 'neurologist') isMySectionCompleted = completionStatus.neurologist;
-            else if (role === 'therapist') isMySectionCompleted = completionStatus.therapist;
-            else if (role === 'head') isMySectionCompleted = completionStatus.head;
+            if (role === 'reflexotherapist') isMySectionCompleted = completionStatus.reflexotherapist;
+            else if (role === 'physiotherapist') isMySectionCompleted = completionStatus.physiotherapist;
+            else if (role === 'therapist_frm') isMySectionCompleted = completionStatus.therapist_frm;
+            else if (role === 'neurologist_frm') isMySectionCompleted = completionStatus.neurologist_frm;
             else if (role === 'psychologist') isMySectionCompleted = completionStatus.psychologist;
-            else if (role === 'cardiologist') isMySectionCompleted = completionStatus.cardiologist;
-            else return false; // неопределённая роль
+            else return false;
 
-            // Разрешено редактировать, если мой раздел ещё не завершён
             return !isMySectionCompleted;
         }
 
-        // ИЗМЕНЕНО: функция применения disabled ко всем полям
         function applyDisabledState() {
             const canEditValue = canEdit();
             document.querySelectorAll('.cell-input').forEach(input => {
@@ -1154,7 +1226,6 @@
             });
         }
 
-        // ИСПРАВЛЕНА ЛОГИКА ОТОБРАЖЕНИЯ КНОПОК
         function updateCaseStatusUI() {
             const caseMessageDiv = document.getElementById('caseStatusMessage');
             const actionsDiv = document.getElementById('documentActions');
@@ -1176,7 +1247,6 @@
                 caseMessageDiv.className = 'case-status-message case-status-completed';
                 caseMessageDiv.style.display = 'block';
 
-                // Кнопки для завершённого случая
                 completeSectionBtn.style.display = 'none';
                 uncompleteSectionBtn.style.display = 'none';
                 saveAllBtn.style.display = 'none';
@@ -1188,18 +1258,16 @@
                 actionsDiv.style.display = 'block';
                 saveAllBtn.style.display = 'inline-block';
 
-                // Обновляем кнопки разделов
                 updateSectionButtons();
 
-                // Кнопка завершения случая: доступна создателю (если его раздел завершён) или администратору
                 let creatorSectionCompleted = false;
                 const userRole = currentUser?.role;
                 if (isCreator) {
-                    if (userRole === 'neurologist') creatorSectionCompleted = completionStatus.neurologist;
-                    else if (userRole === 'therapist') creatorSectionCompleted = completionStatus.therapist;
-                    else if (userRole === 'head') creatorSectionCompleted = completionStatus.head;
+                    if (userRole === 'reflexotherapist') creatorSectionCompleted = completionStatus.reflexotherapist;
+                    else if (userRole === 'physiotherapist') creatorSectionCompleted = completionStatus.physiotherapist;
+                    else if (userRole === 'therapist_frm') creatorSectionCompleted = completionStatus.therapist_frm;
+                    else if (userRole === 'neurologist_frm') creatorSectionCompleted = completionStatus.neurologist_frm;
                     else if (userRole === 'psychologist') creatorSectionCompleted = completionStatus.psychologist;
-                    else if (userRole === 'cardiologist') creatorSectionCompleted = completionStatus.cardiologist;
                 }
 
                 const canComplete = (isAdmin || (isCreator && creatorSectionCompleted));
@@ -1209,12 +1277,10 @@
                     signDocumentBtn.style.display = 'none';
                 }
 
-                // Кнопка отмены завершения случая в незавершённом случае не нужна
                 uncompleteCaseBtn.style.display = 'none';
                 exportBtn.style.display = 'none';
             }
 
-            // ИЗМЕНЕНО: обновляем состояние disabled полей
             applyDisabledState();
         }
 
@@ -1593,6 +1659,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
+            await loadDoctors();
             await loadDocumentStructure();
 
             window.addEventListener('beforeunload', (e) => {

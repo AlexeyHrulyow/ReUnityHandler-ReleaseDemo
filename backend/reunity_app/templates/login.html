@@ -157,7 +157,8 @@
                 } else {
                     const errorData = await response.json();
                     const alertEl = document.getElementById('errorAlert');
-                    alertEl.textContent = errorData.detail || 'Ошибка авторизации';
+                    // Изменённое сообщение
+                    alertEl.textContent = 'Логин или пароль неверны';
                     alertEl.style.display = 'block';
                 }
             } catch (error) {

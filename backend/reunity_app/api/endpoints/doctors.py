@@ -1,14 +1,29 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from reunity_app.core.security import get_current_active_user, require_role, get_password_hash
 from reunity_app.db.session import get_db
 from reunity_app.db.models import Doctor as DoctorModel, DoctorRole
-from reunity_app.schemas.doctor import DoctorCreate, DoctorUpdate, Doctor as DoctorSchema, SetPasswordRequest   # ИЗМЕНЕНО: импорт SetPasswordRequest
+from reunity_app.schemas.doctor import DoctorCreate, DoctorUpdate, Doctor as DoctorSchema, SetPasswordRequest
 
 router = APIRouter()
+
+
+async def ensure_unique_active_for_role(db: AsyncSession, role: DoctorRole, exclude_id: int = None) -> Optional[DoctorModel]:
+    """
+    Проверяет, есть ли активный врач для данной роли, исключая врача с exclude_id.
+    Возвращает найденного врача, если есть, иначе None.
+    """
+    query = select(DoctorModel).where(
+        DoctorModel.role == role,
+        DoctorModel.is_active == True
+    )
+    if exclude_id:
+        query = query.where(DoctorModel.id != exclude_id)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 @router.get("/", response_model=List[DoctorSchema])
@@ -18,7 +33,7 @@ async def list_doctors(
         role: Optional[DoctorRole] = None,
         active_only: bool = True,
         db: AsyncSession = Depends(get_db),
-        current_user: DoctorModel = Depends(require_role("admin", "head"))
+        current_user: DoctorModel = Depends(get_current_active_user)
 ):
     """Получение списка врачей (только для админа и заведующего)"""
     query = select(DoctorModel)
@@ -60,14 +75,14 @@ async def create_doctor(
     # Проверяем уникальность username
     result = await db.execute(select(DoctorModel).where(DoctorModel.username == doctor.username))
     existing_doctor = result.scalar_one_or_none()
-
     if existing_doctor:
-        raise HTTPException(
-            status_code=400,
-            detail="Пользователь с таким именем уже существует"
-        )
+        raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
 
-    # Создаем врача
+    # Проверяем, есть ли уже активный врач с такой ролью
+    active_for_role = await ensure_unique_active_for_role(db, doctor.role)
+    # Если есть активный, создаём неактивного, иначе активного
+    is_active = (active_for_role is None)
+
     hashed_password = get_password_hash(doctor.password)
     db_doctor = DoctorModel(
         username=doctor.username,
@@ -76,14 +91,13 @@ async def create_doctor(
         first_name=doctor.first_name,
         middle_name=doctor.middle_name,
         role=doctor.role,
-        is_active=True
+        is_active=is_active
     )
 
     db.add(db_doctor)
     await db.commit()
     await db.refresh(db_doctor)
 
-    # Возвращаем объект схемы
     return DoctorSchema(
         id=db_doctor.id,
         username=db_doctor.username,
@@ -109,7 +123,6 @@ async def get_doctor(
     if not doctor:
         raise HTTPException(status_code=404, detail="Врач не найден")
 
-    # Возвращаем объект схемы
     return DoctorSchema(
         id=doctor.id,
         username=doctor.username,
@@ -143,15 +156,56 @@ async def update_doctor(
             detail="Используйте профиль для редактирования собственных данных"
         )
 
-    # Обновляем поля
     update_data = doctor_update.dict(exclude_unset=True)
+
+    # Если изменяется username, проверить уникальность
+    if "username" in update_data and update_data["username"] != doctor.username:
+        # Проверить, что такой username не занят другим врачом
+        result_username = await db.execute(
+            select(DoctorModel).where(DoctorModel.username == update_data["username"])
+        )
+        existing = result_username.scalar_one_or_none()
+        if existing and existing.id != doctor_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Пользователь с таким именем уже существует"
+            )
+
+    # Если изменяется роль
+    if "role" in update_data and update_data["role"] != doctor.role:
+        new_role = update_data["role"]
+        # Если текущий врач активен, нужно проверить, не появится ли второй активный с новой ролью
+        if doctor.is_active:
+            active_for_role = await ensure_unique_active_for_role(db, new_role, exclude_id=doctor.id)
+            if active_for_role:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Для роли {new_role.value} уже есть активный врач: {active_for_role.full_name}. "
+                           f"Сначала деактивируйте его или измените роль на неактивную."
+                )
+        # Если врач неактивен, то ничего страшного – новый активный не появится
+        # (но если он станет активным позже, проверка будет при активации)
+
+    # Если изменяется поле is_active (через этот эндпоинт это тоже возможно)
+    # Но лучше использовать отдельные эндпоинты activate/deactivate.
+    # Оставим здесь базовое обновление без автоматической смены активности,
+    # но если is_active передано True и есть другой активный для этой роли – ошибка.
+    if "is_active" in update_data and update_data["is_active"] and not doctor.is_active:
+        # Пытаемся активировать врача
+        active_for_role = await ensure_unique_active_for_role(db, doctor.role, exclude_id=doctor.id)
+        if active_for_role:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Нельзя активировать врача, так как для роли {doctor.role.value} уже есть активный: {active_for_role.full_name}. "
+                       f"Используйте кнопку активации для деактивации другого."
+            )
+
     for field, value in update_data.items():
         setattr(doctor, field, value)
 
     await db.commit()
     await db.refresh(doctor)
 
-    # Возвращаем объект схемы
     return DoctorSchema(
         id=doctor.id,
         username=doctor.username,
@@ -203,6 +257,16 @@ async def activate_doctor(
     if not doctor:
         raise HTTPException(status_code=404, detail="Врач не найден")
 
+    if doctor.is_active:
+        return {"message": "Врач уже активен"}
+
+    # Проверяем, есть ли другой активный с такой же ролью
+    active_for_role = await ensure_unique_active_for_role(db, doctor.role, exclude_id=doctor.id)
+    if active_for_role:
+        # Автоматически деактивируем другого
+        active_for_role.is_active = False
+        db.add(active_for_role)
+
     doctor.is_active = True
     await db.commit()
 
@@ -229,13 +293,15 @@ async def deactivate_doctor(
             detail="Нельзя деактивировать собственный аккаунт"
         )
 
+    if not doctor.is_active:
+        return {"message": "Врач уже неактивен"}
+
     doctor.is_active = False
     await db.commit()
 
     return {"message": "Врач деактивирован"}
 
 
-# ИЗМЕНЕНО: новый эндпоинт для смены пароля врача администратором
 @router.post("/{doctor_id}/set-password")
 async def set_doctor_password(
         doctor_id: int,

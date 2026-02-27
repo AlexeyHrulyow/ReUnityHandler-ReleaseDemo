@@ -89,13 +89,12 @@ async def get_document_structure(
         "current_user_role": current_user.role.value
     }
 
-    # ИЗМЕНЕНО: добавлены статусы для новых ролей
     completion_status = {
-        "neurologist": document.neurologist_completed,
-        "therapist": document.therapist_completed,
-        "head": document.head_completed,
-        "psychologist": document.psychologist_completed,
-        "cardiologist": document.cardiologist_completed
+        "reflexotherapist": document.reflexotherapist_completed,
+        "physiotherapist": document.physiotherapist_completed,
+        "therapist_frm": document.therapist_frm_completed,
+        "neurologist_frm": document.neurologist_frm_completed,
+        "psychologist": document.psychologist_completed
     }
 
     return DocumentStructureResponse(
@@ -134,17 +133,17 @@ async def update_header_fields(
     flag_modified(document, "content")
 
     now = datetime.utcnow()
-    # ИЗМЕНЕНО: добавлены новые роли
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    # Обновляем даты заполнения для соответствующих ролей
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -179,16 +178,16 @@ async def update_table_dates(
     flag_modified(document, "content")
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -216,16 +215,16 @@ async def update_main_table_row(
     document.update_main_table_row(row_update.row_id, row_update.values)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
     await db.refresh(document)
@@ -254,16 +253,16 @@ async def update_procedure_row(
     document.update_procedure_row(row_update.row_id, row_update.values)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -291,16 +290,16 @@ async def update_goals(
     document.update_goals(short_term=goals_update.short_term, long_term=goals_update.long_term)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -354,16 +353,16 @@ async def update_document_full(
     )
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_filled_at = now
 
     await db.commit()
 
@@ -380,22 +379,21 @@ async def complete_section(
     document = await get_document_or_404(document_id, db)
     now = datetime.utcnow()
 
-    # ИЗМЕНЕНО: добавлены новые роли
-    if current_user.role == DoctorRole.NEUROLOGIST:
-        document.neurologist_completed = True
-        document.neurologist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST:
-        document.therapist_completed = True
-        document.therapist_filled_at = now
-    elif current_user.role == DoctorRole.HEAD:
-        document.head_completed = True
-        document.head_filled_at = now
+    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_completed = True
+        document.reflexotherapist_filled_at = now
+    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_completed = True
+        document.physiotherapist_filled_at = now
+    elif current_user.role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_completed = True
+        document.therapist_frm_filled_at = now
+    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_completed = True
+        document.neurologist_frm_filled_at = now
     elif current_user.role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_completed = True
         document.psychologist_filled_at = now
-    elif current_user.role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_completed = True
-        document.cardiologist_filled_at = now
     else:
         raise HTTPException(
             status_code=400,
@@ -422,22 +420,21 @@ async def uncomplete_my_section(
         raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
 
     role = current_user.role
-    # ИЗМЕНЕНО: добавлены новые роли
-    if role == DoctorRole.NEUROLOGIST:
-        document.neurologist_completed = False
-        document.neurologist_filled_at = None
-    elif role == DoctorRole.THERAPIST:
-        document.therapist_completed = False
-        document.therapist_filled_at = None
-    elif role == DoctorRole.HEAD:
-        document.head_completed = False
-        document.head_filled_at = None
+    if role == DoctorRole.REFLEXOTHERAPIST:
+        document.reflexotherapist_completed = False
+        document.reflexotherapist_filled_at = None
+    elif role == DoctorRole.PHYSIOTHERAPIST:
+        document.physiotherapist_completed = False
+        document.physiotherapist_filled_at = None
+    elif role == DoctorRole.THERAPIST_FRM:
+        document.therapist_frm_completed = False
+        document.therapist_frm_filled_at = None
+    elif role == DoctorRole.NEUROLOGIST_FRM:
+        document.neurologist_frm_completed = False
+        document.neurologist_frm_filled_at = None
     elif role == DoctorRole.PSYCHOLOGIST:
         document.psychologist_completed = False
         document.psychologist_filled_at = None
-    elif role == DoctorRole.CARDIOLOGIST:
-        document.cardiologist_completed = False
-        document.cardiologist_filled_at = None
     else:
         raise HTTPException(
             status_code=403,
@@ -453,10 +450,10 @@ async def uncomplete_section_by_admin(
         document_id: int,
         target_role: str,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(require_role("admin", "head"))
+        current_user: Doctor = Depends(require_role("admin"))
 ):
-    """Отмена завершения раздела указанной роли (только для админа/зав.)"""
-    allowed_roles = ["neurologist", "therapist", "head", "psychologist", "cardiologist"]  # ИЗМЕНЕНО
+    """Отмена завершения раздела указанной роли (только для админа)"""
+    allowed_roles = ["reflexotherapist", "physiotherapist", "therapist_frm", "neurologist_frm", "psychologist"]
     if target_role not in allowed_roles:
         raise HTTPException(status_code=400, detail="Недопустимая целевая роль")
 
@@ -465,21 +462,21 @@ async def uncomplete_section_by_admin(
     if document.signed_at:
         raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
 
-    if target_role == "neurologist":
-        document.neurologist_completed = False
-        document.neurologist_filled_at = None
-    elif target_role == "therapist":
-        document.therapist_completed = False
-        document.therapist_filled_at = None
-    elif target_role == "head":
-        document.head_completed = False
-        document.head_filled_at = None
+    if target_role == "reflexotherapist":
+        document.reflexotherapist_completed = False
+        document.reflexotherapist_filled_at = None
+    elif target_role == "physiotherapist":
+        document.physiotherapist_completed = False
+        document.physiotherapist_filled_at = None
+    elif target_role == "therapist_frm":
+        document.therapist_frm_completed = False
+        document.therapist_frm_filled_at = None
+    elif target_role == "neurologist_frm":
+        document.neurologist_frm_completed = False
+        document.neurologist_frm_filled_at = None
     elif target_role == "psychologist":
         document.psychologist_completed = False
         document.psychologist_filled_at = None
-    elif target_role == "cardiologist":
-        document.cardiologist_completed = False
-        document.cardiologist_filled_at = None
 
     await db.commit()
     return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
@@ -494,33 +491,32 @@ async def get_completion_status(
     """Получение статуса заполнения документа"""
     document = await get_document_or_404(document_id, db)
 
-    # ИЗМЕНЕНО: добавлены новые роли
     return {
-        "neurologist": {
-            "completed": document.neurologist_completed,
-            "filled_at": document.neurologist_filled_at.isoformat() if document.neurologist_filled_at else None
+        "reflexotherapist": {
+            "completed": document.reflexotherapist_completed,
+            "filled_at": document.reflexotherapist_filled_at.isoformat() if document.reflexotherapist_filled_at else None
         },
-        "therapist": {
-            "completed": document.therapist_completed,
-            "filled_at": document.therapist_filled_at.isoformat() if document.therapist_filled_at else None
+        "physiotherapist": {
+            "completed": document.physiotherapist_completed,
+            "filled_at": document.physiotherapist_filled_at.isoformat() if document.physiotherapist_filled_at else None
         },
-        "head": {
-            "completed": document.head_completed,
-            "filled_at": document.head_filled_at.isoformat() if document.head_filled_at else None
+        "therapist_frm": {
+            "completed": document.therapist_frm_completed,
+            "filled_at": document.therapist_frm_filled_at.isoformat() if document.therapist_frm_filled_at else None
+        },
+        "neurologist_frm": {
+            "completed": document.neurologist_frm_completed,
+            "filled_at": document.neurologist_frm_filled_at.isoformat() if document.neurologist_frm_filled_at else None
         },
         "psychologist": {
             "completed": document.psychologist_completed,
             "filled_at": document.psychologist_filled_at.isoformat() if document.psychologist_filled_at else None
         },
-        "cardiologist": {
-            "completed": document.cardiologist_completed,
-            "filled_at": document.cardiologist_filled_at.isoformat() if document.cardiologist_filled_at else None
-        },
         "all_completed": (
-            document.neurologist_completed and
-            document.therapist_completed and
-            document.head_completed and
-            document.psychologist_completed and
-            document.cardiologist_completed
+            document.reflexotherapist_completed and
+            document.physiotherapist_completed and
+            document.therapist_frm_completed and
+            document.neurologist_frm_completed and
+            document.psychologist_completed
         )
     }

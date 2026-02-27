@@ -35,6 +35,17 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
         .form-container {
             background: #ffffff;
             padding: 30px;
@@ -225,8 +236,12 @@
     </style>
 </head>
 <body>
-    <!-- тело без изменений (как в исходном) -->
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Создание нового случая</h1>
             <div style="margin-top: 10px;">
@@ -349,7 +364,6 @@
     </div>
 
     <script>
-        // скрипт без изменений (как в исходном)
         let token = localStorage.getItem('auth_token');
         let searchTimeout = null;
         let currentUser = null;
@@ -357,6 +371,18 @@
 
         if (!token) {
             window.location.href = '/';
+        }
+
+        function getRoleName(role) {
+            const roles = {
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
+            };
+            return roles[role] || role;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -380,6 +406,8 @@
                 }
 
                 currentUser = await response.json();
+                document.getElementById('userName').textContent = currentUser.full_name;
+                document.getElementById('userRole').textContent = getRoleName(currentUser.role);
             } catch (error) {
                 console.error('Ошибка:', error);
                 localStorage.removeItem('auth_token');

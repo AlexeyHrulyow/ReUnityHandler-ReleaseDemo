@@ -9,7 +9,7 @@ class DoctorBase(BaseModel):
     last_name: str
     first_name: str
     middle_name: Optional[str] = None
-    role: DoctorRole = DoctorRole.THERAPIST
+    role: DoctorRole = DoctorRole.THERAPIST_FRM  # ← должно быть THERAPIST_FRM
 
 
 class DoctorCreate(DoctorBase):
@@ -22,6 +22,7 @@ class DoctorUpdate(BaseModel):
     middle_name: Optional[str] = None
     role: Optional[DoctorRole] = None
     is_active: Optional[bool] = None
+    username: Optional[str] = None  # добавлено
 
 
 class Doctor(DoctorBase):
@@ -33,6 +34,5 @@ class Doctor(DoctorBase):
         from_attributes = True
 
 
-# ИЗМЕНЕНО: добавлена схема для запроса смены пароля администратором
 class SetPasswordRequest(BaseModel):
     new_password: str

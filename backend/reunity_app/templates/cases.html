@@ -36,6 +36,17 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
         .filters {
             background: #ffffff;
             padding: 15px 20px;
@@ -119,7 +130,7 @@
         th:nth-child(3), td:nth-child(3) { width: 100px; }     /* Дата поступления */
         th:nth-child(4), td:nth-child(4) { width: 120px; }     /* Создатель */
         th:nth-child(5), td:nth-child(5) { width: 100px; }     /* Статус */
-        th:nth-child(6), td:nth-child(6) { width: 250px; }     /* Статус врачей (увеличено для двух столбцов) */
+        th:nth-child(6), td:nth-child(6) { width: 250px; }     /* Статус врачей */
         th:nth-child(7), td:nth-child(7) { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* Примечания */
         th:nth-child(8), td:nth-child(8) { width: 90px; }      /* Создан */
         th:nth-child(9), td:nth-child(9) { width: 120px; }     /* Действия */
@@ -202,7 +213,7 @@
             margin-bottom: 20px;
         }
 
-        /* Сетка для статусов врачей в два столбца */
+        /* Сетка для статусов врачей в два столбца (3+2) */
         .doctor-status-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -242,6 +253,11 @@
 </head>
 <body>
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Управление случаями</h1>
             <div class="actions">
@@ -329,6 +345,29 @@
             myCases: false
         };
 
+        function getRoleName(role) {
+            const roles = {
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
+            };
+            return roles[role] || role;
+        }
+
+        function getShortRoleName(role) {
+            const short = {
+                'reflexotherapist': 'Рефлексо',
+                'physiotherapist': 'Физио',
+                'therapist_frm': 'Терапевт',
+                'neurologist_frm': 'Невролог',
+                'psychologist': 'Психолог'
+            };
+            return short[role] || role;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             token = localStorage.getItem('auth_token');
             console.log('Токен из localStorage:', token ? 'Есть' : 'Нет');
@@ -360,6 +399,8 @@
                 if (response.ok) {
                     currentUser = await response.json();
                     console.log('Пользователь загружен:', currentUser.username);
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('userRole').textContent = getRoleName(currentUser.role);
                 } else {
                     console.error('Ошибка загрузки пользователя:', response.status);
                     const errorText = await response.text();
@@ -452,7 +493,7 @@
                         <td colspan="9" style="text-align: center;">
                             <div class="no-cases">
                                 <p>Случаи не найдены</p>
-                                ${currentUser.role === 'admin' || currentUser.role === 'head' || currentUser.role === 'therapist' ?
+                                ${currentUser.role === 'admin' || currentUser.role === 'therapist_frm' || currentUser.role === 'neurologist_frm' ?
                                     '<button class="btn btn-primary" onclick="createNewCase()">Создать первый случай</button>' :
                                     ''}
                             </div>
@@ -503,39 +544,39 @@
                         statusText = caseItem.status || 'Неизвестно';
                 }
 
-                // Статусы врачей в два столбца (grid)
+                // Статусы врачей в два столбца (3+2) с краткими названиями
                 const doctorStatusHTML = `
                     <div class="doctor-status-grid">
                         <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.neurologist_completed ? 'status-done' : 'status-pending'}">${caseItem.neurologist_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Невролог</span>
+                            <span class="status-icon ${caseItem.reflexotherapist_completed ? 'status-done' : 'status-pending'}">${caseItem.reflexotherapist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Рефлексо</span>
                         </div>
                         <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.therapist_completed ? 'status-done' : 'status-pending'}">${caseItem.therapist_completed ? '✓' : '✗'}</span>
+                            <span class="status-icon ${caseItem.physiotherapist_completed ? 'status-done' : 'status-pending'}">${caseItem.physiotherapist_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Физио</span>
+                        </div>
+                        <div class="doctor-status-item">
+                            <span class="status-icon ${caseItem.therapist_frm_completed ? 'status-done' : 'status-pending'}">${caseItem.therapist_frm_completed ? '✓' : '✗'}</span>
                             <span class="role-name">Терапевт</span>
                         </div>
                         <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.head_completed ? 'status-done' : 'status-pending'}">${caseItem.head_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Врач ФРМ</span>
+                            <span class="status-icon ${caseItem.neurologist_frm_completed ? 'status-done' : 'status-pending'}">${caseItem.neurologist_frm_completed ? '✓' : '✗'}</span>
+                            <span class="role-name">Невролог</span>
                         </div>
                         <div class="doctor-status-item">
                             <span class="status-icon ${caseItem.psychologist_completed ? 'status-done' : 'status-pending'}">${caseItem.psychologist_completed ? '✓' : '✗'}</span>
                             <span class="role-name">Психолог</span>
-                        </div>
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.cardiologist_completed ? 'status-done' : 'status-pending'}">${caseItem.cardiologist_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Кардиолог</span>
                         </div>
                     </div>
                 `;
 
                 // Определяем, завершён ли раздел создателя
                 let creatorSectionCompleted = false;
-                if (caseItem.creator_role === 'neurologist') creatorSectionCompleted = caseItem.neurologist_completed;
-                else if (caseItem.creator_role === 'therapist') creatorSectionCompleted = caseItem.therapist_completed;
-                else if (caseItem.creator_role === 'head') creatorSectionCompleted = caseItem.head_completed;
+                if (caseItem.creator_role === 'reflexotherapist') creatorSectionCompleted = caseItem.reflexotherapist_completed;
+                else if (caseItem.creator_role === 'physiotherapist') creatorSectionCompleted = caseItem.physiotherapist_completed;
+                else if (caseItem.creator_role === 'therapist_frm') creatorSectionCompleted = caseItem.therapist_frm_completed;
+                else if (caseItem.creator_role === 'neurologist_frm') creatorSectionCompleted = caseItem.neurologist_frm_completed;
                 else if (caseItem.creator_role === 'psychologist') creatorSectionCompleted = caseItem.psychologist_completed;
-                else if (caseItem.creator_role === 'cardiologist') creatorSectionCompleted = caseItem.cardiologist_completed;
                 else if (caseItem.creator_role === 'admin') creatorSectionCompleted = true;
 
                 // Собираем действия
@@ -682,7 +723,7 @@
 
                             if (createResponse.ok) {
                                 const newDoc = await createResponse.json();
-                                window.location.href = `/document_edit?id=${newDoc.id}`;
+                                window.location.href = `/document_table?id=${newDoc.id}`;
                             } else {
                                 const error = await createResponse.json();
                                 alert(`Ошибка создания документа: ${error.detail || 'Неизвестная ошибка'}`);

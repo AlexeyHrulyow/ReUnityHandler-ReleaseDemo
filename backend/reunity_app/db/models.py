@@ -10,12 +10,12 @@ from .base import Base
 
 class DoctorRole(str, enum.Enum):
     """Роли врачей"""
-    THERAPIST = "therapist"
-    NEUROLOGIST = "neurologist"
-    HEAD = "head"
-    ADMIN = "admin"
-    PSYCHOLOGIST = "psychologist"
-    CARDIOLOGIST = "cardiologist"
+    REFLEXOTHERAPIST = "reflexotherapist"      # Рефлексотерапевт
+    PHYSIOTHERAPIST = "physiotherapist"        # Физиотерапевт
+    THERAPIST_FRM = "therapist_frm"             # Терапевт/Врач ФРМ
+    NEUROLOGIST_FRM = "neurologist_frm"         # Невролог/Врач ФРМ
+    PSYCHOLOGIST = "psychologist"               # Психолог
+    ADMIN = "admin"                              # Администратор
 
 
 class CaseStatus(str, enum.Enum):
@@ -44,7 +44,7 @@ class DocumentRow(str, enum.Enum):
     TOTAL_SCORE = "total_score"
 
 
-# Константы для распределения строк по врачам (старые)
+# Константы для распределения строк по врачам (старые) – могут быть удалены позже
 NEUROLOGIST_ROWS = [
     DocumentRow.PAIN_SYNDROME,
     DocumentRow.STATO_DYNAMIC,
@@ -106,7 +106,11 @@ class Doctor(Base):
     last_name = Column(String(100), nullable=False)
     first_name = Column(String(100), nullable=False)
     middle_name = Column(String(100))
-    role = Column(Enum(DoctorRole), nullable=False, default=DoctorRole.THERAPIST)
+    role = Column(
+        Enum(DoctorRole, values_callable=lambda obj: [e.value for e in obj]),
+        nullable=False,
+        default=DoctorRole.THERAPIST_FRM
+    )
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -170,20 +174,18 @@ class Document(Base):
     content = Column(JSON, default={}, nullable=False)
 
     # Статусы заполнения врачами
-    neurologist_completed = Column(Boolean, default=False)
-    therapist_completed = Column(Boolean, default=False)
-    head_completed = Column(Boolean, default=False)
-    # добавлены поля для психолога и кардиолога
+    reflexotherapist_completed = Column(Boolean, default=False)
+    physiotherapist_completed = Column(Boolean, default=False)
+    therapist_frm_completed = Column(Boolean, default=False)      # бывший therapist_completed
+    neurologist_frm_completed = Column(Boolean, default=False)    # бывший neurologist_completed
     psychologist_completed = Column(Boolean, default=False)
-    cardiologist_completed = Column(Boolean, default=False)
 
     # Даты заполнения
-    neurologist_filled_at = Column(DateTime(timezone=True))
-    therapist_filled_at = Column(DateTime(timezone=True))
-    head_filled_at = Column(DateTime(timezone=True))
-    # добавлены поля дат
+    reflexotherapist_filled_at = Column(DateTime(timezone=True))
+    physiotherapist_filled_at = Column(DateTime(timezone=True))
+    therapist_frm_filled_at = Column(DateTime(timezone=True))
+    neurologist_frm_filled_at = Column(DateTime(timezone=True))
     psychologist_filled_at = Column(DateTime(timezone=True))
-    cardiologist_filled_at = Column(DateTime(timezone=True))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

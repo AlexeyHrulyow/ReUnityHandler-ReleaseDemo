@@ -35,6 +35,17 @@
             margin-bottom: 20px;
             backdrop-filter: blur(5px);
         }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
         .admin-nav {
             display: flex;
             gap: 10px;
@@ -168,10 +179,15 @@
 </head>
 <body>
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Управление пациентами</h1>
             <div class="admin-nav">
-                <button class="btn" onclick="window.location.href='/admin/doctors'">👨‍⚕️ Врачи</button>
+                <button class="btn" onclick="window.location.href='/admin/doctors'" id="doctorsNavBtn">👨‍⚕️ Врачи</button>
                 <button class="btn active" onclick="window.location.href='/patients'">👥 Пациенты</button>
                 <button class="btn" onclick="window.location.href='/dashboard'">← На главную</button>
             </div>
@@ -251,6 +267,18 @@
         let currentUser = null;
         let patients = [];
 
+        function getRoleName(role) {
+            const roles = {
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
+            };
+            return roles[role] || role;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCurrentUser();
             await loadPatients();
@@ -263,14 +291,13 @@
                 });
                 if (response.ok) {
                     currentUser = await response.json();
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('userRole').textContent = getRoleName(currentUser.role);
 
-                    // ========== ИЗМЕНЕНИЕ: скрываем кнопку "Врачи", если пользователь не администратор ==========
-                    const doctorsBtn = document.querySelector('.admin-nav .btn[onclick*="/admin/doctors"]');
-                    if (doctorsBtn && currentUser.role !== 'admin') {
-                        doctorsBtn.style.display = 'none';
+                    // Скрываем кнопку "Врачи", если не админ
+                    if (currentUser.role !== 'admin') {
+                        document.getElementById('doctorsNavBtn').style.display = 'none';
                     }
-                    // =====================================================================================
-
                 } else {
                     throw new Error('Ошибка загрузки пользователя');
                 }

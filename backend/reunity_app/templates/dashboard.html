@@ -42,6 +42,10 @@
             margin-bottom: 20px;
             border-left: 4px solid var(--primary-medium);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            /* Улучшенное выделение */
+            border: 2px solid var(--primary-dark);
+            font-size: 1.2em;
+            font-weight: bold;
         }
         .nav-cards {
             display: grid;
@@ -103,10 +107,26 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        #user-info-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="user-info-header">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+        </div>
+
         <div class="header">
             <h1>Панель управления ReUnityHandler</h1>
         </div>
@@ -134,32 +154,32 @@
     </div>
 
     <script>
-        // скрипт без изменений
-        let token = null;
-        let currentUser = null;
-
+        // Функция для получения названия роли
         function getRoleName(role) {
             const roles = {
-                'admin': 'Администратор',
-                'head': 'Врач ФРМ',
-                'neurologist': 'Невролог',
-                'therapist': 'Терапевт'
+                'reflexotherapist': 'Рефлексотерапевт',
+                'physiotherapist': 'Физиотерапевт',
+                'therapist_frm': 'Терапевт/Врач ФРМ',
+                'neurologist_frm': 'Невролог/Врач ФРМ',
+                'psychologist': 'Психолог',
+                'admin': 'Администратор'
             };
             return roles[role] || role;
         }
 
+        let token = localStorage.getItem('auth_token');
+        console.log('Токен из localStorage:', token ? 'Есть' : 'Нет');
+
+        if (!token) {
+            showError('Требуется авторизация. Перенаправляю на страницу входа...');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+
+        let currentUser = null;
+
         document.addEventListener('DOMContentLoaded', async () => {
-            token = localStorage.getItem('auth_token');
-            console.log('Токен из localStorage:', token ? 'Есть' : 'Нет');
-
-            if (!token) {
-                showError('Требуется авторизация. Перенаправляю на страницу входа...');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-                return;
-            }
-
             await loadCurrentUser();
         });
 
@@ -178,6 +198,10 @@
                 if (response.ok) {
                     currentUser = await response.json();
                     console.log('Пользователь загружен:', currentUser.username);
+
+                    // Заполняем верхний блок
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('userRole').textContent = getRoleName(currentUser.role);
 
                     document.getElementById('welcomeMessage').textContent =
                         `Добро пожаловать, ${currentUser.full_name}!`;

@@ -42,8 +42,10 @@ class CaseWithPatient(Case):
     patient_birth_date: Optional[date] = None
     creator_name: Optional[str] = None
     creator_role: Optional[str] = None
-    neurologist_completed: bool = False
-    therapist_completed: bool = False
-    head_completed: bool = False
+
+    # Новые поля для статусов врачей
+    reflexotherapist_completed: bool = False
+    physiotherapist_completed: bool = False
+    therapist_frm_completed: bool = False
+    neurologist_frm_completed: bool = False
     psychologist_completed: bool = False
-    cardiologist_completed: bool = False

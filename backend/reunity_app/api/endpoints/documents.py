@@ -298,25 +298,43 @@ async def sign_document(
 
     print(f"Попытка подписания документа {document_id}")
     print(
-        f"   Статусы заполнения: Невролог={document.neurologist_completed}, Терапевт={document.therapist_completed}, Заведующий={document.head_completed}")
+        f"   Статусы заполнения: "
+        f"Рефлексотерапевт={document.reflexotherapist_completed}, "
+        f"Физиотерапевт={document.physiotherapist_completed}, "
+        f"Терапевт/ФРМ={document.therapist_frm_completed}, "
+        f"Невролог/ФРМ={document.neurologist_frm_completed}, "
+        f"Психолог={document.psychologist_completed}"
+    )
 
     # Проверяем, что все разделы заполнены
-    if not document.neurologist_completed:
+    if not document.reflexotherapist_completed:
         raise HTTPException(
             status_code=400,
-            detail="Раздел невролога не заполнен"
+            detail="Раздел рефлексотерапевта не заполнен"
         )
 
-    if not document.therapist_completed:
+    if not document.physiotherapist_completed:
         raise HTTPException(
             status_code=400,
-            detail="Раздел терапевта не заполнен"
+            detail="Раздел физиотерапевта не заполнен"
         )
 
-    if not document.head_completed:
+    if not document.therapist_frm_completed:
         raise HTTPException(
             status_code=400,
-            detail="Раздел заведующего не заполнен"
+            detail="Раздел терапевта/Врача ФРМ не заполнен"
+        )
+
+    if not document.neurologist_frm_completed:
+        raise HTTPException(
+            status_code=400,
+            detail="Раздел невролога/Врача ФРМ не заполнен"
+        )
+
+    if not document.psychologist_completed:
+        raise HTTPException(
+            status_code=400,
+            detail="Раздел психолога не заполнен"
         )
 
     # Подписываем документ

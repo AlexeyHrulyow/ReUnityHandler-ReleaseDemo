@@ -107,32 +107,4 @@ class DocumentStructureResponse(BaseModel):
     procedures_table: List[ProcedureRow]
     goals: Goals
     permissions: Dict[str, Any]
-    completion_status: Dict[str, bool]  # теперь содержит ключи: neurologist, therapist, head, psychologist, cardiologist
-
-
-class DoctorRows(BaseModel):
-    neurologist_rows: List[DocumentRowEnum]
-    therapist_rows: List[DocumentRowEnum]
-    head_rows: List[DocumentRowEnum]
-
-
-DOCTOR_ROWS = DoctorRows(
-    neurologist_rows=[
-        DocumentRowEnum.PAIN_SYNDROME,
-        DocumentRowEnum.STATO_DYNAMIC,
-        DocumentRowEnum.MENTAL_FUNCTIONS,
-        DocumentRowEnum.INTERNAL_ORGANS,
-        DocumentRowEnum.SENSORY_FUNCTIONS
-    ],
-    therapist_rows=[
-        DocumentRowEnum.VITAL_ACTIVITY,
-        DocumentRowEnum.SELF_CARE,
-        DocumentRowEnum.MOBILITY,
-        DocumentRowEnum.WORK_ABILITY,
-        DocumentRowEnum.COMMUNICATION
-    ],
-    head_rows=[
-        DocumentRowEnum.HEADER,
-        DocumentRowEnum.TOTAL_SCORE
-    ]
-)
+    completion_status: Dict[str, bool]  # ключи: reflexotherapist, physiotherapist, therapist_frm, neurologist_frm, psychologist
