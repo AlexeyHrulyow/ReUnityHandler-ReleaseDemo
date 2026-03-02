@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование документа - ReUnityHandler</title>
     <style>
-        /* Стили без изменений (см. исходный код) */
         :root {
             --bg-light: #fffffa;
             --primary-dark: #0d5c63;
@@ -313,6 +312,7 @@
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
         .btn-warning { background: #f39c12; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
         .btn:hover { opacity: 0.9; }
         .btn:disabled {
             opacity: 0.5;
@@ -386,7 +386,7 @@
         .table-dates-row input {
             font-weight: normal;
         }
-        #procedures-table {
+        #procedures-table, #additional-table {
             scroll-margin-top: 160px;
         }
     </style>
@@ -441,7 +441,7 @@
                 <p id="therapistFrmName"></p>
             </div>
             <div class="status-card" id="neurologistFrmStatus">
-                <div class="status-icon">🚶</div>
+                <div class="status-icon">🧠</div>
                 <h4>Невролог/Врач ФРМ</h4>
                 <p id="neurologistFrmText">Не заполнено</p>
                 <p id="neurologistFrmName"></p>
@@ -479,6 +479,7 @@
                 <span class="nav-link" onclick="scrollToElement('header-fields')">📋 Верхние поля</span>
                 <span class="nav-link" onclick="scrollToElement('goals-heading')">🎯 Цель реабилитации</span>
                 <span class="nav-link" onclick="scrollToElement('procedures-table')">💊 Назначенные процедуры</span>
+                <span class="nav-link" onclick="scrollToElement('additional-heading')">📝 Редактируемые домены</span>
             </div>
         </div>
 
@@ -530,6 +531,23 @@
                     <td></td>
                 </tr>
                 <!-- Далее будут строки из данных -->
+            </tbody>
+        </table>
+
+        <!-- Редактируемые домены (фиксированные 5 строк) -->
+        <h2 id="additional-heading">Редактируемые домены</h2>
+        <table class="document-table" id="additional-table">
+            <thead>
+                <tr>
+                    <th>Название домена</th>
+                    <th style="width: 15%;">Дата (поступление)</th>
+                    <th style="width: 15%;">Дата (промежуточная)</th>
+                    <th style="width: 15%;">Дата (выписка)</th>
+                    <th style="width: 20%;">Примечание</th>
+                </tr>
+            </thead>
+            <tbody id="additionalTableBody">
+                <!-- будут заполнены динамически 5 строками -->
             </tbody>
         </table>
 
@@ -675,7 +693,8 @@
             const headings = [
                 { id: 'mainTable', label: 'Оценка функций по МКФ', type: 'heading' },
                 { id: 'goals-block', label: 'Цель реабилитации на данном этапе', type: 'heading' },
-                { id: 'procedures-table', label: 'Назначенные процедуры', type: 'heading' }
+                { id: 'procedures-table', label: 'Назначенные процедуры', type: 'heading' },
+                { id: 'additional-heading', label: 'Редактируемые домены', type: 'heading' }
             ];
             headings.forEach(item => {
                 index.push({
@@ -822,11 +841,21 @@
                 option.textContent = section.label;
                 sectionSelect.appendChild(option);
             });
+            // Добавляем пункт для редактируемых доменов
+            const additionalOption = document.createElement('option');
+            additionalOption.value = 'additional-heading';
+            additionalOption.textContent = '📝 Редактируемые домены';
+            sectionSelect.appendChild(additionalOption);
         }
 
         sectionSelect.addEventListener('change', (e) => {
             const sectionId = e.target.value;
             if (!sectionId) return;
+            if (sectionId === 'additional-heading') {
+                scrollToElement('additional-heading');
+                e.target.value = '';
+                return;
+            }
             scrollToRow(sectionId);
             e.target.value = '';
         });
@@ -878,7 +907,7 @@
             return doctor ? `${doctor.last_name} ${doctor.first_name} ${doctor.middle_name || ''}`.trim() : null;
         }
 
-        // Новая функция для форматирования имени (Фамилия И.О.)
+        // Функция для форматирования имени (Фамилия И.О.)
         function formatDoctorName(fullName) {
             if (!fullName) return null;
             const parts = fullName.split(' ');
@@ -911,6 +940,7 @@
                     fillHeaderFields(documentData.header_fields);
                     fillTableDates(documentData.table_dates);
                     renderMainTable(documentData.main_table);
+                    renderAdditionalTable(documentData.additional_rows || []);
                     renderProceduresTable(documentData.procedures_table);
                     fillGoals(documentData.goals);
 
@@ -1084,6 +1114,35 @@
                     const rowId = e.target.dataset.rowId;
                     const col = e.target.dataset.col;
                     markAsChanged(`proc_${rowId}_${col}`);
+                }, INPUT_DEBOUNCE));
+            });
+        }
+
+        function renderAdditionalTable(rows) {
+            const tbody = document.getElementById('additionalTableBody');
+            tbody.innerHTML = '';
+            const canEditValue = canEdit();
+
+            // Всегда рендерим 5 строк
+            for (let i = 0; i < 5; i++) {
+                const row = rows[i] || { name: '', admission: '', intermediate: '', discharge: '', note: '' };
+                const tr = document.createElement('tr');
+                tr.dataset.index = i;
+                tr.innerHTML = `
+                    <td><input type="text" class="cell-input additional-name-input" data-index="${i}" value="${escapeHtml(row.name || '')}" ${!canEditValue ? 'disabled' : ''} placeholder="Название домена"></td>
+                    <td><input type="text" class="cell-input additional-admission-input" data-index="${i}" value="${escapeHtml(row.admission || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                    <td><input type="text" class="cell-input additional-intermediate-input" data-index="${i}" value="${escapeHtml(row.intermediate || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                    <td><input type="text" class="cell-input additional-discharge-input" data-index="${i}" value="${escapeHtml(row.discharge || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                    <td><input type="text" class="cell-input additional-note-input" data-index="${i}" value="${escapeHtml(row.note || '')}" ${!canEditValue ? 'disabled' : ''}></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            document.querySelectorAll('.additional-name-input, .additional-admission-input, .additional-intermediate-input, .additional-discharge-input, .additional-note-input').forEach(input => {
+                input.addEventListener('input', debounce(function(e) {
+                    const index = e.target.dataset.index;
+                    const fieldClass = e.target.className.split(' ')[1]; // например, additional-name-input
+                    markAsChanged(`additional_${index}_${fieldClass}`);
                 }, INPUT_DEBOUNCE));
             });
         }
@@ -1286,6 +1345,17 @@
 
         // ---- Сбор всех данных в один объект ----
         function collectFullDocumentData() {
+            const additionalRows = [];
+            document.querySelectorAll('#additionalTableBody tr').forEach((tr, index) => {
+                additionalRows.push({
+                    name: tr.querySelector('.additional-name-input')?.value || '',
+                    admission: tr.querySelector('.additional-admission-input')?.value || '',
+                    intermediate: tr.querySelector('.additional-intermediate-input')?.value || '',
+                    discharge: tr.querySelector('.additional-discharge-input')?.value || '',
+                    note: tr.querySelector('.additional-note-input')?.value || ''
+                });
+            });
+
             return {
                 diagnosis_mkb: document.getElementById('diagnosisMKB').value,
                 rehab_potential: document.getElementById('rehabPotential').value,
@@ -1318,7 +1388,8 @@
                 goals: {
                     short_term: document.getElementById('shortTermGoal').value,
                     long_term: document.getElementById('longTermGoal').value
-                }
+                },
+                additional_rows: additionalRows
             };
         }
 
@@ -1604,7 +1675,14 @@
                 electrosleep:             { count: 'singleLineTextInput71', note: 'singleLineTextInput111' },
                 psychological_counseling: { count: 'singleLineTextInput73', note: 'singleLineTextInput112' },
                 biofeedback:              { count: 'singleLineTextInput80', note: 'singleLineTextInput118' }
-            }
+            },
+            // Дополнительные строки (ID из ВебМИС)
+            additional: [
+                { name: 'singleLineText525', admission: 'singleLineText526', intermediate: 'singleLineText527', discharge: 'singleLineText528', note: 'singleLineText529' },
+                { name: 'singleLineText530', admission: 'singleLineText531', intermediate: 'singleLineText532', discharge: 'singleLineText533', note: 'singleLineText534' },
+                { name: 'singleLineText535', admission: 'singleLineText536', intermediate: 'singleLineText537', discharge: 'singleLineText538', note: 'singleLineText539' },
+                { name: 'singleLineText540', admission: 'singleLineText541', intermediate: 'singleLineText542', discharge: 'singleLineText543', note: 'singleLineText544' }
+            ]
         };
 
         function exportToWebmis() {
@@ -1646,6 +1724,18 @@
                     if (values[1] !== undefined) webmisData[proc.note] = values[1];
                 }
             }
+
+            // Заполнение дополнительных строк
+            data.additional_rows.forEach((row, idx) => {
+                if (idx < WEBMIS_MAPPING.additional.length) {
+                    const mapping = WEBMIS_MAPPING.additional[idx];
+                    webmisData[mapping.name] = row.name || '';
+                    webmisData[mapping.admission] = row.admission || '';
+                    webmisData[mapping.intermediate] = row.intermediate || '';
+                    webmisData[mapping.discharge] = row.discharge || '';
+                    webmisData[mapping.note] = row.note || '';
+                }
+            });
 
             const fileName = `${document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_')}_${day}${month}${year}_${String(today.getHours()).padStart(2,'0')}${String(today.getMinutes()).padStart(2,'0')}.json`;
             const blob = new Blob([JSON.stringify(webmisData, null, 2)], { type: 'application/json' });

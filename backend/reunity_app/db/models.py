@@ -418,6 +418,48 @@ class Document(Base):
             }
         }
 
+    def initialize_additional_domains(self, count=5):
+        """
+        Инициализирует массив дополнительных доменов.
+        По умолчанию создаётся 5 пустых строк.
+        """
+        if "additional_domains" not in self.content:
+            self.content["additional_domains"] = [
+                {"name": "", "admission": "", "intermediate": "", "discharge": "", "note": ""}
+                for _ in range(count)
+            ]
+            flag_modified(self, "content")
+
+    def update_additional_row(self, index: int, row_data: dict):
+        """
+        Обновляет одну строку дополнительных доменов.
+        row_data должен содержать ключи: name, admission, intermediate, discharge, note.
+        """
+        if "additional_domains" not in self.content:
+            self.initialize_additional_domains()
+        rows = self.content["additional_domains"]
+        if 0 <= index < len(rows):
+            rows[index].update(row_data)
+            flag_modified(self, "content")
+        else:
+            raise IndexError("Index out of range")
+
+    def add_additional_row(self, row_data: dict = None):
+        """Добавляет новую пустую строку в конец массива дополнительных доменов."""
+        if "additional_domains" not in self.content:
+            self.initialize_additional_domains()
+        default = {"name": "", "admission": "", "intermediate": "", "discharge": "", "note": ""}
+        if row_data:
+            default.update(row_data)
+        self.content["additional_domains"].append(default)
+        flag_modified(self, "content")
+
+    def remove_additional_row(self, index: int):
+        """Удаляет строку по индексу."""
+        if "additional_domains" in self.content and 0 <= index < len(self.content["additional_domains"]):
+            del self.content["additional_domains"][index]
+            flag_modified(self, "content")
+
     def update_main_table_row(self, row_id: str, values: List[str]):
         if "main_table" not in self.content:
             self.content["main_table"] = {"rows": []}

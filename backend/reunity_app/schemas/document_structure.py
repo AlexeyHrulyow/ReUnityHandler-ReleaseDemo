@@ -99,6 +99,23 @@ class TableDatesUpdate(BaseModel):
     intermediate: Optional[str] = None
     discharge: Optional[str] = None
 
+class AdditionalRow(BaseModel):
+    name: str = ""
+    admission: str = ""
+    intermediate: str = ""
+    discharge: str = ""
+    note: str = ""
+
+class AdditionalRowUpdate(BaseModel):
+    index: int
+    name: Optional[str] = None
+    admission: Optional[str] = None
+    intermediate: Optional[str] = None
+    discharge: Optional[str] = None
+    note: Optional[str] = None
+
+class AdditionalRowsUpdate(BaseModel):
+    rows: List[AdditionalRow]  # полная замена всех строк
 
 class DocumentStructureResponse(BaseModel):
     header_fields: HeaderFields
@@ -108,3 +125,4 @@ class DocumentStructureResponse(BaseModel):
     goals: Goals
     permissions: Dict[str, Any]
     completion_status: Dict[str, bool]  # ключи: reflexotherapist, physiotherapist, therapist_frm, neurologist_frm, psychologist
+    additional_rows: List[AdditionalRow] = []

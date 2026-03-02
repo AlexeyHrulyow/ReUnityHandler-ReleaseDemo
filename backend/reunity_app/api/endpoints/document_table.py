@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import select
 from pydantic import BaseModel
 from typing import Dict, List, Optional
+from sqlalchemy.orm.attributes import flag_modified
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
@@ -12,7 +13,7 @@ from reunity_app.schemas.document_structure import (
     MainTableRowUpdate, ProcedureRowUpdate, GoalsUpdate,
     HeaderFieldsUpdate, TableDatesUpdate,
     DocumentStructureResponse, MainTableRow, ProcedureRow, Goals,
-    HeaderFields, TableDates
+    HeaderFields, TableDates, AdditionalRow, AdditionalRowUpdate, AdditionalRowsUpdate
 )
 
 router = APIRouter()
@@ -39,6 +40,8 @@ async def get_document_structure(
     if not document.content or "goals" not in document.content:
         print("Документ имеет старую структуру, инициализируем новой")
         document.initialize_content()
+        if "additional_domains" not in document.content:
+            document.initialize_additional_domains()
         await db.commit()
         await db.refresh(document)
 
@@ -97,6 +100,10 @@ async def get_document_structure(
         "psychologist": document.psychologist_completed
     }
 
+    additional_rows = [
+        AdditionalRow(**row) for row in document.content.get("additional_domains", [])
+    ]
+
     return DocumentStructureResponse(
         header_fields=header_fields,
         table_dates=table_dates,
@@ -104,6 +111,7 @@ async def get_document_structure(
         procedures_table=procedure_rows,
         goals=goals,
         permissions=permissions,
+        additional_rows=additional_rows,
         completion_status=completion_status
     )
 
@@ -129,7 +137,6 @@ async def update_header_fields(
     if fields_update.rehab_prognosis is not None:
         document.content["rehab_prognosis"] = fields_update.rehab_prognosis
 
-    from sqlalchemy.orm.attributes import flag_modified
     flag_modified(document, "content")
 
     now = datetime.utcnow()
@@ -314,6 +321,7 @@ class FullDocumentUpdate(BaseModel):
     main_table: Dict[str, List[str]]
     procedures_table: Dict[str, List[str]]
     goals: Dict[str, str]
+    additional_rows: Optional[List[Dict[str, str]]] = None
 
 
 @router.put("/{document_id}/full-content")
@@ -327,6 +335,10 @@ async def update_document_full(
 
     if document.signed_at:
         raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+
+    if update_data.additional_rows is not None:
+        document.content["additional_domains"] = update_data.additional_rows
+        flag_modified(document, "content")
 
     document.content["diagnosis_mkb"] = update_data.diagnosis_mkb
     document.content["rehab_potential"] = update_data.rehab_potential
@@ -481,6 +493,70 @@ async def uncomplete_section_by_admin(
     await db.commit()
     return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
 
+@router.put("/{document_id}/additional-rows")
+async def update_additional_rows(
+    document_id: int,
+    update: AdditionalRowsUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: Doctor = Depends(get_current_active_user)
+):
+    """Полная замена всех дополнительных строк."""
+    document = await get_document_or_404(document_id, db)
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+    document.content["additional_domains"] = [row.dict() for row in update.rows]
+    flag_modified(document, "content")
+    document.updated_at = datetime.utcnow()
+    await db.commit()
+    return {"message": "Дополнительные строки обновлены"}
+
+@router.post("/{document_id}/additional-rows")
+async def add_additional_row(
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Doctor = Depends(get_current_active_user)
+):
+    """Добавить новую пустую строку."""
+    document = await get_document_or_404(document_id, db)
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+    document.add_additional_row()
+    await db.commit()
+    return {"message": "Строка добавлена"}
+
+@router.delete("/{document_id}/additional-rows/{index}")
+async def delete_additional_row(
+    document_id: int,
+    index: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Doctor = Depends(get_current_active_user)
+):
+    """Удалить строку по индексу."""
+    document = await get_document_or_404(document_id, db)
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+    try:
+        document.remove_additional_row(index)
+    except IndexError:
+        raise HTTPException(status_code=404, detail="Строка не найдена")
+    await db.commit()
+    return {"message": "Строка удалена"}
+
+@router.put("/{document_id}/additional-row/{index}")
+async def update_additional_row(
+    document_id: int,
+    index: int,
+    row_update: AdditionalRowUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: Doctor = Depends(get_current_active_user)
+):
+    """Обновить одну строку по индексу."""
+    document = await get_document_or_404(document_id, db)
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя редактировать подписанный документ")
+    document.update_additional_row(index, row_update.dict(exclude_unset=True))
+    await db.commit()
+    return {"message": "Строка обновлена"}
 
 @router.get("/{document_id}/completion-status")
 async def get_completion_status(

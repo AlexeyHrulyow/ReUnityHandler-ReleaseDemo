@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.0.7&#10;- обновлён gitignore">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.1.3&#10;- alembic">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/documents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +19,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -46,6 +49,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
     &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python.check_doctors.executor&quot;: &quot;Run&quot;,
@@ -96,7 +100,7 @@
       <recent name="C:\Users\reab\PycharmProjects\ReUnityHandler\backend\app" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.pyparser">
+  <component name="RunManager" selected="Python.run">
     <configuration name="check_document_id" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ReUnityHandler" />
       <option name="ENV_FILES" value="" />
@@ -209,8 +213,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.pyparser" />
         <item itemvalue="Python.run" />
+        <item itemvalue="Python.pyparser" />
         <item itemvalue="Python.debug_save" />
         <item itemvalue="Python.check_document_id" />
         <item itemvalue="Python.check_documents" />
@@ -544,7 +548,47 @@
       <option name="project" value="LOCAL" />
       <updated>1772020211601</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Версия 1.0.8&#10;- смайлик удалён">
+      <option name="closed" value="true" />
+      <created>1772020940258</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1772020940258</updated>
+    </task>
+    <task id="LOCAL-00041" summary="Версия 1.1.0&#10;- Добавлено отображение фио врачей&#10;- улучшена визуальная составляющая">
+      <option name="closed" value="true" />
+      <created>1772176773191</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1772176773191</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Версия 1.1.1&#10;- gitignore">
+      <option name="closed" value="true" />
+      <created>1772177541594</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1772177541594</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Версия 1.1.2&#10;- alembic">
+      <option name="closed" value="true" />
+      <created>1772182308426</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1772182308426</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Версия 1.1.3&#10;- alembic">
+      <option name="closed" value="true" />
+      <created>1772183457351</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1772183457351</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -566,11 +610,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.2.0&#10;- мелкий баг с ролями и экспортом" />
-    <MESSAGE value="Версия 0.2.1&#10;- мелкий баг с ролями и экспортом" />
-    <MESSAGE value="Версия 0.2.2&#10;- добавлены начальные функции администрирования" />
-    <MESSAGE value="Версия 0.2.2&#10;- чуть-чуть доработано администрирование" />
-    <MESSAGE value="Версия 0.2.3&#10;- администрирование реализовано&#10;- исправлены мелкие баги" />
     <MESSAGE value="Версия 0.2.4&#10;- испавлена ошибка завершения раздела" />
     <MESSAGE value="Версия 0.3.0&#10;- внедрена новая версия документа" />
     <MESSAGE value="Версия 0.3.1&#10;- реализован поиск по документу" />
@@ -591,6 +630,11 @@
     <MESSAGE value="Версия 1.0.5&#10;- gitignore" />
     <MESSAGE value="Версия 1.0.6&#10;- частично убраны эмоджи" />
     <MESSAGE value="Версия 1.0.7&#10;- обновлён gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.0.7&#10;- обновлён gitignore" />
+    <MESSAGE value="Версия 1.0.8&#10;- смайлик удалён" />
+    <MESSAGE value="Версия 1.1.0&#10;- Добавлено отображение фио врачей&#10;- улучшена визуальная составляющая" />
+    <MESSAGE value="Версия 1.1.1&#10;- gitignore" />
+    <MESSAGE value="Версия 1.1.2&#10;- alembic" />
+    <MESSAGE value="Версия 1.1.3&#10;- alembic" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.1.3&#10;- alembic" />
   </component>
 </project>
