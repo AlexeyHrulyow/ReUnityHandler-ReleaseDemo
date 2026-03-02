@@ -417,6 +417,8 @@ class Document(Base):
                 ]
             }
         }
+        # Инициализируем 5 пустых дополнительных строк
+        self.initialize_additional_domains()
 
     def initialize_additional_domains(self, count=5):
         """

@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.1.3&#10;- alembic">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.2.1&#10;- небольшая коррекция в таблице">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/api/endpoints/document_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/db/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/schemas/document_structure.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -588,7 +587,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772183457351</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="Версия 1.2.0&#10;- добавлены изменения по просьбе врачей">
+      <option name="closed" value="true" />
+      <created>1772439332515</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1772439332515</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Версия 1.2.1&#10;- небольшая коррекция в таблице">
+      <option name="closed" value="true" />
+      <created>1772439901842</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1772439901842</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,8 +625,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.2.4&#10;- испавлена ошибка завершения раздела" />
-    <MESSAGE value="Версия 0.3.0&#10;- внедрена новая версия документа" />
     <MESSAGE value="Версия 0.3.1&#10;- реализован поиск по документу" />
     <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
     <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
@@ -635,6 +648,8 @@
     <MESSAGE value="Версия 1.1.1&#10;- gitignore" />
     <MESSAGE value="Версия 1.1.2&#10;- alembic" />
     <MESSAGE value="Версия 1.1.3&#10;- alembic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.1.3&#10;- alembic" />
+    <MESSAGE value="Версия 1.2.0&#10;- добавлены изменения по просьбе врачей" />
+    <MESSAGE value="Версия 1.2.1&#10;- небольшая коррекция в таблице" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.2.1&#10;- небольшая коррекция в таблице" />
   </component>
 </project>
