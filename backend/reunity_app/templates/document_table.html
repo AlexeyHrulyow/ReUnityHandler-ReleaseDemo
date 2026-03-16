@@ -389,6 +389,12 @@
         #procedures-table, #additional-table {
             scroll-margin-top: 160px;
         }
+        /* Стиль для примечания в блоке информации */
+        .case-note-icon {
+            cursor: help;
+            margin-left: 5px;
+            color: var(--primary-medium);
+        }
     </style>
 </head>
 <body>
@@ -415,6 +421,11 @@
             <p><strong>Пациент:</strong> <span id="patientName"></span></p>
             <p><strong>Номер полиса:</strong> <span id="insuranceNumber"></span></p>
             <p><strong>Дата создания:</strong> <span id="createdAt"></span></p>
+            <!-- Новая строка для примечания к случаю -->
+            <p>
+                <strong>Примечание к случаю:</strong>
+                <span id="caseNotes" title=""></span>
+            </p>
         </div>
 
         <!-- Статус завершения случая -->
@@ -534,7 +545,7 @@
             </tbody>
         </table>
 
-        <!-- Редактируемые домены (фиксированные 5 строк) -->
+        <!-- Редактируемые домены (фиксированные 5 строк) - без столбца Примечание -->
         <h2 id="additional-heading">Редактируемые домены</h2>
         <table class="document-table" id="additional-table">
             <thead>
@@ -543,7 +554,6 @@
                     <th style="width: 15%;">Поступление</th>
                     <th style="width: 15%;">Промежуточная</th>
                     <th style="width: 15%;">Выписка</th>
-                    <th style="width: 20%;">Примечание</th>
                 </tr>
             </thead>
             <tbody id="additionalTableBody">
@@ -675,6 +685,18 @@
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        // Функция блокировки кнопки
+        function disableButton(btn, disable, loadingText = 'Сохранение...') {
+            if (disable) {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.textContent;
+                btn.textContent = loadingText;
+            } else {
+                btn.disabled = false;
+                btn.textContent = btn.dataset.originalText || btn.textContent;
+            }
         }
 
         // ---- Функции навигации по ссылкам ----
@@ -991,10 +1013,16 @@
                     const caseData = await response.json();
                     caseStatus = caseData.status;
                     caseCreatorId = caseData.creator_id;
-                    console.log('📌 Статус случая:', caseStatus, 'creator:', caseCreatorId);
+                    // Сохраняем примечание случая и отображаем его
+                    const caseNotes = caseData.notes || '';
+                    const notesDisplay = caseNotes
+                        ? (caseNotes.length > 50 ? caseNotes.substring(0, 50) + '…' : caseNotes)
+                        : 'Нет';
+                    document.getElementById('caseNotes').textContent = notesDisplay;
+                    document.getElementById('caseNotes').title = caseNotes;
+                    console.log('📌 Статус случая:', caseStatus, 'creator:', caseCreatorId, 'notes:', caseNotes);
                     updateCaseStatusUI();
                 } else if (response.status === 401) {
-                    // Токен истёк
                     localStorage.removeItem('auth_token');
                     showAlert('Сессия истекла. Перенаправление на страницу входа...', 'warning');
                     setTimeout(() => window.location.href = '/', 2000);
@@ -1125,7 +1153,7 @@
 
             // Всегда рендерим 5 строк
             for (let i = 0; i < 5; i++) {
-                const row = rows[i] || { name: '', admission: '', intermediate: '', discharge: '', note: '' };
+                const row = rows[i] || { name: '', admission: '', intermediate: '', discharge: '' }; // поле note убрано
                 const tr = document.createElement('tr');
                 tr.dataset.index = i;
                 tr.innerHTML = `
@@ -1133,12 +1161,11 @@
                     <td><input type="text" class="cell-input additional-admission-input" data-index="${i}" value="${escapeHtml(row.admission || '')}" ${!canEditValue ? 'disabled' : ''}></td>
                     <td><input type="text" class="cell-input additional-intermediate-input" data-index="${i}" value="${escapeHtml(row.intermediate || '')}" ${!canEditValue ? 'disabled' : ''}></td>
                     <td><input type="text" class="cell-input additional-discharge-input" data-index="${i}" value="${escapeHtml(row.discharge || '')}" ${!canEditValue ? 'disabled' : ''}></td>
-                    <td><input type="text" class="cell-input additional-note-input" data-index="${i}" value="${escapeHtml(row.note || '')}" ${!canEditValue ? 'disabled' : ''}></td>
                 `;
                 tbody.appendChild(tr);
             }
 
-            document.querySelectorAll('.additional-name-input, .additional-admission-input, .additional-intermediate-input, .additional-discharge-input, .additional-note-input').forEach(input => {
+            document.querySelectorAll('.additional-name-input, .additional-admission-input, .additional-intermediate-input, .additional-discharge-input').forEach(input => {
                 input.addEventListener('input', debounce(function(e) {
                     const index = e.target.dataset.index;
                     const fieldClass = e.target.className.split(' ')[1]; // например, additional-name-input
@@ -1351,8 +1378,8 @@
                     name: tr.querySelector('.additional-name-input')?.value || '',
                     admission: tr.querySelector('.additional-admission-input')?.value || '',
                     intermediate: tr.querySelector('.additional-intermediate-input')?.value || '',
-                    discharge: tr.querySelector('.additional-discharge-input')?.value || '',
-                    note: tr.querySelector('.additional-note-input')?.value || ''
+                    discharge: tr.querySelector('.additional-discharge-input')?.value || ''
+                    // note: ''  // поле note не используется
                 });
             });
 
@@ -1395,11 +1422,13 @@
 
         // ---- Сохранение всех изменений одним запросом ----
         async function saveAllChanges() {
+            const saveBtn = document.getElementById('saveAllBtn');
             if (unsavedChanges.size === 0) {
                 showAlert('Нет изменений для сохранения', 'info');
                 return;
             }
 
+            disableButton(saveBtn, true, 'Сохранение...');
             showLoading(true);
 
             const fullData = collectFullDocumentData();
@@ -1427,17 +1456,24 @@
                 showAlert('Ошибка сети при сохранении', 'danger');
             } finally {
                 showLoading(false);
+                disableButton(saveBtn, false);
             }
         }
 
         // ---- Завершение / отмена разделов ----
         async function completeMySection() {
+            const btn = document.getElementById('completeSectionBtn');
+            disableButton(btn, true, 'Завершение...');
             if (!caseStatus || caseStatus === 'completed' || caseStatus === 'sent') {
                 showAlert('Нельзя завершить раздел в завершённом случае', 'warning');
+                disableButton(btn, false);
                 return;
             }
             await saveAllChanges();
-            if (!confirm('Вы уверены, что завершили заполнение вашего раздела?')) return;
+            if (!confirm('Вы уверены, что завершили заполнение вашего раздела?')) {
+                disableButton(btn, false);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/v1/document-table/${documentId}/complete-section`, {
@@ -1453,15 +1489,23 @@
                 }
             } catch (error) {
                 showAlert('Ошибка: ' + error.message, 'danger');
+            } finally {
+                disableButton(btn, false);
             }
         }
 
         async function uncompleteMySection() {
+            const btn = document.getElementById('uncompleteSectionBtn');
+            disableButton(btn, true, 'Отмена...');
             if (!caseStatus || caseStatus === 'completed' || caseStatus === 'sent') {
                 showAlert('Нельзя отменить завершение раздела в завершённом случае', 'warning');
+                disableButton(btn, false);
                 return;
             }
-            if (!confirm('Вы уверены, что хотите отменить завершение раздела?')) return;
+            if (!confirm('Вы уверены, что хотите отменить завершение раздела?')) {
+                disableButton(btn, false);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/v1/document-table/${documentId}/uncomplete-my-section`, {
@@ -1477,16 +1521,24 @@
                 }
             } catch (error) {
                 showAlert('Ошибка: ' + error.message, 'danger');
+            } finally {
+                disableButton(btn, false);
             }
         }
 
         // ---- Завершение случая и экспорт ----
         async function completeCaseFromDocument() {
+            const btn = document.getElementById('signDocumentBtn');
+            disableButton(btn, true, 'Завершение...');
             if (!caseId) {
                 showAlert('ID случая не найден', 'danger');
+                disableButton(btn, false);
                 return;
             }
-            if (!confirm('Вы уверены, что хотите завершить случай?')) return;
+            if (!confirm('Вы уверены, что хотите завершить случай?')) {
+                disableButton(btn, false);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}/complete`, {
@@ -1502,11 +1554,18 @@
                 }
             } catch (error) {
                 showAlert('Ошибка: ' + error.message, 'danger');
+            } finally {
+                disableButton(btn, false);
             }
         }
 
         async function uncompleteCase() {
-            if (!confirm('Вы уверены, что хотите отменить завершение случая?')) return;
+            const btn = document.getElementById('uncompleteCaseBtn');
+            disableButton(btn, true, 'Отмена...');
+            if (!confirm('Вы уверены, что хотите отменить завершение случая?')) {
+                disableButton(btn, false);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}/uncomplete`, {
@@ -1522,6 +1581,8 @@
                 }
             } catch (error) {
                 showAlert('Ошибка: ' + error.message, 'danger');
+            } finally {
+                disableButton(btn, false);
             }
         }
 
@@ -1676,76 +1737,81 @@
                 psychological_counseling: { count: 'singleLineTextInput73', note: 'singleLineTextInput112' },
                 biofeedback:              { count: 'singleLineTextInput80', note: 'singleLineTextInput118' }
             },
-            // Дополнительные строки (ID из ВебМИС) – теперь 5 элементов
+            // Дополнительные строки (ID из ВебМИС) – теперь 5 элементов, поле note исключено
             additional: [
-                { name: 'singleLineTextInput525', admission: 'singleLineTextInput526', intermediate: 'singleLineTextInput527', discharge: 'singleLineTextInput528', note: 'singleLineTextInput529' },
-                { name: 'singleLineTextInput530', admission: 'singleLineTextInput531', intermediate: 'singleLineTextInput532', discharge: 'singleLineTextInput533', note: 'singleLineTextInput534' },
-                { name: 'singleLineTextInput535', admission: 'singleLineTextInput536', intermediate: 'singleLineTextInput537', discharge: 'singleLineTextInput538', note: 'singleLineTextInput539' },
-                { name: 'singleLineTextInput540', admission: 'singleLineTextInput541', intermediate: 'singleLineTextInput542', discharge: 'singleLineTextInput543', note: 'singleLineTextInput544' },
-                { name: 'singleLineTextInput545', admission: 'singleLineTextInput546', intermediate: 'singleLineTextInput547', discharge: 'singleLineTextInput548', note: 'singleLineTextInput549' }
+                { name: 'singleLineTextInput525', admission: 'singleLineTextInput526', intermediate: 'singleLineTextInput527', discharge: 'singleLineTextInput528' }, // note убрано
+                { name: 'singleLineTextInput530', admission: 'singleLineTextInput531', intermediate: 'singleLineTextInput532', discharge: 'singleLineTextInput533' },
+                { name: 'singleLineTextInput535', admission: 'singleLineTextInput536', intermediate: 'singleLineTextInput537', discharge: 'singleLineTextInput538' },
+                { name: 'singleLineTextInput540', admission: 'singleLineTextInput541', intermediate: 'singleLineTextInput542', discharge: 'singleLineTextInput543' },
+                { name: 'singleLineTextInput545', admission: 'singleLineTextInput546', intermediate: 'singleLineTextInput547', discharge: 'singleLineTextInput548' }
             ]
         };
 
         function exportToWebmis() {
-            const data = collectFullDocumentData();
-            const webmisData = {};
+            const exportBtn = document.getElementById('exportWebmisBtn');
+            disableButton(exportBtn, true, 'Экспорт...');
+            try {
+                const data = collectFullDocumentData();
+                const webmisData = {};
 
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const year = today.getFullYear();
-            webmisData[WEBMIS_MAPPING.documentDate] = `${day}.${month}.${year}`;
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const year = today.getFullYear();
+                webmisData[WEBMIS_MAPPING.documentDate] = `${day}.${month}.${year}`;
 
-            webmisData[WEBMIS_MAPPING.header.diagnosis_mkb] = data.diagnosis_mkb || '';
-            webmisData[WEBMIS_MAPPING.header.rehab_potential] = data.rehab_potential || '';
-            webmisData[WEBMIS_MAPPING.header.rehab_prognosis] = data.rehab_prognosis || '';
+                webmisData[WEBMIS_MAPPING.header.diagnosis_mkb] = data.diagnosis_mkb || '';
+                webmisData[WEBMIS_MAPPING.header.rehab_potential] = data.rehab_potential || '';
+                webmisData[WEBMIS_MAPPING.header.rehab_prognosis] = data.rehab_prognosis || '';
 
-            webmisData[WEBMIS_MAPPING.dates.admission] = data.table_dates.admission || '';
-            webmisData[WEBMIS_MAPPING.dates.intermediate] = data.table_dates.intermediate || '';
-            webmisData[WEBMIS_MAPPING.dates.discharge] = data.table_dates.discharge || '';
+                webmisData[WEBMIS_MAPPING.dates.admission] = data.table_dates.admission || '';
+                webmisData[WEBMIS_MAPPING.dates.intermediate] = data.table_dates.intermediate || '';
+                webmisData[WEBMIS_MAPPING.dates.discharge] = data.table_dates.discharge || '';
 
-            webmisData[WEBMIS_MAPPING.goals.short_term] = data.goals.short_term || '';
-            webmisData[WEBMIS_MAPPING.goals.long_term] = data.goals.long_term || '';
+                webmisData[WEBMIS_MAPPING.goals.short_term] = data.goals.short_term || '';
+                webmisData[WEBMIS_MAPPING.goals.long_term] = data.goals.long_term || '';
 
-            for (const [rowId, values] of Object.entries(data.main_table)) {
-                const ids = WEBMIS_MAPPING.domain[rowId];
-                if (ids && Array.isArray(ids) && ids.length === 4) {
-                    for (let i = 0; i < 4; i++) {
-                        if (values[i] !== undefined) {
-                            webmisData[ids[i]] = values[i];
+                for (const [rowId, values] of Object.entries(data.main_table)) {
+                    const ids = WEBMIS_MAPPING.domain[rowId];
+                    if (ids && Array.isArray(ids) && ids.length === 4) {
+                        for (let i = 0; i < 4; i++) {
+                            if (values[i] !== undefined) {
+                                webmisData[ids[i]] = values[i];
+                            }
                         }
                     }
                 }
-            }
 
-            for (const [rowId, values] of Object.entries(data.procedures_table)) {
-                const proc = WEBMIS_MAPPING.procedure[rowId];
-                if (proc) {
-                    if (values[0] !== undefined) webmisData[proc.count] = values[0];
-                    if (values[1] !== undefined) webmisData[proc.note] = values[1];
+                for (const [rowId, values] of Object.entries(data.procedures_table)) {
+                    const proc = WEBMIS_MAPPING.procedure[rowId];
+                    if (proc) {
+                        if (values[0] !== undefined) webmisData[proc.count] = values[0];
+                        if (values[1] !== undefined) webmisData[proc.note] = values[1];
+                    }
                 }
+
+                // Заполнение дополнительных строк без поля note
+                data.additional_rows.forEach((row, idx) => {
+                    if (idx < WEBMIS_MAPPING.additional.length) {
+                        const mapping = WEBMIS_MAPPING.additional[idx];
+                        webmisData[mapping.name] = row.name || '';
+                        webmisData[mapping.admission] = row.admission || '';
+                        webmisData[mapping.intermediate] = row.intermediate || '';
+                        webmisData[mapping.discharge] = row.discharge || '';
+                    }
+                });
+
+                const fileName = `${document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_')}_${day}${month}${year}_${String(today.getHours()).padStart(2,'0')}${String(today.getMinutes()).padStart(2,'0')}.json`;
+                const blob = new Blob([JSON.stringify(webmisData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+            } finally {
+                disableButton(exportBtn, false);
             }
-
-            // Заполнение дополнительных строк
-            data.additional_rows.forEach((row, idx) => {
-                if (idx < WEBMIS_MAPPING.additional.length) {
-                    const mapping = WEBMIS_MAPPING.additional[idx];
-                    webmisData[mapping.name] = row.name || '';
-                    webmisData[mapping.admission] = row.admission || '';
-                    webmisData[mapping.intermediate] = row.intermediate || '';
-                    webmisData[mapping.discharge] = row.discharge || '';
-                    webmisData[mapping.note] = row.note || '';
-                }
-            });
-
-            const fileName = `${document.getElementById('patientName').textContent.trim().replace(/\s+/g, '_')}_${day}${month}${year}_${String(today.getHours()).padStart(2,'0')}${String(today.getMinutes()).padStart(2,'0')}.json`;
-            const blob = new Blob([JSON.stringify(webmisData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
