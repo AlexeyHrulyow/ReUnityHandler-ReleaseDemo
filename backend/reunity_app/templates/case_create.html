@@ -372,6 +372,7 @@
         let searchTimeout = null;
         let currentUser = null;
         let currentMode = 'existing';
+        let isSubmitting = false; // Флаг для предотвращения двойной отправки
 
         if (!token) {
             window.location.href = '/';
@@ -616,11 +617,16 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
 
+            // Предотвращаем повторную отправку
+            if (isSubmitting) return;
+            isSubmitting = true;
+
             const submitBtn = document.getElementById('submitBtn');
             disableButton(submitBtn, true, 'Создание...');
 
             if (!validateForm()) {
                 disableButton(submitBtn, false);
+                isSubmitting = false;
                 return;
             }
 
@@ -679,6 +685,7 @@
                     const caseResult = await caseResponse.json();
                     showMessage('Случай успешно создан! Перенаправление...', 'success');
 
+                    // Перенаправляем на страницу случаев, не сбрасывая флаг (страница уйдёт)
                     setTimeout(() => {
                         window.location.href = '/cases';
                     }, 2000);
@@ -690,7 +697,9 @@
             } catch (error) {
                 console.error('Ошибка:', error);
                 showMessage(error.message, 'error');
+                // Разблокируем кнопку и сбрасываем флаг при ошибке
                 disableButton(submitBtn, false);
+                isSubmitting = false;
             }
         }
 

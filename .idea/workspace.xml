@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.2.2&#10;- изменен эмоджи&#10;- добавление редактируемых доменов работает исправно">
+    <list default="true" id="25645073-795d-4b30-bc08-d2f92693862e" name="Changes" comment="Версия 1.2.3&#10;- примечачния исправлены">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/admin_doctors.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/case_create.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/cases.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/document_table.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/reunity_app/templates/patients.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -611,7 +613,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772442977673</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="Версия 1.2.3&#10;- примечачния исправлены">
+      <option name="closed" value="true" />
+      <created>1773647400512</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1773647400512</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -633,7 +643,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Версия 0.3.2&#10;- разработка дизайна сайта" />
     <MESSAGE value="Версия 0.3.3&#10;- пофиксил таблицы" />
     <MESSAGE value="Версия 0.3.4&#10;- работа над мелкими багами" />
     <MESSAGE value="Версия 0.3.5&#10;- исправлены шортакты в документе" />
@@ -658,6 +667,7 @@
     <MESSAGE value="Версия 1.2.0&#10;- добавлены изменения по просьбе врачей" />
     <MESSAGE value="Версия 1.2.1&#10;- небольшая коррекция в таблице" />
     <MESSAGE value="Версия 1.2.2&#10;- изменен эмоджи&#10;- добавление редактируемых доменов работает исправно" />
-    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.2.2&#10;- изменен эмоджи&#10;- добавление редактируемых доменов работает исправно" />
+    <MESSAGE value="Версия 1.2.3&#10;- примечачния исправлены" />
+    <option name="LAST_COMMIT_MESSAGE" value="Версия 1.2.3&#10;- примечачния исправлены" />
   </component>
 </project>

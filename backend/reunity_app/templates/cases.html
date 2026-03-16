@@ -360,6 +360,17 @@
             myCases: false
         };
 
+        function disableButton(btn, disable, loadingText = 'Загрузка...') {
+            if (disable) {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.textContent;
+                btn.textContent = loadingText;
+            } else {
+                btn.disabled = false;
+                btn.textContent = btn.dataset.originalText || btn.textContent;
+            }
+        }
+
         function escapeHtml(unsafe) {
             return unsafe.replace(/[&<>"]/g, function(m) {
                 if (m === '&') return '&amp;';
@@ -688,7 +699,10 @@
         }
 
         async function deleteCase(caseId) {
+            const button = event.target;
+            disableButton(button, true, 'Удаление...');
             if (!confirm('Вы уверены, что хотите удалить этот случай? Это действие необратимо.')) {
+                disableButton(button, false);
                 return;
             }
 
@@ -712,6 +726,8 @@
             } catch (error) {
                 console.error('Ошибка:', error);
                 alert('Ошибка подключения к серверу: ' + error.message);
+            } finally {
+                disableButton(button, false);
             }
         }
 
@@ -792,6 +808,8 @@
         }
 
         async function completeCase(caseId) {
+            const button = event.target;
+            disableButton(button, true, 'Завершение...');
             if (!confirm('Вы уверены, что хотите завершить этот случай?')) {
                 return;
             }
@@ -816,6 +834,8 @@
             } catch (error) {
                 console.error('Ошибка:', error);
                 alert('Ошибка подключения к серверу: ' + error.message);
+            } finally {
+                disableButton(button, false);
             }
         }
 

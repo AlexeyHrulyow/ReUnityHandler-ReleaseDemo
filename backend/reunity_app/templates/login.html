@@ -136,6 +136,29 @@
     </div>
 
     <script>
+        let isLoginSubmitting = false;
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (isLoginSubmitting) return;
+            isLoginSubmitting = true;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Вход...';
+
+            // ... код ...
+
+            try {
+                // ... fetch ...
+            } catch (error) {
+                // ...
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                isLoginSubmitting = false;
+            }
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;

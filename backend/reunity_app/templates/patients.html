@@ -266,6 +266,18 @@
 
         let currentUser = null;
         let patients = [];
+        let isPatientFormSubmitting = false;
+
+        function disableButton(btn, disable, loadingText = 'Сохранение...') {
+            if (disable) {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.textContent;
+                btn.textContent = loadingText;
+            } else {
+                btn.disabled = false;
+                btn.textContent = btn.dataset.originalText || btn.textContent;
+            }
+        }
 
         function getRoleName(role) {
             const roles = {
@@ -426,6 +438,10 @@
 
         document.getElementById('patientForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isPatientFormSubmitting) return;
+            isPatientFormSubmitting = true;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            disableButton(submitBtn, true, 'Сохранение...');
 
             const id = document.getElementById('patientId').value;
             const isEditing = !!id;
@@ -462,11 +478,19 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
+            } finally {
+                disableButton(submitBtn, false);
+                isPatientFormSubmitting = false;
             }
         });
 
         async function deletePatient(id) {
-            if (!confirm('Вы уверены, что хотите удалить этого пациента? Это действие необратимо.')) return;
+            const button = event.target;
+            disableButton(button, true, 'Удаление...');
+            if (!confirm('Вы уверены, что хотите удалить этого пациента? Это действие необратимо.')) {
+                disableButton(button, false);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/v1/patients/${id}`, {
@@ -484,10 +508,12 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
+            } finally {
+                disableButton(button, false);
             }
         }
 
-        function showAlert(message, type) {
+        function showAlert(<message></message>, type) {
             const container = document.getElementById('alertContainer');
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type}`;
