@@ -15,15 +15,14 @@ router = APIRouter()
 async def create_patient(
         patient: PatientCreate,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(require_role("admin", "head", "therapist"))
+        current_user: Doctor = Depends(require_role("admin", "head", "therapist_frm", "neurologist_frm", "psychologist", "reflexotherapist", "physiotherapist"))
 ):
-    """Создание нового пациента"""
+    """Создание нового пациента (доступно всем врачам)"""
     db_patient = PatientModel(**patient.dict())
     db.add(db_patient)
     await db.commit()
     await db.refresh(db_patient)
 
-    # Возвращаем объект схемы
     return PatientSchema(
         id=db_patient.id,
         last_name=db_patient.last_name,
@@ -43,7 +42,7 @@ async def list_patients(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Получение списка пациентов с поиском"""
+    """Получение списка пациентов с поиском (доступно всем авторизованным)"""
     query = select(PatientModel)
 
     if search:
@@ -61,7 +60,6 @@ async def list_patients(
     result = await db.execute(query)
     patients = result.scalars().all()
 
-    # Преобразуем модели в схемы
     return [
         PatientSchema(
             id=patient.id,
@@ -83,14 +81,13 @@ async def search_patients(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Умный поиск пациентов по части ФИО"""
+    """Умный поиск пациентов по части ФИО (доступно всем авторизованным)"""
     search_term = f"%{q}%"
 
     query = select(PatientModel).where(
         or_(
             func.concat(PatientModel.last_name, ' ', PatientModel.first_name).ilike(search_term),
-            func.concat(PatientModel.last_name, ' ', PatientModel.first_name, ' ', PatientModel.middle_name).ilike(
-                search_term),
+            func.concat(PatientModel.last_name, ' ', PatientModel.first_name, ' ', PatientModel.middle_name).ilike(search_term),
             PatientModel.last_name.ilike(search_term),
             PatientModel.first_name.ilike(search_term),
             PatientModel.insurance_number.ilike(search_term)
@@ -100,7 +97,6 @@ async def search_patients(
     result = await db.execute(query)
     patients = result.scalars().all()
 
-    # Преобразуем модели в схемы
     return [
         PatientSchema(
             id=patient.id,
@@ -121,14 +117,13 @@ async def get_patient(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Получение информации о пациенте"""
+    """Получение информации о пациенте (доступно всем авторизованным)"""
     result = await db.execute(select(PatientModel).where(PatientModel.id == patient_id))
     patient = result.scalar_one_or_none()
 
     if patient is None:
         raise HTTPException(status_code=404, detail="Пациент не найден")
 
-    # Возвращаем объект схемы
     return PatientSchema(
         id=patient.id,
         last_name=patient.last_name,
@@ -145,16 +140,15 @@ async def update_patient(
         patient_id: int,
         patient_update: PatientUpdate,
         db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(require_role("admin", "head", "therapist"))
+        current_user: Doctor = Depends(require_role("admin", "head", "therapist_frm", "neurologist_frm", "psychologist", "reflexotherapist", "physiotherapist"))
 ):
-    """Обновление информации о пациенте"""
+    """Обновление информации о пациенте (доступно всем врачам)"""
     result = await db.execute(select(PatientModel).where(PatientModel.id == patient_id))
     patient = result.scalar_one_or_none()
 
     if patient is None:
         raise HTTPException(status_code=404, detail="Пациент не найден")
 
-    # Обновляем только переданные поля
     update_data = patient_update.dict(exclude_unset=True)
     for field, value in update_data.items():
         setattr(patient, field, value)
@@ -162,7 +156,6 @@ async def update_patient(
     await db.commit()
     await db.refresh(patient)
 
-    # Возвращаем объект схемы
     return PatientSchema(
         id=patient.id,
         last_name=patient.last_name,
@@ -180,7 +173,7 @@ async def delete_patient(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(require_role("admin", "head"))
 ):
-    """Удаление пациента"""
+    """Удаление пациента (только для администратора и заведующего)"""
     result = await db.execute(select(PatientModel).where(PatientModel.id == patient_id))
     patient = result.scalar_one_or_none()
 
