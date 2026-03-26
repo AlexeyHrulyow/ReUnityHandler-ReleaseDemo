@@ -399,7 +399,7 @@
                     <td>${created}</td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editPatient(${patient.id})">✏️</button>
-                        ${canDelete ? `<button class="btn btn-danger btn-sm" onclick="deletePatient(${patient.id})">🗑️</button>` : ''}
+                        ${canDelete ? `<button class="btn btn-danger btn-sm" onclick="deletePatient(${patient.id}, event)">🗑️</button>` : ''}
                     </td>
                 `;
             });
@@ -484,7 +484,7 @@
             }
         });
 
-        async function deletePatient(id) {
+        async function deletePatient(id, event) {
             const button = event.target;
             disableButton(button, true, 'Удаление...');
             if (!confirm('Вы уверены, что хотите удалить этого пациента? Это действие необратимо.')) {
@@ -513,7 +513,7 @@
             }
         }
 
-        function showAlert(<message></message>, type) {
+        function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type}`;

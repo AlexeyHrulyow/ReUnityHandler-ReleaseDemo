@@ -377,10 +377,10 @@
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editDoctor(${doc.id})">✏️</button>
                         <button class="btn btn-secondary btn-sm" onclick="openPasswordModal(${doc.id}, '${doc.full_name}')">🔑 Сменить пароль</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id})" ${doc.id === currentUser.id ? 'disabled' : ''}>🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id}, event)" ${doc.id === currentUser.id ? 'disabled' : ''}>🗑️</button>
                         ${doc.is_active ?
-                            `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false)">🔒 Деактивировать</button>` :
-                            `<button class="btn btn-success btn-sm" onclick="toggleActive(${doc.id}, true)">🔓 Активировать</button>`
+                            `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false, event)">🔒 Деактивировать</button>` :
+                            `<button class="btn btn-success btn-sm" onclick="toggleActive(${doc.id}, true, event)">🔓 Активировать</button>`
                         }
                     </td>
                 `;
@@ -449,6 +449,8 @@
                 data.password = document.getElementById('password').value;
                 if (!data.password) {
                     showAlert('Пароль обязателен при создании', 'danger');
+                    disableButton(submitBtn, false);
+                    isDoctorFormSubmitting = false;
                     return;
                 }
             }
@@ -461,6 +463,8 @@
                     const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
                     const roleName = getRoleName(activeDoctor.role);
                     if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
+                        disableButton(submitBtn, false);
+                        isDoctorFormSubmitting = false;
                         return;
                     }
                 }
@@ -490,14 +494,13 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
-            }
             } finally {
                 disableButton(submitBtn, false);
                 isDoctorFormSubmitting = false;
             }
         });
 
-        async function deleteDoctor(id) {
+        async function deleteDoctor(id, event) {
             const button = event.target;
             disableButton(button, true, 'Удаление...');
             if (!confirm('Вы уверены, что хотите удалить этого врача? Это действие необратимо.')) {
@@ -526,11 +529,14 @@
             }
         }
 
-        async function toggleActive(id, activate) {
-            const button = event.target; // предполагаем, что вызывается из onclick
+        async function toggleActive(id, activate, event) {
+            const button = event.target;
             disableButton(button, true, activate ? 'Активация...' : 'Деактивация...');
             const doctor = doctors.find(d => d.id === id);
-            if (!doctor) return;
+            if (!doctor) {
+                disableButton(button, false);
+                return;
+            }
 
             if (activate) {
                 const activeDoctor = doctors.find(d => d.role === doctor.role && d.is_active && d.id !== id);
@@ -538,6 +544,7 @@
                     const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
                     const roleName = getRoleName(activeDoctor.role);
                     if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
+                        disableButton(button, false);
                         return;
                     }
                 }
@@ -579,6 +586,10 @@
 
         document.getElementById('passwordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isPasswordFormSubmitting) return;
+            isPasswordFormSubmitting = true;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            disableButton(submitBtn, true, 'Смена...');
 
             const doctorId = document.getElementById('passwordDoctorId').value;
             const newPassword = document.getElementById('newPassword').value;
@@ -586,11 +597,15 @@
 
             if (newPassword !== confirm) {
                 showAlert('Пароли не совпадают', 'danger');
+                disableButton(submitBtn, false);
+                isPasswordFormSubmitting = false;
                 return;
             }
 
             if (newPassword.length < 4) {
                 showAlert('Пароль должен быть не менее 4 символов', 'danger');
+                disableButton(submitBtn, false);
+                isPasswordFormSubmitting = false;
                 return;
             }
 
@@ -614,6 +629,9 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
+            } finally {
+                disableButton(submitBtn, false);
+                isPasswordFormSubmitting = false;
             }
         });
 
