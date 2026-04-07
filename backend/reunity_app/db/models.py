@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
 import enum
@@ -7,15 +7,13 @@ from typing import List, Dict, Any
 from sqlalchemy.orm.attributes import flag_modified
 from .base import Base
 
-
 class DoctorRole(str, enum.Enum):
-    """Роли врачей"""
-    REFLEXOTHERAPIST = "reflexotherapist"      # Рефлексотерапевт
-    PHYSIOTHERAPIST = "physiotherapist"        # Физиотерапевт
-    THERAPIST_FRM = "therapist_frm"             # Терапевт/Врач ФРМ
-    NEUROLOGIST_FRM = "neurologist_frm"         # Невролог/Врач ФРМ
-    PSYCHOLOGIST = "psychologist"               # Психолог
-    ADMIN = "admin"                              # Администратор
+    REFLEXOTHERAPIST = "reflexotherapist"
+    PHYSIOTHERAPIST = "physiotherapist"
+    THERAPIST_FRM = "therapist_frm"
+    NEUROLOGIST_FRM = "neurologist_frm"
+    PSYCHOLOGIST = "psychologist"
+    ADMIN = "admin"   # обязательно с маленькой буквы "admin"
 
 
 class CaseStatus(str, enum.Enum):
@@ -106,17 +104,20 @@ class Doctor(Base):
     last_name = Column(String(100), nullable=False)
     first_name = Column(String(100), nullable=False)
     middle_name = Column(String(100))
-    role = Column(
-        Enum(DoctorRole, values_callable=lambda obj: [e.value for e in obj]),
-        nullable=False,
-        default=DoctorRole.THERAPIST_FRM
-    )
+    # Изменяем тип на String(50)
+    role = Column(String(50), nullable=False, default=DoctorRole.THERAPIST_FRM.value)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Новые поля
+    show_in_status = Column(Boolean, default=False)
+    status_order = Column(Integer, default=0)
+
+    # Отношения
     created_cases = relationship("Case", back_populates="creator")
     document_sections = relationship("DocumentSection", back_populates="doctor")
     signed_documents = relationship("Document", back_populates="signer")
+    document_statuses = relationship("DocumentDoctorStatus", back_populates="doctor")
 
     def __repr__(self):
         return f"<Doctor {self.last_name} {self.first_name} ({self.role})>"
@@ -162,6 +163,23 @@ class Case(Base):
     def __repr__(self):
         return f"<Case #{self.id} {self.status}>"
 
+class DocumentDoctorStatus(Base):
+    __tablename__ = "document_doctor_status"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False)
+    completed = Column(Boolean, default=False)
+    filled_at = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    document = relationship("Document", back_populates="doctor_statuses")
+    doctor = relationship("Doctor", back_populates="document_statuses")
+
+    __table_args__ = (
+        UniqueConstraint('document_id', 'doctor_id', name='uq_document_doctor'),
+    )
 
 class Document(Base):
     __tablename__ = "documents"
@@ -173,19 +191,7 @@ class Document(Base):
 
     content = Column(JSON, default={}, nullable=False)
 
-    # Статусы заполнения врачами
-    reflexotherapist_completed = Column(Boolean, default=False)
-    physiotherapist_completed = Column(Boolean, default=False)
-    therapist_frm_completed = Column(Boolean, default=False)      # бывший therapist_completed
-    neurologist_frm_completed = Column(Boolean, default=False)    # бывший neurologist_completed
-    psychologist_completed = Column(Boolean, default=False)
-
-    # Даты заполнения
-    reflexotherapist_filled_at = Column(DateTime(timezone=True))
-    physiotherapist_filled_at = Column(DateTime(timezone=True))
-    therapist_frm_filled_at = Column(DateTime(timezone=True))
-    neurologist_frm_filled_at = Column(DateTime(timezone=True))
-    psychologist_filled_at = Column(DateTime(timezone=True))
+    # Старые поля удалены, теперь статусы хранятся в отдельной таблице
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -195,6 +201,7 @@ class Document(Base):
     template = relationship("DocumentTemplate")
     signer = relationship("Doctor", back_populates="signed_documents")
     sections = relationship("DocumentSection", back_populates="document", cascade="all, delete-orphan")
+    doctor_statuses = relationship("DocumentDoctorStatus", back_populates="document", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Document #{self.id}>"

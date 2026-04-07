@@ -1,13 +1,13 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, and_
 from datetime import datetime, date
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
-from reunity_app.db.models import Doctor, Patient, Case as CaseModel, Document, CaseStatus
-from reunity_app.schemas.case import CaseCreate, CaseUpdate, Case as CaseSchema, CaseWithPatient
+from reunity_app.db.models import Doctor, Patient, Case as CaseModel, Document, CaseStatus, DocumentDoctorStatus
+from reunity_app.schemas.case import CaseCreate, CaseUpdate, Case as CaseSchema, CaseWithPatient, DoctorStatusItem
 
 router = APIRouter()
 
@@ -21,7 +21,6 @@ async def create_case(
     """Создание нового случая"""
     result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
     patient = result.scalar_one_or_none()
-
     if not patient:
         raise HTTPException(status_code=404, detail="Пациент не найден")
 
@@ -32,11 +31,11 @@ async def create_case(
         status=case.status,
         notes=case.notes
     )
-
     db.add(db_case)
     await db.commit()
     await db.refresh(db_case)
 
+    # Создаём документ
     db_document = Document(
         case_id=db_case.id,
         content={}
@@ -45,7 +44,22 @@ async def create_case(
     await db.commit()
     await db.refresh(db_document)
 
+    # Инициализируем содержимое документа
     db_document.initialize_content()
+    await db.commit()
+
+    # Создаём записи статусов для всех врачей, участвующих в процессе
+    result_doctors = await db.execute(
+        select(Doctor).where(Doctor.is_active == True, Doctor.show_in_status == True)
+    )
+    doctors = result_doctors.scalars().all()
+    for doctor in doctors:
+        status_record = DocumentDoctorStatus(
+            document_id=db_document.id,
+            doctor_id=doctor.id,
+            completed=False
+        )
+        db.add(status_record)
     await db.commit()
 
     return CaseSchema(
@@ -116,24 +130,37 @@ async def list_cases(
         creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
         creator = creator_result.scalar_one_or_none()
 
-        document_result = await db.execute(
-            select(Document).where(Document.case_id == case.id)
-        )
+        document_result = await db.execute(select(Document).where(Document.case_id == case.id))
         document = document_result.scalar_one_or_none()
 
-        # Новые статусы
-        reflexotherapist_completed = False
-        physiotherapist_completed = False
-        therapist_frm_completed = False
-        neurologist_frm_completed = False
-        psychologist_completed = False
-
+        # Получаем статусы врачей для этого документа
+        doctors_status = []
         if document:
-            reflexotherapist_completed = document.reflexotherapist_completed
-            physiotherapist_completed = document.physiotherapist_completed
-            therapist_frm_completed = document.therapist_frm_completed
-            neurologist_frm_completed = document.neurologist_frm_completed
-            psychologist_completed = document.psychologist_completed
+            status_q = select(
+                Doctor,
+                DocumentDoctorStatus.completed,
+                DocumentDoctorStatus.filled_at
+            ).join(
+                DocumentDoctorStatus,
+                and_(
+                    DocumentDoctorStatus.doctor_id == Doctor.id,
+                    DocumentDoctorStatus.document_id == document.id
+                ),
+                isouter=True
+            ).where(
+                Doctor.is_active == True,
+                Doctor.show_in_status == True
+            ).order_by(Doctor.status_order)
+
+            status_result = await db.execute(status_q)
+            for doctor, completed, filled_at in status_result:
+                doctors_status.append(DoctorStatusItem(
+                    doctor_id=doctor.id,
+                    doctor_name=doctor.full_name,
+                    doctor_role=doctor.role,
+                    completed=completed if completed is not None else False,
+                    filled_at=filled_at
+                ))
 
         case_data = CaseSchema(
             id=case.id,
@@ -154,12 +181,8 @@ async def list_cases(
             patient_insurance=patient.insurance_number if patient else None,
             patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
             creator_name=creator.full_name if creator else "Неизвестно",
-            creator_role=creator.role.value if creator else None,
-            reflexotherapist_completed=reflexotherapist_completed,
-            physiotherapist_completed=physiotherapist_completed,
-            therapist_frm_completed=therapist_frm_completed,
-            neurologist_frm_completed=neurologist_frm_completed,
-            psychologist_completed=psychologist_completed
+            creator_role=creator.role if creator else None,
+            doctors_status=doctors_status
         )
 
         cases_with_details.append(case_with_patient)
@@ -175,13 +198,10 @@ async def get_case(
 ):
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
-
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    document_result = await db.execute(
-        select(Document).where(Document.case_id == case.id)
-    )
+    document_result = await db.execute(select(Document).where(Document.case_id == case.id))
     document = document_result.scalar_one_or_none()
 
     patient_result = await db.execute(select(Patient).where(Patient.id == case.patient_id))
@@ -190,18 +210,33 @@ async def get_case(
     creator_result = await db.execute(select(Doctor).where(Doctor.id == case.creator_id))
     creator = creator_result.scalar_one_or_none()
 
-    reflexotherapist_completed = False
-    physiotherapist_completed = False
-    therapist_frm_completed = False
-    neurologist_frm_completed = False
-    psychologist_completed = False
-
+    doctors_status = []
     if document:
-        reflexotherapist_completed = document.reflexotherapist_completed
-        physiotherapist_completed = document.physiotherapist_completed
-        therapist_frm_completed = document.therapist_frm_completed
-        neurologist_frm_completed = document.neurologist_frm_completed
-        psychologist_completed = document.psychologist_completed
+        status_q = select(
+            Doctor,
+            DocumentDoctorStatus.completed,
+            DocumentDoctorStatus.filled_at
+        ).join(
+            DocumentDoctorStatus,
+            and_(
+                DocumentDoctorStatus.doctor_id == Doctor.id,
+                DocumentDoctorStatus.document_id == document.id
+            ),
+            isouter=True
+        ).where(
+            Doctor.is_active == True,
+            Doctor.show_in_status == True
+        ).order_by(Doctor.status_order)
+
+        status_result = await db.execute(status_q)
+        for doctor, completed, filled_at in status_result:
+            doctors_status.append(DoctorStatusItem(
+                doctor_id=doctor.id,
+                doctor_name=doctor.full_name,
+                doctor_role=doctor.role,
+                completed=completed if completed is not None else False,
+                filled_at=filled_at
+            ))
 
     case_data = CaseSchema(
         id=case.id,
@@ -222,11 +257,8 @@ async def get_case(
         patient_insurance=patient.insurance_number if patient else None,
         patient_birth_date=patient.birth_date.date() if patient and patient.birth_date else None,
         creator_name=creator.full_name if creator else "Неизвестно",
-        reflexotherapist_completed=reflexotherapist_completed,
-        physiotherapist_completed=physiotherapist_completed,
-        therapist_frm_completed=therapist_frm_completed,
-        neurologist_frm_completed=neurologist_frm_completed,
-        psychologist_completed=psychologist_completed
+        creator_role=creator.role if creator else None,
+        doctors_status=doctors_status
     )
 
 
@@ -239,7 +271,6 @@ async def update_case(
 ):
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
-
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
@@ -270,17 +301,12 @@ async def delete_case(
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(get_current_active_user)
 ):
-    """
-    Удаление случая.
-    Доступно администратору или создателю случая.
-    """
+    """Удаление случая. Доступно администратору или создателю случая."""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
-
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
-    # Проверка прав: администратор или создатель случая
     if current_user.role != "admin" and case.creator_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -289,7 +315,6 @@ async def delete_case(
 
     await db.delete(case)
     await db.commit()
-
     return {"message": "Случай удален"}
 
 
@@ -302,7 +327,6 @@ async def complete_case(
     """Завершение случая (только для создателя или администратора)"""
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
-
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
@@ -314,9 +338,7 @@ async def complete_case(
 
     case.status = CaseStatus.COMPLETED
     case.completed_at = datetime.utcnow()
-
     await db.commit()
-
     return {"message": "Случай завершен"}
 
 
@@ -352,7 +374,6 @@ async def send_case_to_webmis(
 ):
     result = await db.execute(select(CaseModel).where(CaseModel.id == case_id))
     case = result.scalar_one_or_none()
-
     if not case:
         raise HTTPException(status_code=404, detail="Случай не найден")
 
@@ -364,7 +385,5 @@ async def send_case_to_webmis(
 
     case.status = CaseStatus.SENT
     case.sent_to_webmis_at = datetime.utcnow()
-
     await db.commit()
-
     return {"message": "Случай отправлен в ВебМИС"}

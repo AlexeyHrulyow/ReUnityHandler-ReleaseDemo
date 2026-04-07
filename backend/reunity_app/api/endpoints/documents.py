@@ -6,7 +6,8 @@ from datetime import datetime
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
-from reunity_app.db.models import Doctor, Patient, Case, Document, DocumentSection, DocumentTemplate, WebmisFieldMapping
+from reunity_app.db.models import Doctor, Patient, Case, Document, DocumentSection, DocumentTemplate, \
+    WebmisFieldMapping, DocumentDoctorStatus
 from reunity_app.schemas.document import (
     DocumentCreate, DocumentUpdate, Document as DocumentSchema,
     DocumentWithDetails, DocumentSectionCreate, DocumentSectionUpdate,
@@ -283,66 +284,31 @@ async def delete_document(
 
 @router.post("/{document_id}/sign")
 async def sign_document(
-        document_id: int,
-        db: AsyncSession = Depends(get_db),
-        current_user: Doctor = Depends(get_current_active_user)
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Doctor = Depends(get_current_active_user)
 ):
-    """Подписание документа"""
-    result = await db.execute(
-        select(Document).where(Document.id == document_id)
-    )
+    result = await db.execute(select(Document).where(Document.id == document_id))
     document = result.scalar_one_or_none()
-
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
 
-    print(f"Попытка подписания документа {document_id}")
-    print(
-        f"   Статусы заполнения: "
-        f"Рефлексотерапевт={document.reflexotherapist_completed}, "
-        f"Физиотерапевт={document.physiotherapist_completed}, "
-        f"Терапевт/ФРМ={document.therapist_frm_completed}, "
-        f"Невролог/ФРМ={document.neurologist_frm_completed}, "
-        f"Психолог={document.psychologist_completed}"
-    )
-
-    # Проверяем, что все разделы заполнены
-    if not document.reflexotherapist_completed:
+    # Проверяем, что все врачи с show_in_status=true завершили свои разделы
+    status_q = select(DocumentDoctorStatus).where(
+        DocumentDoctorStatus.document_id == document.id
+    ).join(Doctor).where(Doctor.show_in_status == True)
+    statuses = await db.execute(status_q)
+    statuses = statuses.scalars().all()
+    incomplete = [s.doctor.full_name for s in statuses if not s.completed]
+    if incomplete:
         raise HTTPException(
             status_code=400,
-            detail="Раздел рефлексотерапевта не заполнен"
+            detail=f"Не все врачи завершили разделы: {', '.join(incomplete)}"
         )
 
-    if not document.physiotherapist_completed:
-        raise HTTPException(
-            status_code=400,
-            detail="Раздел физиотерапевта не заполнен"
-        )
-
-    if not document.therapist_frm_completed:
-        raise HTTPException(
-            status_code=400,
-            detail="Раздел терапевта/Врача ФРМ не заполнен"
-        )
-
-    if not document.neurologist_frm_completed:
-        raise HTTPException(
-            status_code=400,
-            detail="Раздел невролога/Врача ФРМ не заполнен"
-        )
-
-    if not document.psychologist_completed:
-        raise HTTPException(
-            status_code=400,
-            detail="Раздел психолога не заполнен"
-        )
-
-    # Подписываем документ
     document.signer_id = current_user.id
     document.signed_at = datetime.utcnow()
-
     await db.commit()
-    print(f"Документ {document_id} подписан пользователем {current_user.username}")
 
     return {"message": "Документ подписан успешно"}
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, validator
 from typing import List, Dict, Any, Optional
 from enum import Enum
@@ -65,6 +67,12 @@ class ProcedureRowUpdate(BaseModel):
             raise ValueError("Для таблицы процедур требуется 2 значения")
         return v
 
+class DoctorStatusItem(BaseModel):
+    doctor_id: int
+    doctor_name: str
+    doctor_role: str
+    completed: bool
+    filled_at: Optional[datetime] = None
 
 class Goals(BaseModel):
     short_term: str
@@ -124,5 +132,6 @@ class DocumentStructureResponse(BaseModel):
     procedures_table: List[ProcedureRow]
     goals: Goals
     permissions: Dict[str, Any]
-    completion_status: Dict[str, bool]  # ключи: reflexotherapist, physiotherapist, therapist_frm, neurologist_frm, psychologist
+    completion_status: List[DoctorStatusItem] = []
     additional_rows: List[AdditionalRow] = []
+

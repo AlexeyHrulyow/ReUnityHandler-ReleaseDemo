@@ -1,19 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 from sqlalchemy.orm.attributes import flag_modified
 
 from reunity_app.core.security import get_current_active_user, require_role
 from reunity_app.db.session import get_db
-from reunity_app.db.models import Doctor, Document, DoctorRole, Case
+from reunity_app.db.models import Doctor, Document, DoctorRole, Case, DocumentDoctorStatus
 from reunity_app.schemas.document_structure import (
     MainTableRowUpdate, ProcedureRowUpdate, GoalsUpdate,
     HeaderFieldsUpdate, TableDatesUpdate,
     DocumentStructureResponse, MainTableRow, ProcedureRow, Goals,
-    HeaderFields, TableDates, AdditionalRow, AdditionalRowUpdate, AdditionalRowsUpdate
+    HeaderFields, TableDates, AdditionalRow, AdditionalRowUpdate, AdditionalRowsUpdate,
+    DoctorStatusItem  # добавим в schemas/document_structure.py
 )
 
 router = APIRouter()
@@ -25,6 +26,30 @@ async def get_document_or_404(document_id: int, db: AsyncSession) -> Document:
     if not document:
         raise HTTPException(status_code=404, detail="Документ не найден")
     return document
+
+
+async def get_or_create_doctor_status(
+    document: Document,
+    doctor_id: int,
+    db: AsyncSession
+) -> DocumentDoctorStatus:
+    """Получить или создать запись статуса для врача в документе."""
+    result = await db.execute(
+        select(DocumentDoctorStatus).where(
+            DocumentDoctorStatus.document_id == document.id,
+            DocumentDoctorStatus.doctor_id == doctor_id
+        )
+    )
+    status = result.scalar_one_or_none()
+    if not status:
+        status = DocumentDoctorStatus(
+            document_id=document.id,
+            doctor_id=doctor_id,
+            completed=False
+        )
+        db.add(status)
+        await db.flush()
+    return status
 
 
 @router.get("/{document_id}/structure", response_model=DocumentStructureResponse)
@@ -89,16 +114,38 @@ async def get_document_structure(
 
     permissions = {
         "can_edit_all": current_user.role == DoctorRole.ADMIN,
-        "current_user_role": current_user.role.value
+        "current_user_role": current_user.role
     }
 
-    completion_status = {
-        "reflexotherapist": document.reflexotherapist_completed,
-        "physiotherapist": document.physiotherapist_completed,
-        "therapist_frm": document.therapist_frm_completed,
-        "neurologist_frm": document.neurologist_frm_completed,
-        "psychologist": document.psychologist_completed
-    }
+    # Получаем статусы для всех врачей с show_in_status=true
+    completion_status = []
+    status_q = select(
+        Doctor,
+        DocumentDoctorStatus.completed,
+        DocumentDoctorStatus.filled_at
+    ).join(
+        DocumentDoctorStatus,
+        and_(
+            DocumentDoctorStatus.doctor_id == Doctor.id,
+            DocumentDoctorStatus.document_id == document.id
+        ),
+        isouter=True
+    ).where(
+        Doctor.is_active == True,
+        Doctor.show_in_status == True
+    ).order_by(Doctor.status_order)
+
+    status_result = await db.execute(status_q)
+    for doctor, completed, filled_at in status_result:
+        completion_status.append(
+            DoctorStatusItem(
+                doctor_id=doctor.id,
+                doctor_name=doctor.full_name,
+                doctor_role=doctor.role,
+                completed=completed if completed is not None else False,
+                filled_at=filled_at
+            )
+        )
 
     additional_rows = [
         AdditionalRow(**row) for row in document.content.get("additional_domains", [])
@@ -140,20 +187,14 @@ async def update_header_fields(
     flag_modified(document, "content")
 
     now = datetime.utcnow()
-    # Обновляем даты заполнения для соответствующих ролей
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    # Обновляем дату заполнения для текущего врача, если он участвует в статусах
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
+        # не меняем completed автоматически, только дату
 
     await db.commit()
-
     return {"message": "Поля верхней части обновлены"}
 
 
@@ -181,23 +222,15 @@ async def update_table_dates(
     if dates_update.discharge is not None:
         document.content["table_dates"]["discharge"] = dates_update.discharge
 
-    from sqlalchemy.orm.attributes import flag_modified
     flag_modified(document, "content")
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
 
     await db.commit()
-
     return {"message": "Даты таблицы обновлены"}
 
 
@@ -222,16 +255,10 @@ async def update_main_table_row(
     document.update_main_table_row(row_update.row_id, row_update.values)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
 
     await db.commit()
     await db.refresh(document)
@@ -260,16 +287,10 @@ async def update_procedure_row(
     document.update_procedure_row(row_update.row_id, row_update.values)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
 
     await db.commit()
 
@@ -297,16 +318,10 @@ async def update_goals(
     document.update_goals(short_term=goals_update.short_term, long_term=goals_update.long_term)
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
 
     await db.commit()
 
@@ -365,16 +380,10 @@ async def update_document_full(
     )
 
     now = datetime.utcnow()
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_filled_at = now
+    doctor = await db.execute(select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True))
+    if doctor.scalar_one_or_none():
+        status = await get_or_create_doctor_status(document, current_user.id, db)
+        status.filled_at = now
 
     await db.commit()
 
@@ -389,33 +398,24 @@ async def complete_section(
 ):
     """Отметить раздел как заполненный (для врачей)"""
     document = await get_document_or_404(document_id, db)
-    now = datetime.utcnow()
+    if document.signed_at:
+        raise HTTPException(status_code=400, detail="Нельзя завершить раздел в подписанном документе")
 
-    if current_user.role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_completed = True
-        document.reflexotherapist_filled_at = now
-    elif current_user.role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_completed = True
-        document.physiotherapist_filled_at = now
-    elif current_user.role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_completed = True
-        document.therapist_frm_filled_at = now
-    elif current_user.role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_completed = True
-        document.neurologist_frm_filled_at = now
-    elif current_user.role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_completed = True
-        document.psychologist_filled_at = now
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Только врачи могут отмечать разделы как заполненные"
-        )
+    # Проверяем, что текущий врач участвует в статусах
+    doctor = await db.execute(
+        select(Doctor).where(Doctor.id == current_user.id, Doctor.show_in_status == True)
+    )
+    if not doctor.scalar_one_or_none():
+        raise HTTPException(status_code=403, detail="Ваш профиль не участвует в заполнении документа")
+
+    status = await get_or_create_doctor_status(document, current_user.id, db)
+    status.completed = True
+    status.filled_at = datetime.utcnow()
 
     await db.commit()
     return {
-        "message": f"Раздел {current_user.role.value} отмечен как заполненный",
-        "completed_at": now.isoformat()
+        "message": f"Раздел отмечен как заполненный",
+        "completed_at": status.filled_at.isoformat()
     }
 
 
@@ -429,69 +429,50 @@ async def uncomplete_my_section(
     document = await get_document_or_404(document_id, db)
 
     if document.signed_at:
-        raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
+        raise HTTPException(status_code=400, detail="Нельзя отменить завершение в подписанном документе")
 
-    role = current_user.role
-    if role == DoctorRole.REFLEXOTHERAPIST:
-        document.reflexotherapist_completed = False
-        document.reflexotherapist_filled_at = None
-    elif role == DoctorRole.PHYSIOTHERAPIST:
-        document.physiotherapist_completed = False
-        document.physiotherapist_filled_at = None
-    elif role == DoctorRole.THERAPIST_FRM:
-        document.therapist_frm_completed = False
-        document.therapist_frm_filled_at = None
-    elif role == DoctorRole.NEUROLOGIST_FRM:
-        document.neurologist_frm_completed = False
-        document.neurologist_frm_filled_at = None
-    elif role == DoctorRole.PSYCHOLOGIST:
-        document.psychologist_completed = False
-        document.psychologist_filled_at = None
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="Только врач может отменить свой раздел"
+    result = await db.execute(
+        select(DocumentDoctorStatus).where(
+            DocumentDoctorStatus.document_id == document.id,
+            DocumentDoctorStatus.doctor_id == current_user.id
         )
+    )
+    status = result.scalar_one_or_none()
+    if status:
+        status.completed = False
+        status.filled_at = None
+        await db.commit()
 
-    await db.commit()
-    return {"message": f"Завершение раздела '{role.value}' отменено"}
+    return {"message": "Завершение раздела отменено"}
 
 
-@router.post("/{document_id}/uncomplete-section/{target_role}")
+@router.post("/{document_id}/uncomplete-section/{doctor_id}")
 async def uncomplete_section_by_admin(
         document_id: int,
-        target_role: str,
+        doctor_id: int,
         db: AsyncSession = Depends(get_db),
         current_user: Doctor = Depends(require_role("admin"))
 ):
-    """Отмена завершения раздела указанной роли (только для админа)"""
-    allowed_roles = ["reflexotherapist", "physiotherapist", "therapist_frm", "neurologist_frm", "psychologist"]
-    if target_role not in allowed_roles:
-        raise HTTPException(status_code=400, detail="Недопустимая целевая роль")
-
+    """Отмена завершения раздела указанного врача (только для админа)"""
     document = await get_document_or_404(document_id, db)
 
     if document.signed_at:
-        raise HTTPException(status_code=400, detail="Нельзя отменить завершение подписанного документа")
+        raise HTTPException(status_code=400, detail="Нельзя отменить завершение в подписанном документе")
 
-    if target_role == "reflexotherapist":
-        document.reflexotherapist_completed = False
-        document.reflexotherapist_filled_at = None
-    elif target_role == "physiotherapist":
-        document.physiotherapist_completed = False
-        document.physiotherapist_filled_at = None
-    elif target_role == "therapist_frm":
-        document.therapist_frm_completed = False
-        document.therapist_frm_filled_at = None
-    elif target_role == "neurologist_frm":
-        document.neurologist_frm_completed = False
-        document.neurologist_frm_filled_at = None
-    elif target_role == "psychologist":
-        document.psychologist_completed = False
-        document.psychologist_filled_at = None
+    result = await db.execute(
+        select(DocumentDoctorStatus).where(
+            DocumentDoctorStatus.document_id == document.id,
+            DocumentDoctorStatus.doctor_id == doctor_id
+        )
+    )
+    status = result.scalar_one_or_none()
+    if status:
+        status.completed = False
+        status.filled_at = None
+        await db.commit()
 
-    await db.commit()
-    return {"message": f"Завершение раздела '{target_role}' отменено администратором"}
+    return {"message": f"Завершение раздела врача отменено"}
+
 
 @router.put("/{document_id}/additional-rows")
 async def update_additional_rows(
@@ -510,6 +491,7 @@ async def update_additional_rows(
     await db.commit()
     return {"message": "Дополнительные строки обновлены"}
 
+
 @router.post("/{document_id}/additional-rows")
 async def add_additional_row(
     document_id: int,
@@ -523,6 +505,7 @@ async def add_additional_row(
     document.add_additional_row()
     await db.commit()
     return {"message": "Строка добавлена"}
+
 
 @router.delete("/{document_id}/additional-rows/{index}")
 async def delete_additional_row(
@@ -542,6 +525,7 @@ async def delete_additional_row(
     await db.commit()
     return {"message": "Строка удалена"}
 
+
 @router.put("/{document_id}/additional-row/{index}")
 async def update_additional_row(
     document_id: int,
@@ -558,6 +542,7 @@ async def update_additional_row(
     await db.commit()
     return {"message": "Строка обновлена"}
 
+
 @router.get("/{document_id}/completion-status")
 async def get_completion_status(
         document_id: int,
@@ -567,32 +552,31 @@ async def get_completion_status(
     """Получение статуса заполнения документа"""
     document = await get_document_or_404(document_id, db)
 
-    return {
-        "reflexotherapist": {
-            "completed": document.reflexotherapist_completed,
-            "filled_at": document.reflexotherapist_filled_at.isoformat() if document.reflexotherapist_filled_at else None
-        },
-        "physiotherapist": {
-            "completed": document.physiotherapist_completed,
-            "filled_at": document.physiotherapist_filled_at.isoformat() if document.physiotherapist_filled_at else None
-        },
-        "therapist_frm": {
-            "completed": document.therapist_frm_completed,
-            "filled_at": document.therapist_frm_filled_at.isoformat() if document.therapist_frm_filled_at else None
-        },
-        "neurologist_frm": {
-            "completed": document.neurologist_frm_completed,
-            "filled_at": document.neurologist_frm_filled_at.isoformat() if document.neurologist_frm_filled_at else None
-        },
-        "psychologist": {
-            "completed": document.psychologist_completed,
-            "filled_at": document.psychologist_filled_at.isoformat() if document.psychologist_filled_at else None
-        },
-        "all_completed": (
-            document.reflexotherapist_completed and
-            document.physiotherapist_completed and
-            document.therapist_frm_completed and
-            document.neurologist_frm_completed and
-            document.psychologist_completed
-        )
-    }
+    status_q = select(
+        Doctor,
+        DocumentDoctorStatus.completed,
+        DocumentDoctorStatus.filled_at
+    ).join(
+        DocumentDoctorStatus,
+        and_(
+            DocumentDoctorStatus.doctor_id == Doctor.id,
+            DocumentDoctorStatus.document_id == document.id
+        ),
+        isouter=True
+    ).where(
+        Doctor.is_active == True,
+        Doctor.show_in_status == True
+    ).order_by(Doctor.status_order)
+
+    result = await db.execute(status_q)
+    statuses = []
+    for doctor, completed, filled_at in result:
+        statuses.append({
+            "doctor_id": doctor.id,
+            "doctor_name": doctor.full_name,
+            "doctor_role": doctor.role,
+            "completed": completed if completed is not None else False,
+            "filled_at": filled_at.isoformat() if filled_at else None
+        })
+    all_completed = all(s["completed"] for s in statuses)
+    return {"doctors_status": statuses, "all_completed": all_completed}

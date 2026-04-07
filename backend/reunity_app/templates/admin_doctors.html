@@ -19,7 +19,6 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            line-height: 1.6;
             background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             min-height: 100vh;
         }
@@ -69,11 +68,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         table {
-            background: #ffffff;
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            min-width: 800px;
+            min-width: 900px;
         }
         th, td {
             border: 1px solid var(--border-color);
@@ -92,7 +89,6 @@
             cursor: pointer;
             font-size: 14px;
             margin-right: 5px;
-            text-decoration: none;
             display: inline-block;
         }
         .btn-primary { background: var(--primary-medium); color: white; }
@@ -101,21 +97,9 @@
         .btn-warning { background: #f39c12; color: white; }
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
         .btn-sm { padding: 4px 8px; font-size: 12px; }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; }
         .modal {
             display: none;
             position: fixed;
@@ -172,8 +156,10 @@
 
         <div class="content">
             <div id="alertContainer"></div>
-            <button class="btn btn-success" onclick="openCreateModal()">＋ Добавить врача</button>
-
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="openCreateModal()">＋ Добавить врача</button>
+                <button class="btn btn-primary" id="saveStatusSettingsBtn">💾 Сохранить настройки статусов</button>
+            </div>
             <div id="loading" class="loading">Загрузка списка врачей...</div>
             <div id="doctorsTable" style="display: none;">
                 <table>
@@ -184,12 +170,13 @@
                             <th>Логин</th>
                             <th>Роль</th>
                             <th>Активен</th>
+                            <th>Показывать в статусах</th>
+                            <th>Порядок</th>
                             <th>Создан</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
-                    <tbody id="doctorsTableBody">
-                    </tbody>
+                    <tbody id="doctorsTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -276,20 +263,6 @@
 
         let currentUser = null;
         let doctors = [];
-        let isDoctorFormSubmitting = false;
-        let isPasswordFormSubmitting = false;
-
-        // Функция блокировки кнопки
-        function disableButton(btn, disable, loadingText = 'Сохранение...') {
-            if (disable) {
-                btn.disabled = true;
-                btn.dataset.originalText = btn.textContent;
-                btn.textContent = loadingText;
-            } else {
-                btn.disabled = false;
-                btn.textContent = btn.dataset.originalText || btn.textContent;
-            }
-        }
 
         function getRoleName(role) {
             const roles = {
@@ -301,6 +274,17 @@
                 'admin': 'Администратор'
             };
             return roles[role] || role;
+        }
+
+        function disableButton(btn, disable, loadingText = 'Сохранение...') {
+            if (disable) {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.textContent;
+                btn.textContent = loadingText;
+            } else {
+                btn.disabled = false;
+                btn.textContent = btn.dataset.originalText || btn.textContent;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -318,8 +302,7 @@
                     document.getElementById('userName').textContent = currentUser.full_name;
                     document.getElementById('userRole').textContent = getRoleName(currentUser.role);
                     if (currentUser.role !== 'admin') {
-                        showAlert('Доступ запрещён', 'danger');
-                        setTimeout(() => window.location.href = '/dashboard', 2000);
+                        window.location.href = '/dashboard';
                     }
                 } else {
                     throw new Error('Ошибка загрузки пользователя');
@@ -328,10 +311,6 @@
                 console.error(error);
                 window.location.href = '/';
             }
-        }
-
-        function getActiveDoctorForRole(role, excludeId = null) {
-            return doctors.find(d => d.role === role && d.is_active && d.id !== excludeId);
         }
 
         async function loadDoctors() {
@@ -362,25 +341,27 @@
             tbody.innerHTML = '';
 
             doctors.forEach(doc => {
-                const roleName = getRoleName(doc.role);
-                const activeText = doc.is_active ? 'Да' : 'Нет';
-                const created = new Date(doc.created_at).toLocaleDateString('ru-RU');
-
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${doc.id}</td>
                     <td>${doc.last_name} ${doc.first_name} ${doc.middle_name || ''}</td>
                     <td>${doc.username}</td>
-                    <td>${roleName}</td>
-                    <td>${activeText}</td>
-                    <td>${created}</td>
+                    <td>${getRoleName(doc.role)}</td>
+                    <td>${doc.is_active ? 'Да' : 'Нет'}</td>
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="status-show-chk" data-id="${doc.id}" ${doc.show_in_status ? 'checked' : ''} ${!doc.is_active ? 'disabled' : ''}>
+                    </td>
+                    <td>
+                        <input type="number" class="status-order-input" data-id="${doc.id}" value="${doc.status_order || 0}" style="width: 70px;" ${!doc.is_active ? 'disabled' : ''}>
+                    </td>
+                    <td>${new Date(doc.created_at).toLocaleDateString('ru-RU')}</td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editDoctor(${doc.id})">✏️</button>
-                        <button class="btn btn-secondary btn-sm" onclick="openPasswordModal(${doc.id}, '${doc.full_name}')">🔑 Сменить пароль</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id}, event)" ${doc.id === currentUser.id ? 'disabled' : ''}>🗑️</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openPasswordModal(${doc.id}, '${doc.full_name}')">🔑</button>
+                        ${doc.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deleteDoctor(${doc.id})">🗑️</button>` : ''}
                         ${doc.is_active ?
-                            `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false, event)">🔒 Деактивировать</button>` :
-                            `<button class="btn btn-success btn-sm" onclick="toggleActive(${doc.id}, true, event)">🔓 Активировать</button>`
+                            `<button class="btn btn-secondary btn-sm" onclick="toggleActive(${doc.id}, false)">🔒 Деактивировать</button>` :
+                            `<button class="btn btn-success btn-sm" onclick="toggleActive(${doc.id}, true)">🔓 Активировать</button>`
                         }
                     </td>
                 `;
@@ -389,6 +370,44 @@
             document.getElementById('doctorsTable').style.display = 'block';
         }
 
+        // Сохранение настроек статусов
+        document.getElementById('saveStatusSettingsBtn').addEventListener('click', async () => {
+            const settings = [];
+            document.querySelectorAll('.status-show-chk').forEach(chk => {
+                const id = parseInt(chk.dataset.id);
+                const orderInput = document.querySelector(`.status-order-input[data-id="${id}"]`);
+                const order = orderInput ? parseInt(orderInput.value) || 0 : 0;
+                settings.push({
+                    id: id,
+                    show_in_status: chk.checked,
+                    status_order: order
+                });
+            });
+
+            try {
+                const response = await fetch('/api/v1/doctors/status-settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    showAlert('Настройки статусов сохранены', 'success');
+                    await loadDoctors(); // обновим таблицу
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ошибка сохранения', 'danger');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Ошибка подключения к серверу', 'danger');
+            }
+        });
+
+        // --- Остальные функции (создание, редактирование, удаление, активация, смена пароля) ---
         function openCreateModal() {
             document.getElementById('modalTitle').textContent = 'Добавление врача';
             document.getElementById('doctorId').value = '';
@@ -428,11 +447,6 @@
 
         document.getElementById('doctorForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (isDoctorFormSubmitting) return;
-            isDoctorFormSubmitting = true;
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            disableButton(submitBtn, true, 'Сохранение...');
-
             const id = document.getElementById('doctorId').value;
             const isEditing = !!id;
 
@@ -449,24 +463,7 @@
                 data.password = document.getElementById('password').value;
                 if (!data.password) {
                     showAlert('Пароль обязателен при создании', 'danger');
-                    disableButton(submitBtn, false);
-                    isDoctorFormSubmitting = false;
                     return;
-                }
-            }
-
-            // Проверка на уникальность активного врача при создании или смене роли/активации
-            if (data.is_active) {
-                const currentDoctor = isEditing ? doctors.find(d => d.id === parseInt(id)) : null;
-                const activeDoctor = doctors.find(d => d.role === data.role && d.is_active && d.id !== (currentDoctor ? currentDoctor.id : null));
-                if (activeDoctor) {
-                    const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
-                    const roleName = getRoleName(activeDoctor.role);
-                    if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
-                        disableButton(submitBtn, false);
-                        isDoctorFormSubmitting = false;
-                        return;
-                    }
                 }
             }
 
@@ -494,19 +491,11 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
-            } finally {
-                disableButton(submitBtn, false);
-                isDoctorFormSubmitting = false;
             }
         });
 
-        async function deleteDoctor(id, event) {
-            const button = event.target;
-            disableButton(button, true, 'Удаление...');
-            if (!confirm('Вы уверены, что хотите удалить этого врача? Это действие необратимо.')) {
-                disableButton(button, false);
-                return;
-            }
+        async function deleteDoctor(id) {
+            if (!confirm('Вы уверены, что хотите удалить этого врача? Это действие необратимо.')) return;
 
             try {
                 const response = await fetch(`/api/v1/doctors/${id}`, {
@@ -524,27 +513,17 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
-            } finally {
-                disableButton(button, false);
             }
         }
 
-        async function toggleActive(id, activate, event) {
-            const button = event.target;
-            disableButton(button, true, activate ? 'Активация...' : 'Деактивация...');
+        async function toggleActive(id, activate) {
             const doctor = doctors.find(d => d.id === id);
-            if (!doctor) {
-                disableButton(button, false);
-                return;
-            }
+            if (!doctor) return;
 
             if (activate) {
                 const activeDoctor = doctors.find(d => d.role === doctor.role && d.is_active && d.id !== id);
                 if (activeDoctor) {
-                    const fullName = `${activeDoctor.last_name} ${activeDoctor.first_name} ${activeDoctor.middle_name || ''}`.trim();
-                    const roleName = getRoleName(activeDoctor.role);
-                    if (!confirm(`Врач ${fullName} (${roleName}) уже активен. Он будет деактивирован. Продолжить?`)) {
-                        disableButton(button, false);
+                    if (!confirm(`Врач ${activeDoctor.full_name} (${getRoleName(activeDoctor.role)}) уже активен. Он будет деактивирован. Продолжить?`)) {
                         return;
                     }
                 }
@@ -567,12 +546,9 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
-            } finally {
-                disableButton(button, false);
             }
         }
 
-        // Функции для смены пароля
         function openPasswordModal(doctorId, doctorName) {
             document.getElementById('passwordDoctorId').value = doctorId;
             document.getElementById('newPassword').value = '';
@@ -586,26 +562,16 @@
 
         document.getElementById('passwordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (isPasswordFormSubmitting) return;
-            isPasswordFormSubmitting = true;
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            disableButton(submitBtn, true, 'Смена...');
-
             const doctorId = document.getElementById('passwordDoctorId').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
 
             if (newPassword !== confirm) {
                 showAlert('Пароли не совпадают', 'danger');
-                disableButton(submitBtn, false);
-                isPasswordFormSubmitting = false;
                 return;
             }
-
             if (newPassword.length < 4) {
                 showAlert('Пароль должен быть не менее 4 символов', 'danger');
-                disableButton(submitBtn, false);
-                isPasswordFormSubmitting = false;
                 return;
             }
 
@@ -629,9 +595,6 @@
             } catch (error) {
                 console.error(error);
                 showAlert('Ошибка подключения к серверу', 'danger');
-            } finally {
-                disableButton(submitBtn, false);
-                isPasswordFormSubmitting = false;
             }
         });
 
@@ -644,16 +607,11 @@
             setTimeout(() => alertDiv.remove(), 3000);
         }
 
-        // Закрытие модалок при клике вне
         window.onclick = function(event) {
             const modal = document.getElementById('doctorModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            if (event.target === modal) closeModal();
             const pwdModal = document.getElementById('passwordModal');
-            if (event.target === pwdModal) {
-                closePasswordModal();
-            }
+            if (event.target === pwdModal) closePasswordModal();
         };
     </script>
 </body>

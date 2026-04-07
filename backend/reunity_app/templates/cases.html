@@ -19,7 +19,6 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            line-height: 1.5;
             background: linear-gradient(135deg, #78cdd7 0%, #44a1a0 100%);
             min-height: 100vh;
         }
@@ -66,11 +65,9 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: var(--text-dark);
             font-size: 14px;
         }
-        .filter-group input,
-        .filter-group select {
+        .filter-group input, .filter-group select {
             width: 100%;
             padding: 8px;
             border: 1px solid var(--border-color);
@@ -112,7 +109,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         table {
-            background: #ffffff;
             width: 100%;
             border-collapse: collapse;
             min-width: 900px;
@@ -124,16 +120,6 @@
             text-align: left;
             vertical-align: middle;
         }
-        /* Настройки ширины колонок (без примечаний) */
-        th:first-child, td:first-child { width: 50px; }
-        th:nth-child(2), td:nth-child(2) { min-width: 160px; } /* Пациент */
-        th:nth-child(3), td:nth-child(3) { width: 100px; }     /* Дата поступления */
-        th:nth-child(4), td:nth-child(4) { width: 120px; }     /* Создатель */
-        th:nth-child(5), td:nth-child(5) { width: 100px; }     /* Статус */
-        th:nth-child(6), td:nth-child(6) { width: 250px; }     /* Статус врачей */
-        th:nth-child(7), td:nth-child(7) { width: 90px; }      /* Создан */
-        th:nth-child(8), td:nth-child(8) { width: 120px; }     /* Действия */
-
         th {
             background-color: var(--primary-dark);
             color: white;
@@ -155,7 +141,6 @@
         .status-waiting_review { background: #d1ecf1; color: #0c5460; }
         .status-completed { background: #d4edda; color: #155724; }
         .status-sent { background: #cce5ff; color: #004085; }
-
         .btn {
             padding: 6px 10px;
             border: none;
@@ -168,54 +153,15 @@
             gap: 6px;
             transition: opacity 0.2s;
             white-space: nowrap;
-            width: 100%;
-            box-sizing: border-box;
         }
-        .btn:hover { opacity: 0.9; }
         .btn-primary { background: var(--primary-medium); color: white; }
         .btn-secondary { background: var(--primary-light); color: var(--text-dark); }
         .btn-success { background: var(--primary-deep); color: white; }
         .btn-danger { background: #e74c3c; color: white; }
-
-        .actions .btn {
-            width: auto;
-            display: inline-flex;
-        }
-
-        td .btn {
-            display: block;
-            margin-bottom: 4px;
-        }
-        td .btn:last-child {
-            margin-bottom: 0;
-        }
-
-        .actions {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            background: #ffffff;
-            border-radius: 5px;
-        }
-        .error {
-            color: #e74c3c;
-            padding: 10px;
-            background: #f8d7da;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
         .doctor-status-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px 8px;
-            align-items: center;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
         }
         .doctor-status-item {
             display: flex;
@@ -236,18 +182,22 @@
         .status-done { background: #27ae60; color: white; }
         .status-pending { background: #e74c3c; color: white; }
         .role-name {
-            font-size: 14px;
+            font-size: 13px;
             white-space: nowrap;
         }
-
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            background: #ffffff;
+            border-radius: 5px;
+        }
         .no-cases {
             text-align: center;
             padding: 40px;
             color: #6c757d;
             font-style: italic;
         }
-
-        /* Стили для кастомного тултипа (без стрелки) */
         #custom-tooltip {
             position: absolute;
             background: #333;
@@ -274,20 +224,15 @@
         <div class="header">
             <h1>Управление случаями</h1>
             <div class="actions">
-                <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
-                    ← Назад в панель управления
-                </button>
-                <button class="btn btn-success" onclick="createNewCase()">
-                    ＋ Создать новый случай
-                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">← Назад в панель управления</button>
+                <button class="btn btn-success" onclick="createNewCase()">＋ Создать новый случай</button>
             </div>
         </div>
 
         <div class="filters">
             <div class="filter-group">
                 <label for="searchInput">Поиск по пациенту:</label>
-                <input type="text" id="searchInput" placeholder="Фамилия, имя..."
-                       onkeypress="if(event.key === 'Enter') applyFilters()">
+                <input type="text" id="searchInput" placeholder="Фамилия, имя..." onkeypress="if(event.key === 'Enter') applyFilters()">
             </div>
             <div class="filter-group">
                 <label for="statusFilter">Статус:</label>
@@ -311,10 +256,7 @@
             </div>
         </div>
 
-        <div id="loading" class="loading">
-            Загрузка случаев...
-        </div>
-
+        <div id="loading" class="loading">Загрузка случаев...</div>
         <div id="errorContainer" style="display: none;"></div>
 
         <div id="casesTable" style="display: none;">
@@ -332,54 +274,26 @@
                             <th>Действия</th>
                         </tr>
                     </thead>
-                    <tbody id="casesTableBody">
-                    </tbody>
+                    <tbody id="casesTableBody"></tbody>
                 </table>
             </div>
             <div style="margin-top: 20px; text-align: center;">
-                <button class="btn btn-secondary" onclick="loadMore()" id="loadMoreBtn" style="display: none;">
-                    Загрузить еще
-                </button>
+                <button class="btn btn-secondary" onclick="loadMore()" id="loadMoreBtn" style="display: none;">Загрузить еще</button>
             </div>
         </div>
     </div>
 
-    <!-- Кастомный тултип -->
     <div id="custom-tooltip"></div>
 
     <script>
-        let token = null;
+        let token = localStorage.getItem('auth_token');
+        if (!token) window.location.href = '/';
+
         let currentUser = null;
         let currentPage = 0;
         const limit = 20;
         let hasMore = true;
-        let currentFilters = {
-            search: '',
-            status: '',
-            date: '',
-            myCases: false
-        };
-
-        function disableButton(btn, disable, loadingText = 'Загрузка...') {
-            if (disable) {
-                btn.disabled = true;
-                btn.dataset.originalText = btn.textContent;
-                btn.textContent = loadingText;
-            } else {
-                btn.disabled = false;
-                btn.textContent = btn.dataset.originalText || btn.textContent;
-            }
-        }
-
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/[&<>"]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                if (m === '"') return '&quot;';
-                return m;
-            });
-        }
+        let currentFilters = { search: '', status: '', date: '', myCases: false };
 
         function getRoleName(role) {
             const roles = {
@@ -393,172 +307,86 @@
             return roles[role] || role;
         }
 
-        function getShortRoleName(role) {
-            const short = {
-                'reflexotherapist': 'Рефлексо',
-                'physiotherapist': 'Физио',
-                'therapist_frm': 'Терапевт',
-                'neurologist_frm': 'Невролог',
-                'psychologist': 'Психолог'
-            };
-            return short[role] || role;
+        function formatDoctorName(fullName) {
+            if (!fullName) return '—';
+            const parts = fullName.split(' ');
+            const lastName = parts[0] || '';
+            const firstName = parts[1] || '';
+            const middleName = parts[2] || '';
+            let initials = '';
+            if (firstName) initials += firstName[0].toUpperCase() + '.';
+            if (middleName) initials += middleName[0].toUpperCase() + '.';
+            return `${lastName} ${initials}`.trim();
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            token = localStorage.getItem('auth_token');
-            console.log('Токен из localStorage:', token ? 'Есть' : 'Нет');
-
-            if (!token) {
-                showError('Требуется авторизация. Перенаправляю на страницу входа...');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-                return;
-            }
-
-            await loadCurrentUser();
-            await loadCases();
-        });
+        function showError(message) {
+            const container = document.getElementById('errorContainer');
+            container.innerHTML = `<div class="error" style="background:#f8d7da;color:#721c24;padding:12px;border-radius:4px;margin-bottom:20px;">${message}</div>`;
+            container.style.display = 'block';
+            setTimeout(() => container.style.display = 'none', 5000);
+        }
 
         async function loadCurrentUser() {
             try {
-                console.log('Загружаем информацию о пользователе...');
                 const response = await fetch('/api/v1/auth/me', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                console.log('Ответ от /api/v1/auth/me:', response.status);
-
                 if (response.ok) {
                     currentUser = await response.json();
-                    console.log('Пользователь загружен:', currentUser.username);
                     document.getElementById('userName').textContent = currentUser.full_name;
                     document.getElementById('userRole').textContent = getRoleName(currentUser.role);
                 } else {
-                    console.error('Ошибка загрузки пользователя:', response.status);
-                    const errorText = await response.text();
-                    console.error('Текст ошибки:', errorText);
-
-                    showError('Сессия истекла. Пожалуйста, войдите снова.');
-                    setTimeout(() => {
-                        localStorage.removeItem('auth_token');
-                        window.location.href = '/';
-                    }, 3000);
+                    throw new Error('Ошибка загрузки пользователя');
                 }
             } catch (error) {
-                console.error('Ошибка загрузки пользователя:', error);
-                showError('Ошибка подключения к серверу: ' + error.message);
-                setTimeout(() => {
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/';
-                }, 3000);
+                console.error(error);
+                localStorage.removeItem('auth_token');
+                window.location.href = '/';
             }
         }
 
         async function loadCases() {
             try {
-                const loadingEl = document.getElementById('loading');
-                loadingEl.style.display = 'block';
+                document.getElementById('loading').style.display = 'block';
                 document.getElementById('casesTable').style.display = 'none';
-                document.getElementById('errorContainer').style.display = 'none';
 
                 let url = `/api/v1/cases/?skip=${currentPage * limit}&limit=${limit}`;
-
-                if (currentFilters.search) {
-                    url += `&search=${encodeURIComponent(currentFilters.search)}`;
-                }
-
-                if (currentFilters.status) {
-                    url += `&status=${currentFilters.status}`;
-                }
-
-                if (currentFilters.date) {
-                    url += `&date_from=${currentFilters.date}&date_to=${currentFilters.date}`;
-                }
-
-                if (currentFilters.myCases && currentUser) {
-                    url += `&creator_id=${currentUser.id}`;
-                }
+                if (currentFilters.search) url += `&search=${encodeURIComponent(currentFilters.search)}`;
+                if (currentFilters.status) url += `&status=${currentFilters.status}`;
+                if (currentFilters.date) url += `&date_from=${currentFilters.date}&date_to=${currentFilters.date}`;
+                if (currentFilters.myCases && currentUser) url += `&creator_id=${currentUser.id}`;
 
                 const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                console.log('Запрос к cases:', url, 'Статус:', response.status);
 
                 if (response.ok) {
                     const cases = await response.json();
-                    console.log('Получено случаев:', cases.length);
                     displayCases(cases);
-                    updateLoadMoreButton(cases.length);
+                    hasMore = cases.length === limit;
+                    document.getElementById('loadMoreBtn').style.display = hasMore ? 'inline-block' : 'none';
                 } else if (response.status === 401) {
-                    showError('Требуется авторизация. Перенаправляю на страницу входа...');
-                    setTimeout(() => {
-                        localStorage.removeItem('auth_token');
-                        window.location.href = '/';
-                    }, 2000);
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/';
                 } else {
-                    const errorText = await response.text();
-                    showError('Ошибка загрузки случаев. Код ошибки: ' + response.status + ' - ' + errorText);
+                    showError('Ошибка загрузки случаев');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                showError('Ошибка подключения к серверу: ' + error.message);
+                console.error(error);
+                showError('Ошибка подключения к серверу');
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // Функции для работы с кастомным тултипом
-        function showTooltip(text, x, y) {
-            const tooltip = document.getElementById('custom-tooltip');
-            tooltip.textContent = 'Примечание: ' + text;
-            tooltip.style.display = 'block';
-            tooltip.style.left = x + 'px';
-            tooltip.style.top = y + 'px';
-        }
-
-        function hideTooltip() {
-            document.getElementById('custom-tooltip').style.display = 'none';
-        }
-
-        function moveTooltip(e) {
-            const tooltip = document.getElementById('custom-tooltip');
-            if (tooltip.style.display === 'block') {
-                tooltip.style.left = e.pageX + 15 + 'px';
-                tooltip.style.top = e.pageY + 15 + 'px';
-            }
-        }
-
-        document.addEventListener('mousemove', moveTooltip);
-
         function displayCases(cases) {
             const tableBody = document.getElementById('casesTableBody');
             const casesTable = document.getElementById('casesTable');
 
-            if (currentPage === 0) {
-                tableBody.innerHTML = '';
-            }
+            if (currentPage === 0) tableBody.innerHTML = '';
 
             if (cases.length === 0 && currentPage === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center;">
-                            <div class="no-cases">
-                                <p>Случаи не найдены</p>
-                                ${currentUser.role === 'admin' || currentUser.role === 'therapist_frm' || currentUser.role === 'neurologist_frm' ?
-                                    '<button class="btn btn-primary" onclick="createNewCase()">Создать первый случай</button>' :
-                                    ''}
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center;"><div class="no-cases">Случаи не найдены</div></td></tr>`;
                 casesTable.style.display = 'block';
                 return;
             }
@@ -566,113 +394,64 @@
             cases.forEach(caseItem => {
                 const row = document.createElement('tr');
 
-                // Добавляем обработчики, если есть примечание
-                if (caseItem.notes && caseItem.notes.trim() !== '') {
+                // Примечание (тултип)
+                if (caseItem.notes && caseItem.notes.trim()) {
                     row.addEventListener('mouseenter', (e) => {
-                        showTooltip(caseItem.notes, e.pageX + 15, e.pageY + 15);
+                        const tooltip = document.getElementById('custom-tooltip');
+                        tooltip.textContent = 'Примечание: ' + caseItem.notes;
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = e.pageX + 15 + 'px';
+                        tooltip.style.top = e.pageY + 15 + 'px';
                     });
-                    row.addEventListener('mouseleave', hideTooltip);
+                    row.addEventListener('mouseleave', () => {
+                        document.getElementById('custom-tooltip').style.display = 'none';
+                    });
                 }
 
-                const admissionDate = caseItem.admission_date ?
-                    new Date(caseItem.admission_date).toLocaleDateString('ru-RU') : 'Не указана';
-                const createdDate = caseItem.created_at ?
-                    new Date(caseItem.created_at).toLocaleDateString('ru-RU') : 'Не указана';
+                const admissionDate = caseItem.admission_date ? new Date(caseItem.admission_date).toLocaleDateString('ru-RU') : '—';
+                const createdDate = caseItem.created_at ? new Date(caseItem.created_at).toLocaleDateString('ru-RU') : '—';
 
-                let statusClass = '';
-                let statusText = '';
-                switch(caseItem.status) {
-                    case 'draft':
-                        statusClass = 'status-draft';
-                        statusText = 'Черновик';
-                        break;
-                    case 'in_progress':
-                        statusClass = 'status-in_progress';
-                        statusText = 'В процессе';
-                        break;
-                    case 'waiting_review':
-                        statusClass = 'status-waiting_review';
-                        statusText = 'На проверке';
-                        break;
-                    case 'completed':
-                        statusClass = 'status-completed';
-                        statusText = 'Завершен';
-                        break;
-                    case 'sent':
-                        statusClass = 'status-sent';
-                        statusText = 'Отправлен';
-                        break;
-                    default:
-                        statusClass = 'status-draft';
-                        statusText = caseItem.status || 'Неизвестно';
+                let statusClass = '', statusText = '';
+                switch (caseItem.status) {
+                    case 'draft': statusClass = 'status-draft'; statusText = 'Черновик'; break;
+                    case 'in_progress': statusClass = 'status-in_progress'; statusText = 'В процессе'; break;
+                    case 'waiting_review': statusClass = 'status-waiting_review'; statusText = 'На проверке'; break;
+                    case 'completed': statusClass = 'status-completed'; statusText = 'Завершен'; break;
+                    case 'sent': statusClass = 'status-sent'; statusText = 'Отправлен'; break;
+                    default: statusClass = 'status-draft'; statusText = caseItem.status;
                 }
 
-                // Статусы врачей в два столбца (3+2) с краткими названиями
+                // Генерация статусов врачей из doctors_status
                 const doctorStatusHTML = `
                     <div class="doctor-status-grid">
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.reflexotherapist_completed ? 'status-done' : 'status-pending'}">${caseItem.reflexotherapist_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Рефлексотерапевт</span>
-                        </div>
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.physiotherapist_completed ? 'status-done' : 'status-pending'}">${caseItem.physiotherapist_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Физиотерапевт</span>
-                        </div>
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.therapist_frm_completed ? 'status-done' : 'status-pending'}">${caseItem.therapist_frm_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Терапевт</span>
-                        </div>
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.neurologist_frm_completed ? 'status-done' : 'status-pending'}">${caseItem.neurologist_frm_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Невролог</span>
-                        </div>
-                        <div class="doctor-status-item">
-                            <span class="status-icon ${caseItem.psychologist_completed ? 'status-done' : 'status-pending'}">${caseItem.psychologist_completed ? '✓' : '✗'}</span>
-                            <span class="role-name">Психолог</span>
-                        </div>
+                        ${caseItem.doctors_status.map(ds => `
+                            <div class="doctor-status-item" title="${ds.filled_at ? `Заполнено: ${new Date(ds.filled_at).toLocaleString()}` : 'Не заполнено'}">
+                                <span class="status-icon ${ds.completed ? 'status-done' : 'status-pending'}">${ds.completed ? '✓' : '✗'}</span>
+                                <span class="role-name">${formatDoctorName(ds.doctor_name)}</span>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
 
-                // Определяем, завершён ли раздел создателя
-                let creatorSectionCompleted = false;
-                if (caseItem.creator_role === 'reflexotherapist') creatorSectionCompleted = caseItem.reflexotherapist_completed;
-                else if (caseItem.creator_role === 'physiotherapist') creatorSectionCompleted = caseItem.physiotherapist_completed;
-                else if (caseItem.creator_role === 'therapist_frm') creatorSectionCompleted = caseItem.therapist_frm_completed;
-                else if (caseItem.creator_role === 'neurologist_frm') creatorSectionCompleted = caseItem.neurologist_frm_completed;
-                else if (caseItem.creator_role === 'psychologist') creatorSectionCompleted = caseItem.psychologist_completed;
-                else if (caseItem.creator_role === 'admin') creatorSectionCompleted = true;
-
-                // Собираем действия
-                let actions = '';
-
-                // Кнопка "Документ"
-                actions += `<button class="btn btn-primary" onclick="viewDocument(${caseItem.id})" title="Редактировать документ">📝 Документ</button>`;
-
-                // Кнопка "Завершить случай"
+                // Действия
+                let actions = `<button class="btn btn-primary" onclick="viewDocument(${caseItem.id})">📝 Документ</button>`;
+                const creatorSectionCompleted = caseItem.doctors_status.find(ds => ds.doctor_id === caseItem.creator_id)?.completed || false;
                 const canComplete = (caseItem.status !== 'completed' && caseItem.status !== 'sent') &&
-                                    (currentUser.role === 'admin' ||
-                                     (currentUser.id === caseItem.creator_id && creatorSectionCompleted));
-                if (canComplete) {
-                    actions += `<button class="btn btn-success" onclick="completeCase(${caseItem.id})" title="Завершить случай">✅ Завершить</button>`;
-                }
-
-                // Кнопка "Удалить"
+                                    (currentUser.role === 'admin' || (currentUser.id === caseItem.creator_id && creatorSectionCompleted));
+                if (canComplete) actions += `<button class="btn btn-success" onclick="completeCase(${caseItem.id})">✅ Завершить</button>`;
                 const canDelete = (currentUser.role === 'admin' || currentUser.id === caseItem.creator_id);
-                if (canDelete) {
-                    actions += `<button class="btn btn-danger" onclick="deleteCase(${caseItem.id})" title="Удалить случай">🗑️ Удалить</button>`;
-                }
+                if (canDelete) actions += `<button class="btn btn-danger" onclick="deleteCase(${caseItem.id})">🗑️ Удалить</button>`;
 
                 row.innerHTML = `
-                    <td>${caseItem.id || 'N/A'}</td>
-                    <td>${caseItem.patient_name || 'Не указан'}</td>
+                    <td>${caseItem.id}</td>
+                    <td>${caseItem.patient_name || '—'}</td>
                     <td>${admissionDate}</td>
-                    <td>${caseItem.creator_name || 'Неизвестно'}</td>
+                    <td>${caseItem.creator_name || '—'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${doctorStatusHTML}</td>
                     <td>${createdDate}</td>
                     <td>${actions}</td>
                 `;
-
                 tableBody.appendChild(row);
             });
 
@@ -698,150 +477,90 @@
             loadCases();
         }
 
-        async function deleteCase(caseId) {
-            const button = event.target;
-            disableButton(button, true, 'Удаление...');
-            if (!confirm('Вы уверены, что хотите удалить этот случай? Это действие необратимо.')) {
-                disableButton(button, false);
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/v1/cases/${caseId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    alert('Случай успешно удалён');
-                    currentPage = 0;
-                    await loadCases();
-                } else {
-                    const errorText = await response.text();
-                    alert(`Ошибка: ${errorText || 'Не удалось удалить случай'}`);
-                }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Ошибка подключения к серверу: ' + error.message);
-            } finally {
-                disableButton(button, false);
-            }
-        }
-
         function loadMore() {
             currentPage++;
             loadCases();
         }
 
-        function updateLoadMoreButton(casesCount) {
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            hasMore = casesCount === limit;
-            loadMoreBtn.style.display = hasMore ? 'inline-block' : 'none';
-        }
-
-        function showError(message) {
-            const errorContainer = document.getElementById('errorContainer');
-            errorContainer.innerHTML = `
-                <div class="error">
-                    <strong>Ошибка:</strong> ${message}
-                    <button onclick="location.reload()" style="float: right; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                        Повторить
-                    </button>
-                </div>
-            `;
-            errorContainer.style.display = 'block';
-        }
-
-        async function viewDocument(caseId) {
+        async function deleteCase(caseId) {
+            if (!confirm('Вы уверены, что хотите удалить этот случай?')) return;
             try {
-                console.log('Проверяем документ для случая:', caseId);
-
-                const response = await fetch(`/api/v1/documents/?case_id=${caseId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                const response = await fetch(`/api/v1/cases/${caseId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    const documents = await response.json();
-                    console.log('Найдено документов:', documents.length);
-
-                    if (documents.length > 0) {
-                        console.log('ID документа:', documents[0].id, 'ID случая:', caseId);
-                        window.location.href = `/document_table?id=${documents[0].id}`;
-                    } else {
-                        if (confirm('Документ для этого случая не найден. Создать новый?')) {
-                            const createResponse = await fetch('/api/v1/documents', {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': `Bearer ${token}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    case_id: caseId,
-                                    content: { sections: {} }
-                                })
-                            });
-
-                            if (createResponse.ok) {
-                                const newDoc = await createResponse.json();
-                                window.location.href = `/document_table?id=${newDoc.id}`;
-                            } else {
-                                const error = await createResponse.json();
-                                alert(`Ошибка создания документа: ${error.detail || 'Неизвестная ошибка'}`);
-                            }
-                        }
-                    }
+                    currentPage = 0;
+                    loadCases();
                 } else {
-                    const errorText = await response.text();
-                    alert(`Ошибка проверки документа: ${errorText || 'Неизвестная ошибка'}`);
+                    const error = await response.json();
+                    showError(error.detail || 'Ошибка удаления');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Ошибка подключения к серверу: ' + error.message);
+                showError('Ошибка сети');
             }
         }
 
         async function completeCase(caseId) {
-            const button = event.target;
-            disableButton(button, true, 'Завершение...');
-            if (!confirm('Вы уверены, что хотите завершить этот случай?')) {
-                return;
-            }
-
+            if (!confirm('Вы уверены, что хотите завершить этот случай?')) return;
             try {
                 const response = await fetch(`/api/v1/cases/${caseId}/complete`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-
                 if (response.ok) {
-                    alert('Случай успешно завершен');
                     currentPage = 0;
-                    await loadCases();
+                    loadCases();
                 } else {
-                    const errorText = await response.text();
-                    alert(`Ошибка: ${errorText || 'Не удалось завершить случай'}`);
+                    const error = await response.json();
+                    showError(error.detail || 'Ошибка завершения');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Ошибка подключения к серверу: ' + error.message);
-            } finally {
-                disableButton(button, false);
+                showError('Ошибка сети');
+            }
+        }
+
+        async function viewDocument(caseId) {
+            try {
+                const response = await fetch(`/api/v1/documents/?case_id=${caseId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const documents = await response.json();
+                    if (documents.length > 0) {
+                        window.location.href = `/document_table?id=${documents[0].id}`;
+                    } else if (confirm('Документ для этого случая не найден. Создать новый?')) {
+                        const createResponse = await fetch('/api/v1/documents', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ case_id: caseId, content: {} })
+                        });
+                        if (createResponse.ok) {
+                            const newDoc = await createResponse.json();
+                            window.location.href = `/document_table?id=${newDoc.id}`;
+                        } else {
+                            alert('Ошибка создания документа');
+                        }
+                    }
+                } else {
+                    alert('Ошибка загрузки документа');
+                }
+            } catch (error) {
+                alert('Ошибка сети');
             }
         }
 
         function createNewCase() {
             window.location.href = '/case_create';
         }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadCases();
+        });
     </script>
 </body>
 </html>

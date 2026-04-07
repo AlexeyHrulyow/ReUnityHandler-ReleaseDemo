@@ -1,7 +1,17 @@
+# reunity_app/schemas/case.py
+
 from pydantic import BaseModel
 from datetime import datetime, date
 from typing import Optional, List
 from reunity_app.db.models import CaseStatus
+
+
+class DoctorStatusItem(BaseModel):
+    doctor_id: int
+    doctor_name: str
+    doctor_role: str
+    completed: bool
+    filled_at: Optional[datetime] = None
 
 
 class CaseBase(BaseModel):
@@ -42,10 +52,4 @@ class CaseWithPatient(Case):
     patient_birth_date: Optional[date] = None
     creator_name: Optional[str] = None
     creator_role: Optional[str] = None
-
-    # Новые поля для статусов врачей
-    reflexotherapist_completed: bool = False
-    physiotherapist_completed: bool = False
-    therapist_frm_completed: bool = False
-    neurologist_frm_completed: bool = False
-    psychologist_completed: bool = False
+    doctors_status: List[DoctorStatusItem] = []   # заменяет отдельные поля

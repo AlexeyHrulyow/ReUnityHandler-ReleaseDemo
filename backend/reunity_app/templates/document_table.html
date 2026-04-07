@@ -620,6 +620,15 @@
         const searchResults = document.getElementById('searchResults');
         const sectionSelect = document.getElementById('sectionSelect');
 
+        function formatDoctorName(fullName) {
+            if (!fullName) return '—';
+            const parts = fullName.split(' ');
+            let initials = '';
+            if (parts[1]) initials += parts[1][0].toUpperCase() + '.';
+            if (parts[2]) initials += parts[2][0].toUpperCase() + '.';
+            return `${parts[0]} ${initials}`.trim();
+        }
+
         // ---- Вспомогательные функции ----
         function getRoleName(role) {
             const roles = {
@@ -1012,6 +1021,8 @@
                 if (response.ok) {
                     const caseData = await response.json();
                     caseStatus = caseData.status;
+                    updateSectionButtons()
+                    applyDisabledState()
                     caseCreatorId = caseData.creator_id;
                     // Сохраняем примечание случая и отображаем его
                     const caseNotes = caseData.notes || '';
@@ -1192,85 +1203,32 @@
         }
 
         function displayDoctorStatus() {
-            const reflex = document.getElementById('reflexotherapistStatus');
-            const physio = document.getElementById('physiotherapistStatus');
-            const therapist = document.getElementById('therapistFrmStatus');
-            const neuro = document.getElementById('neurologistFrmStatus');
-            const psych = document.getElementById('psychologistStatus');
-
-            // Обновляем текст и классы
-            if (completionStatus.reflexotherapist) {
-                reflex.classList.add('completed');
-                document.getElementById('reflexotherapistText').textContent = 'Заполнено';
-            } else {
-                reflex.classList.remove('completed');
-                document.getElementById('reflexotherapistText').textContent = 'Не заполнено';
+            const container = document.getElementById('doctorStatus');
+            if (!documentData.completion_status || documentData.completion_status.length === 0) {
+                container.style.display = 'none';
+                return;
             }
-            if (completionStatus.physiotherapist) {
-                physio.classList.add('completed');
-                document.getElementById('physiotherapistText').textContent = 'Заполнено';
-            } else {
-                physio.classList.remove('completed');
-                document.getElementById('physiotherapistText').textContent = 'Не заполнено';
-            }
-            if (completionStatus.therapist_frm) {
-                therapist.classList.add('completed');
-                document.getElementById('therapistFrmText').textContent = 'Заполнено';
-            } else {
-                therapist.classList.remove('completed');
-                document.getElementById('therapistFrmText').textContent = 'Не заполнено';
-            }
-            if (completionStatus.neurologist_frm) {
-                neuro.classList.add('completed');
-                document.getElementById('neurologistFrmText').textContent = 'Заполнено';
-            } else {
-                neuro.classList.remove('completed');
-                document.getElementById('neurologistFrmText').textContent = 'Не заполнено';
-            }
-            if (completionStatus.psychologist) {
-                psych.classList.add('completed');
-                document.getElementById('psychologistText').textContent = 'Заполнено';
-            } else {
-                psych.classList.remove('completed');
-                document.getElementById('psychologistText').textContent = 'Не заполнено';
-            }
-
-            // Показываем фамилию и инициалы активного врача для каждой роли (или "не назначен")
-            const reflexName = getActiveDoctorName('reflexotherapist');
-            document.getElementById('reflexotherapistName').textContent = reflexName ? formatDoctorName(reflexName) : 'не назначен';
-
-            const physioName = getActiveDoctorName('physiotherapist');
-            document.getElementById('physiotherapistName').textContent = physioName ? formatDoctorName(physioName) : 'не назначен';
-
-            const therapistName = getActiveDoctorName('therapist_frm');
-            document.getElementById('therapistFrmName').textContent = therapistName ? formatDoctorName(therapistName) : 'не назначен';
-
-            const neuroName = getActiveDoctorName('neurologist_frm');
-            document.getElementById('neurologistFrmName').textContent = neuroName ? formatDoctorName(neuroName) : 'не назначен';
-
-            const psychName = getActiveDoctorName('psychologist');
-            document.getElementById('psychologistName').textContent = psychName ? formatDoctorName(psychName) : 'не назначен';
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            documentData.completion_status.forEach(status => {
+                const card = document.createElement('div');
+                card.className = `status-card ${status.completed ? 'completed' : 'pending'}`;
+                card.innerHTML = `
+                    <div class="status-icon">${status.completed ? '✓' : '⏳'}</div>
+                    <h4>${formatDoctorName(status.doctor_name)}</h4>
+                    <p>${status.completed ? 'Заполнено' : 'Не заполнено'}</p>
+                    <p style="font-size:12px;color:#666;">${status.filled_at ? new Date(status.filled_at).toLocaleString() : ''}</p>
+                `;
+                container.appendChild(card);
+            });
         }
 
         function updateSectionButtons() {
             const completeBtn = document.getElementById('completeSectionBtn');
             const uncompleteBtn = document.getElementById('uncompleteSectionBtn');
-            const userRole = currentUser?.role;
-
-            if (!completionStatus || !caseStatus) return;
-
-            let isCompleted = false;
-            if (userRole === 'reflexotherapist') isCompleted = completionStatus.reflexotherapist;
-            else if (userRole === 'physiotherapist') isCompleted = completionStatus.physiotherapist;
-            else if (userRole === 'therapist_frm') isCompleted = completionStatus.therapist_frm;
-            else if (userRole === 'neurologist_frm') isCompleted = completionStatus.neurologist_frm;
-            else if (userRole === 'psychologist') isCompleted = completionStatus.psychologist;
-            else {
-                completeBtn.style.display = 'none';
-                uncompleteBtn.style.display = 'none';
-                return;
-            }
-
+            if (!documentData.completion_status || !caseStatus) return;
+            const myStatus = documentData.completion_status.find(s => s.doctor_id === currentUser.id);
+            const isCompleted = myStatus ? myStatus.completed : false;
             if (caseStatus !== 'completed' && caseStatus !== 'sent') {
                 if (isCompleted) {
                     completeBtn.style.display = 'none';
@@ -1286,23 +1244,11 @@
         }
 
         function canEdit() {
-            if (!caseStatus || !completionStatus || !currentUser) return false;
-            const isCaseCompleted = (caseStatus === 'completed' || caseStatus === 'sent');
-            if (isCaseCompleted) return false;
-
-            const isAdmin = (currentUser.role === 'admin');
-            if (isAdmin) return true;
-
-            let isMySectionCompleted = false;
-            const role = currentUser.role;
-            if (role === 'reflexotherapist') isMySectionCompleted = completionStatus.reflexotherapist;
-            else if (role === 'physiotherapist') isMySectionCompleted = completionStatus.physiotherapist;
-            else if (role === 'therapist_frm') isMySectionCompleted = completionStatus.therapist_frm;
-            else if (role === 'neurologist_frm') isMySectionCompleted = completionStatus.neurologist_frm;
-            else if (role === 'psychologist') isMySectionCompleted = completionStatus.psychologist;
-            else return false;
-
-            return !isMySectionCompleted;
+            if (!caseStatus || !documentData.completion_status || !currentUser) return false;
+            if (caseStatus === 'completed' || caseStatus === 'sent') return false;
+            if (currentUser.role === 'admin') return true;
+            const myStatus = documentData.completion_status.find(s => s.doctor_id === currentUser.id);
+            return !(myStatus && myStatus.completed);
         }
 
         function applyDisabledState() {

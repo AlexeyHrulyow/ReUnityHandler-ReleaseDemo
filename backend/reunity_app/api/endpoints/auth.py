@@ -85,6 +85,6 @@ async def read_current_user(
         "id": current_user.id,
         "username": current_user.username,
         "full_name": current_user.full_name,
-        "role": current_user.role.value if hasattr(current_user.role, 'value') else current_user.role,
+        "role": current_user.role if hasattr(current_user.role, 'value') else current_user.role,
         "is_active": current_user.is_active
     }

@@ -10,6 +10,8 @@ class DoctorBase(BaseModel):
     first_name: str
     middle_name: Optional[str] = None
     role: DoctorRole = DoctorRole.THERAPIST_FRM  # ← должно быть THERAPIST_FRM
+    show_in_status: bool = False
+    status_order: int = 0
 
 
 class DoctorCreate(DoctorBase):

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -180,7 +180,7 @@ async def update_doctor(
             if active_for_role:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Для роли {new_role.value} уже есть активный врач: {active_for_role.full_name}. "
+                    detail=f"Для роли {new_role} уже есть активный врач: {active_for_role.full_name}. "
                            f"Сначала деактивируйте его или измените роль на неактивную."
                 )
         # Если врач неактивен, то ничего страшного – новый активный не появится
@@ -196,7 +196,7 @@ async def update_doctor(
         if active_for_role:
             raise HTTPException(
                 status_code=400,
-                detail=f"Нельзя активировать врача, так как для роли {doctor.role.value} уже есть активный: {active_for_role.full_name}. "
+                detail=f"Нельзя активировать врача, так как для роли {doctor.role} уже есть активный: {active_for_role.full_name}. "
                        f"Используйте кнопку активации для деактивации другого."
             )
 
@@ -320,3 +320,44 @@ async def set_doctor_password(
     await db.commit()
 
     return {"message": "Пароль успешно изменен"}
+
+@router.get("/status-doctors")
+async def get_status_doctors(
+    db: AsyncSession = Depends(get_db),
+    current_user: DoctorModel = Depends(require_role("admin"))
+):
+    """Получить список врачей для настройки отображения в статусах."""
+    result = await db.execute(
+        select(DoctorModel)
+        .where(DoctorModel.is_active == True)
+        .order_by(DoctorModel.status_order, DoctorModel.id)
+    )
+    doctors = result.scalars().all()
+    return [
+        {
+            "id": d.id,
+            "full_name": d.full_name,
+            "role": d.role,
+            "show_in_status": d.show_in_status,
+            "status_order": d.status_order
+        }
+        for d in doctors
+    ]
+
+@router.put("/status-settings")
+async def update_status_settings(
+    settings: List[Dict[str, Any]],
+    db: AsyncSession = Depends(get_db),
+    current_user: DoctorModel = Depends(require_role("admin"))
+):
+    """Обновить настройки отображения врачей в статусах."""
+    for item in settings:
+        result = await db.execute(
+            select(DoctorModel).where(DoctorModel.id == item["id"])
+        )
+        doctor = result.scalar_one_or_none()
+        if doctor:
+            doctor.show_in_status = item.get("show_in_status", doctor.show_in_status)
+            doctor.status_order = item.get("status_order", doctor.status_order)
+    await db.commit()
+    return {"message": "Настройки сохранены"}
