@@ -2,7 +2,16 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 from reunity_app.db.models import DoctorRole
+from pydantic import BaseModel
+from typing import List
 
+class DoctorStatusUpdate(BaseModel):
+    id: int
+    show_in_status: bool
+    status_order: int
+
+class DoctorStatusSettingsBatch(BaseModel):
+    settings: List[DoctorStatusUpdate]
 
 class DoctorBase(BaseModel):
     username: str

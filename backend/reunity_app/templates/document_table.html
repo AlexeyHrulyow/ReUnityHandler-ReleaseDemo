@@ -432,38 +432,7 @@
         <div id="caseStatusMessage" class="case-status-message" style="display: none;"></div>
 
         <!-- Статус заполнения врачами -->
-        <div id="doctorStatus" class="doctor-status" style="display: none;">
-            <div class="status-card" id="reflexotherapistStatus">
-                <div class="status-icon">💆</div>
-                <h4>Рефлексотерапевт</h4>
-                <p id="reflexotherapistText">Не заполнено</p>
-                <p id="reflexotherapistName"></p>
-            </div>
-            <div class="status-card" id="physiotherapistStatus">
-                <div class="status-icon">🏋️</div>
-                <h4>Физиотерапевт</h4>
-                <p id="physiotherapistText">Не заполнено</p>
-                <p id="physiotherapistName"></p>
-            </div>
-            <div class="status-card" id="therapistFrmStatus">
-                <div class="status-icon">🩺</div>
-                <h4>Терапевт/Врач ФРМ</h4>
-                <p id="therapistFrmText">Не заполнено</p>
-                <p id="therapistFrmName"></p>
-            </div>
-            <div class="status-card" id="neurologistFrmStatus">
-                <div class="status-icon">🥼</div>
-                <h4>Невролог/Врач ФРМ</h4>
-                <p id="neurologistFrmText">Не заполнено</p>
-                <p id="neurologistFrmName"></p>
-            </div>
-            <div class="status-card" id="psychologistStatus">
-                <div class="status-icon">🧠</div>
-                <h4>Психолог</h4>
-                <p id="psychologistText">Не заполнено</p>
-                <p id="psychologistName"></p>
-            </div>
-        </div>
+        <div id="doctorStatus" class="doctor-status" style="display: none;"></div>
 
         <!-- Кнопки действий -->
         <div id="documentActions" style="display: none;">
@@ -1204,13 +1173,13 @@
 
         function displayDoctorStatus() {
             const container = document.getElementById('doctorStatus');
-            if (!documentData.completion_status || documentData.completion_status.length === 0) {
+            if (!completionStatus || completionStatus.length === 0) {
                 container.style.display = 'none';
                 return;
             }
             container.style.display = 'flex';
             container.innerHTML = '';
-            documentData.completion_status.forEach(status => {
+            completionStatus.forEach(status => {
                 const card = document.createElement('div');
                 card.className = `status-card ${status.completed ? 'completed' : 'pending'}`;
                 card.innerHTML = `

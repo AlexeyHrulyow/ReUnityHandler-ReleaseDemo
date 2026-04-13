@@ -421,7 +421,7 @@
                     default: statusClass = 'status-draft'; statusText = caseItem.status;
                 }
 
-                // Генерация статусов врачей из doctors_status
+                // Генерация статусов врачей из doctors_status (динамически)
                 const doctorStatusHTML = `
                     <div class="doctor-status-grid">
                         ${caseItem.doctors_status.map(ds => `

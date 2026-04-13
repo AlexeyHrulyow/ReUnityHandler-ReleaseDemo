@@ -171,7 +171,6 @@
                             <th>Роль</th>
                             <th>Активен</th>
                             <th>Показывать в статусах</th>
-                            <th>Порядок</th>
                             <th>Создан</th>
                             <th>Действия</th>
                         </tr>
@@ -351,9 +350,6 @@
                     <td style="text-align: center;">
                         <input type="checkbox" class="status-show-chk" data-id="${doc.id}" ${doc.show_in_status ? 'checked' : ''} ${!doc.is_active ? 'disabled' : ''}>
                     </td>
-                    <td>
-                        <input type="number" class="status-order-input" data-id="${doc.id}" value="${doc.status_order || 0}" style="width: 70px;" ${!doc.is_active ? 'disabled' : ''}>
-                    </td>
                     <td>${new Date(doc.created_at).toLocaleDateString('ru-RU')}</td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editDoctor(${doc.id})">✏️</button>
@@ -370,17 +366,15 @@
             document.getElementById('doctorsTable').style.display = 'block';
         }
 
-        // Сохранение настроек статусов
+        // Сохранение настроек статусов (исправлено)
         document.getElementById('saveStatusSettingsBtn').addEventListener('click', async () => {
             const settings = [];
             document.querySelectorAll('.status-show-chk').forEach(chk => {
                 const id = parseInt(chk.dataset.id);
-                const orderInput = document.querySelector(`.status-order-input[data-id="${id}"]`);
-                const order = orderInput ? parseInt(orderInput.value) || 0 : 0;
                 settings.push({
                     id: id,
-                    show_in_status: chk.checked,
-                    status_order: order
+                    show_in_status: chk.checked
+                    // status_order больше не отправляем
                 });
             });
 

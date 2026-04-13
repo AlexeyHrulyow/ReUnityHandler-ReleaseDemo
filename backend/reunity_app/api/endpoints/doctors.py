@@ -25,6 +25,23 @@ async def ensure_unique_active_for_role(db: AsyncSession, role: DoctorRole, excl
     result = await db.execute(query)
     return result.scalar_one_or_none()
 
+@router.put("/status-settings")
+async def update_status_settings(
+    settings: List[Dict[str, Any]],
+    db: AsyncSession = Depends(get_db),
+    current_user: DoctorModel = Depends(require_role("admin"))
+):
+    """Обновить настройки отображения врачей в статусах."""
+    for item in settings:
+        result = await db.execute(
+            select(DoctorModel).where(DoctorModel.id == item["id"])
+        )
+        doctor = result.scalar_one_or_none()
+        if doctor:
+            doctor.show_in_status = item.get("show_in_status", doctor.show_in_status)
+            doctor.status_order = item.get("status_order", doctor.status_order)
+    await db.commit()
+    return {"message": "Настройки сохранены"}
 
 @router.get("/", response_model=List[DoctorSchema])
 async def list_doctors(
@@ -343,21 +360,3 @@ async def get_status_doctors(
         }
         for d in doctors
     ]
-
-@router.put("/status-settings")
-async def update_status_settings(
-    settings: List[Dict[str, Any]],
-    db: AsyncSession = Depends(get_db),
-    current_user: DoctorModel = Depends(require_role("admin"))
-):
-    """Обновить настройки отображения врачей в статусах."""
-    for item in settings:
-        result = await db.execute(
-            select(DoctorModel).where(DoctorModel.id == item["id"])
-        )
-        doctor = result.scalar_one_or_none()
-        if doctor:
-            doctor.show_in_status = item.get("show_in_status", doctor.show_in_status)
-            doctor.status_order = item.get("status_order", doctor.status_order)
-    await db.commit()
-    return {"message": "Настройки сохранены"}
