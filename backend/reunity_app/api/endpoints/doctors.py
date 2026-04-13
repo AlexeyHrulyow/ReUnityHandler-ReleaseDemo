@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
 from reunity_app.core.security import get_current_active_user, require_role, get_password_hash
 from reunity_app.db.session import get_db
@@ -11,19 +11,33 @@ from reunity_app.schemas.doctor import DoctorCreate, DoctorUpdate, Doctor as Doc
 router = APIRouter()
 
 
-async def ensure_unique_active_for_role(db: AsyncSession, role: DoctorRole, exclude_id: int = None) -> Optional[DoctorModel]:
-    """
-    Проверяет, есть ли активный врач для данной роли, исключая врача с exclude_id.
-    Возвращает найденного врача, если есть, иначе None.
-    """
-    query = select(DoctorModel).where(
-        DoctorModel.role == role,
-        DoctorModel.is_active == True
+# ============================================================================
+# СПЕЦИФИЧНЫЕ МАРШРУТЫ (БЕЗ ПАРАМЕТРОВ {doctor_id}) – ДОЛЖНЫ БЫТЬ ПЕРВЫМИ
+# ============================================================================
+
+@router.get("/status-doctors")
+async def get_status_doctors(
+    db: AsyncSession = Depends(get_db),
+    current_user: DoctorModel = Depends(require_role("admin"))
+):
+    """Получить список врачей для настройки отображения в статусах."""
+    result = await db.execute(
+        select(DoctorModel)
+        .where(DoctorModel.is_active == True)
+        .order_by(DoctorModel.status_order, DoctorModel.id)
     )
-    if exclude_id:
-        query = query.where(DoctorModel.id != exclude_id)
-    result = await db.execute(query)
-    return result.scalar_one_or_none()
+    doctors = result.scalars().all()
+    return [
+        {
+            "id": d.id,
+            "full_name": d.full_name,
+            "role": d.role,
+            "show_in_status": d.show_in_status,
+            "status_order": d.status_order
+        }
+        for d in doctors
+    ]
+
 
 @router.put("/status-settings")
 async def update_status_settings(
@@ -39,9 +53,14 @@ async def update_status_settings(
         doctor = result.scalar_one_or_none()
         if doctor:
             doctor.show_in_status = item.get("show_in_status", doctor.show_in_status)
-            doctor.status_order = item.get("status_order", doctor.status_order)
+            # status_order игнорируем (можно не обновлять)
     await db.commit()
     return {"message": "Настройки сохранены"}
+
+
+# ============================================================================
+# ДИНАМИЧЕСКИЕ МАРШРУТЫ (С ПАРАМЕТРОМ {doctor_id})
+# ============================================================================
 
 @router.get("/", response_model=List[DoctorSchema])
 async def list_doctors(
@@ -66,7 +85,6 @@ async def list_doctors(
     result = await db.execute(query)
     doctors = result.scalars().all()
 
-    # Преобразуем модели в схемы
     return [
         DoctorSchema(
             id=doctor.id,
@@ -95,11 +113,8 @@ async def create_doctor(
     if existing_doctor:
         raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
 
-    # Проверяем, есть ли уже активный врач с такой ролью
-    active_for_role = await ensure_unique_active_for_role(db, doctor.role)
-    # Если есть активный, создаём неактивного, иначе активного
-    is_active = (active_for_role is None)
-
+    # Все врачи создаются активными (если не указано иное в схеме, но в DoctorCreate нет поля is_active)
+    # По умолчанию is_active = True
     hashed_password = get_password_hash(doctor.password)
     db_doctor = DoctorModel(
         username=doctor.username,
@@ -108,7 +123,7 @@ async def create_doctor(
         first_name=doctor.first_name,
         middle_name=doctor.middle_name,
         role=doctor.role,
-        is_active=is_active
+        is_active=True  # всегда активен при создании
     )
 
     db.add(db_doctor)
@@ -177,7 +192,6 @@ async def update_doctor(
 
     # Если изменяется username, проверить уникальность
     if "username" in update_data and update_data["username"] != doctor.username:
-        # Проверить, что такой username не занят другим врачом
         result_username = await db.execute(
             select(DoctorModel).where(DoctorModel.username == update_data["username"])
         )
@@ -188,35 +202,7 @@ async def update_doctor(
                 detail="Пользователь с таким именем уже существует"
             )
 
-    # Если изменяется роль
-    if "role" in update_data and update_data["role"] != doctor.role:
-        new_role = update_data["role"]
-        # Если текущий врач активен, нужно проверить, не появится ли второй активный с новой ролью
-        if doctor.is_active:
-            active_for_role = await ensure_unique_active_for_role(db, new_role, exclude_id=doctor.id)
-            if active_for_role:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Для роли {new_role} уже есть активный врач: {active_for_role.full_name}. "
-                           f"Сначала деактивируйте его или измените роль на неактивную."
-                )
-        # Если врач неактивен, то ничего страшного – новый активный не появится
-        # (но если он станет активным позже, проверка будет при активации)
-
-    # Если изменяется поле is_active (через этот эндпоинт это тоже возможно)
-    # Но лучше использовать отдельные эндпоинты activate/deactivate.
-    # Оставим здесь базовое обновление без автоматической смены активности,
-    # но если is_active передано True и есть другой активный для этой роли – ошибка.
-    if "is_active" in update_data and update_data["is_active"] and not doctor.is_active:
-        # Пытаемся активировать врача
-        active_for_role = await ensure_unique_active_for_role(db, doctor.role, exclude_id=doctor.id)
-        if active_for_role:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Нельзя активировать врача, так как для роли {doctor.role} уже есть активный: {active_for_role.full_name}. "
-                       f"Используйте кнопку активации для деактивации другого."
-            )
-
+    # Обновляем остальные поля (роль и is_active могут быть любыми, без проверок уникальности)
     for field, value in update_data.items():
         setattr(doctor, field, value)
 
@@ -277,13 +263,7 @@ async def activate_doctor(
     if doctor.is_active:
         return {"message": "Врач уже активен"}
 
-    # Проверяем, есть ли другой активный с такой же ролью
-    active_for_role = await ensure_unique_active_for_role(db, doctor.role, exclude_id=doctor.id)
-    if active_for_role:
-        # Автоматически деактивируем другого
-        active_for_role.is_active = False
-        db.add(active_for_role)
-
+    # Больше не деактивируем других врачей с той же ролью
     doctor.is_active = True
     await db.commit()
 
@@ -337,26 +317,3 @@ async def set_doctor_password(
     await db.commit()
 
     return {"message": "Пароль успешно изменен"}
-
-@router.get("/status-doctors")
-async def get_status_doctors(
-    db: AsyncSession = Depends(get_db),
-    current_user: DoctorModel = Depends(require_role("admin"))
-):
-    """Получить список врачей для настройки отображения в статусах."""
-    result = await db.execute(
-        select(DoctorModel)
-        .where(DoctorModel.is_active == True)
-        .order_by(DoctorModel.status_order, DoctorModel.id)
-    )
-    doctors = result.scalars().all()
-    return [
-        {
-            "id": d.id,
-            "full_name": d.full_name,
-            "role": d.role,
-            "show_in_status": d.show_in_status,
-            "status_order": d.status_order
-        }
-        for d in doctors
-    ]

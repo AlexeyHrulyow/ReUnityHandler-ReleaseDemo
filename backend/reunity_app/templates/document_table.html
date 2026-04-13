@@ -1243,6 +1243,10 @@
             const isAdmin = (currentUser.role === 'admin');
             const isCreator = (currentUser.id === caseCreatorId);
 
+            // ✅ Получаем статус завершённости раздела текущего врача
+            const myStatus = documentData?.completion_status?.find(s => s.doctor_id === currentUser.id);
+            const isMySectionCompleted = myStatus ? myStatus.completed : false;
+
             if (isCaseCompleted) {
                 caseMessageDiv.textContent = 'Случай завершён';
                 caseMessageDiv.className = 'case-status-message case-status-completed';
@@ -1250,7 +1254,7 @@
 
                 completeSectionBtn.style.display = 'none';
                 uncompleteSectionBtn.style.display = 'none';
-                saveAllBtn.style.display = 'none';
+                saveAllBtn.style.display = 'none';          // ✅ Скрываем кнопку сохранения
                 signDocumentBtn.style.display = 'none';
                 exportBtn.style.display = isAdmin || isCreator ? 'inline-block' : 'none';
                 uncompleteCaseBtn.style.display = isAdmin || isCreator ? 'inline-block' : 'none';
@@ -1259,19 +1263,10 @@
                 actionsDiv.style.display = 'block';
                 saveAllBtn.style.display = 'inline-block';
 
-                updateSectionButtons();
+                updateSectionButtons();  // обновляет кнопки завершения/отмены раздела
 
-                let creatorSectionCompleted = false;
-                const userRole = currentUser?.role;
-                if (isCreator) {
-                    if (userRole === 'reflexotherapist') creatorSectionCompleted = completionStatus.reflexotherapist;
-                    else if (userRole === 'physiotherapist') creatorSectionCompleted = completionStatus.physiotherapist;
-                    else if (userRole === 'therapist_frm') creatorSectionCompleted = completionStatus.therapist_frm;
-                    else if (userRole === 'neurologist_frm') creatorSectionCompleted = completionStatus.neurologist_frm;
-                    else if (userRole === 'psychologist') creatorSectionCompleted = completionStatus.psychologist;
-                }
-
-                const canComplete = (isAdmin || (isCreator && creatorSectionCompleted));
+                // ✅ Может ли пользователь завершить случай?
+                const canComplete = (isAdmin || (isCreator && isMySectionCompleted));
                 if (canComplete) {
                     signDocumentBtn.style.display = 'inline-block';
                 } else {
