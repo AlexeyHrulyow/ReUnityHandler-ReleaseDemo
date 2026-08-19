@@ -4,3 +4,9 @@ pyparser_config.json
 structure.txt
 choosen_code.txt
 code.txt
+.env
+pgdata/
+__pycache__/
+.venv/
+*.sqlite3
+*.db
