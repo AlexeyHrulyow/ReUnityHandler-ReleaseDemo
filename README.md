@@ -33,8 +33,8 @@
 
 1. Склонируйте репозиторий:
    ```bash
-   git clone https://github.com/ВАШ_ЛОГИН/ReUnityHandler-Demo.git
-   cd ReUnityHandler-Demo
+   git clone git@github.com:AlexeyHrulyow/ReUnityHandler-ReleaseDemo.git
+   cd ReUnityHandler-ReleaseDemo
    ```
 
 2. Соберите и запустите контейнеры в фоновом режиме:
