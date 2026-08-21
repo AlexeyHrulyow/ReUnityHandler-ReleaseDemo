@@ -12,6 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d reunity_db"]
       interval: 3s
@@ -24,7 +25,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://admin:secretpassword@db:5432/reunity_db
+      - DATABASE_URL=postgresql+asyncpg://admin:secretpassword@db:5432/reunity_db
+      - SECRET_KEY=your_secret_key_here
     depends_on:
       db:
         condition: service_healthy

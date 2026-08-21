@@ -25,6 +25,7 @@ from reunity_app.db.models import (
     DocumentSection, DocumentTemplate, WebmisFieldMapping
 )
 from reunity_app.core.security import get_current_user, get_current_active_user, oauth2_scheme
+from reunity_app.db.seed import create_admin_if_not_exists
 
 # Инициализация шаблонов
 templates_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -89,6 +90,8 @@ async def lifespan(app: FastAPI):
 
     # Создаем таблицы
     await create_tables()
+
+    await create_admin_if_not_exists()
 
     logger.info("✅ Приложение готово к работе")
     logger.info(f"📡 API доступно по адресу: http://localhost:8000")
